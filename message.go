@@ -42,6 +42,9 @@ type request struct {
 }
 
 func (r *request) String() string {
+	if r == nil {
+		return ""
+	}
 	return fmt.Sprintf("[T%d:P%d]", r.time, r.process)
 }
 

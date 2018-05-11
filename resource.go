@@ -29,6 +29,7 @@ func (r *resource) occupy(p int) {
 	}
 	r.grantedTo = p
 	r.occupyOrder = append(r.occupyOrder, p)
+	wg.Done()
 	debugPrintf("~~~ @resource: P%d occupy ~~~", p)
 }
 
@@ -70,8 +71,8 @@ func (p *process) occupy() {
 
 	// 经过一段时间，就释放资源
 	go func(p *process) {
-		occupyPeriod := time.Duration(10+rand.Intn(90)) * time.Millisecond
-		time.Sleep(occupyPeriod)
+		occupyTime := time.Duration(5+rand.Intn(20)) * time.Millisecond
+		time.Sleep(occupyTime)
 
 		p.rwmu.Lock()
 

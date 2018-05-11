@@ -13,13 +13,11 @@ func init() {
 var wg sync.WaitGroup
 
 func start(size, occupyNumber int, r *resource) []int {
-	wg.Add(size)
+	wg.Add(occupyNumber)
 
 	sys := newSystem(size, r)
 
 	requestOrder := requestLoop(sys.processes, occupyNumber)
-
-	sys.kill()
 
 	wg.Wait()
 
@@ -39,7 +37,7 @@ func requestLoop(ps []*process, occupyNumber int) (requestOrder []int) {
 		ps[i].request()
 
 		// 等待一段时间，再进行下一个 request
-		waitingTime := time.Duration(10+rand.Intn(90)) * time.Millisecond
+		waitingTime := time.Duration(50+rand.Intn(50)) * time.Millisecond
 		time.Sleep(waitingTime)
 		idx++
 	}

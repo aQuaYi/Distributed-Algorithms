@@ -18,7 +18,6 @@ type process struct {
 	toCheckRule5Chan chan struct{} // 每次收到 message 后，都靠这个 chan 来通知检查此 process 是否已经满足 rule 5，以便决定是否占有 resource
 
 	isOccupying bool
-	isShutdown  bool
 }
 
 func newProcess(me int, r *resource, chans []chan *message) *process {
@@ -42,9 +41,8 @@ func newProcess(me int, r *resource, chans []chan *message) *process {
 }
 
 func (p *process) receiveLoop() {
-	msgChan := p.chans[p.me]
 	for {
-		msg := <-msgChan
+		msg := <-p.chans[p.me]
 
 		debugPrintf("[%d]P%d receive %s", p.clock.getTime(), p.me, msg)
 
@@ -100,7 +98,7 @@ func (p *process) updateMinReceiveTime() {
 }
 
 func (p *process) occupyLoop() {
-	timer := time.NewTimer(10 * time.Millisecond)
+	timer := time.NewTicker(10 * time.Millisecond)
 	for {
 
 		select {
@@ -109,11 +107,6 @@ func (p *process) occupyLoop() {
 		}
 
 		p.rwmu.Lock()
-
-		if p.isShutdown && len(p.requestQueue) == 0 {
-			wg.Done()
-			return
-		}
 
 		if len(p.requestQueue) > 0 && // p.requestQueue 中还有元素
 			p.requestQueue[0].process == p.me && // 排在首位的 repuest 是 p 自己的
@@ -125,10 +118,4 @@ func (p *process) occupyLoop() {
 
 		p.rwmu.Unlock()
 	}
-}
-
-func (p *process) kill() {
-	p.rwmu.Lock()
-	p.isShutdown = true
-	p.rwmu.Unlock()
 }
