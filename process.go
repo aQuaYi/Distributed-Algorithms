@@ -30,6 +30,10 @@ func newProcess(me int, chans []chan *message) *process {
 		toCheckRule5Chan: make(chan struct{}, 1),
 	}
 
+	go p.receiveLoop()
+
+	go p.occupyLoop()
+
 	return p
 }
 

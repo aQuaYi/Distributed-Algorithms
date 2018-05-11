@@ -1,5 +1,7 @@
 package mutual
 
+import "fmt"
+
 type message struct {
 	msgType  msgType
 	time     int // 发送 message 时， process.clock 的时间
@@ -20,6 +22,10 @@ const (
 type request struct {
 	time    int // request 的时间
 	process int // request 的 process
+}
+
+func (r *request) String() string {
+	return fmt.Sprintf("[T%d:P%d]", r.time, r.process)
 }
 
 func (p *process) messaging(mt msgType, r *request) {

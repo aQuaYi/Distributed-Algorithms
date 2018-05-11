@@ -51,6 +51,8 @@ func (p *process) request() {
 
 	p.rwmu.Lock()
 
+	debugPrintf("P%d request %s", p.me, r)
+
 	p.append(r)
 
 	p.clock.tick()

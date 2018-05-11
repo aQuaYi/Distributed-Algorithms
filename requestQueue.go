@@ -2,6 +2,7 @@ package mutual
 
 func (p *process) append(r *request) {
 	p.requestQueue = append(p.requestQueue, r)
+	debugPrintf("P%d append %s, request queue%v", p.me, r, p.requestQueue)
 	p.clock.tick()
 }
 

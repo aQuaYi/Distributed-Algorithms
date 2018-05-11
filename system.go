@@ -27,5 +27,8 @@ func newSystem(size int) *system {
 }
 
 func (s *system) kill() {
+
+	// TODO: 添加退出机制
+
 	time.Sleep(20 * time.Second)
 }
