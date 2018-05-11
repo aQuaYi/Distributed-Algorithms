@@ -9,17 +9,21 @@ const (
 	NULL = -1
 )
 
+var (
+	rsc *resource
+)
+
+func init() {
+	rsc = &resource{
+		grantedTo: NULL,
+	}
+}
+
 type resource struct {
 	grantedTo int
 }
 
-func newResouce() *resource {
-	return &resource{
-		grantedTo: 0,
-	}
-}
-
-func (r *resource) request(p int) {
+func (r *resource) occupy(p int) {
 	if r.grantedTo != NULL {
 		msg := fmt.Sprintf("资源正在被 P%d 占据，P%d 却想获取资源。", r.grantedTo, p)
 		panic(msg)

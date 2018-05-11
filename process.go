@@ -1,9 +1,7 @@
 package mutual
 
 import (
-	"math/rand"
 	"sync"
-	"time"
 )
 
 type request struct {
@@ -15,55 +13,42 @@ type process struct {
 	rwmu             *sync.RWMutex
 	me               int
 	clock            *clock
-	resource         *resource
-	peers            []chan message
+	chans            []chan message
 	requestQueue     []*request
-	sentTime         []int         // 给各个 process 中发送的消息，所携带的最后时间
-	receiveTime      []int         // 从各个 process 中收到的消息，所携带的最后时间
+	sentTime         []int         // 最近一次给别的 process 发送的消息，所携带的最后时间
+	receiveTime      []int         // 最近一次从别的 process 收到的消息，所携带的最后时间
 	minReceiveTime   int           // lastReceiveTime 中的最小值
 	toCheckRule5Chan chan struct{} // 每次收到 message 后，都靠这个 chan 来通知检查此 process 是否已经满足 rule 5，以便决定是否占有 resource
-	isTaken          bool          // process 正在占用资源
-	takenCounterDown int           // 每个 preocess 想要占用 resource 的次数
+
+	isHoldingResource bool // process 正在占用资源
+
+	takenCounterDown int // 每个 preocess 想要占用 resource 的次数
 }
 
-func newProcess(me, takenTimes int, r *resource, peers []chan message) *process {
-	rq := make([]*request, 1, len(peers)*takenTimes*2)
-	rq[0] = &request{
-		time:    -1,
-		process: 0,
-	}
+func newProcess(me, takenTimes, initTakonProcess int, r *resource, chans []chan message) *process {
+	rq := make([]*request, 1, len(chans)*takenTimes*2)
 	p := &process{
 		me:               me,
 		clock:            newClock(),
-		resource:         r,
-		peers:            peers,
+		chans:            chans,
 		requestQueue:     rq,
-		sentTime:         make([]int, len(peers)),
-		receiveTime:      make([]int, len(peers)),
+		sentTime:         make([]int, len(chans)),
+		receiveTime:      make([]int, len(chans)),
 		minReceiveTime:   0,
 		toCheckRule5Chan: make(chan struct{}, 1),
 		takenCounterDown: takenTimes,
 	}
 
+	if me == initTakonProcess {
+		p.isHoldingResource = true
+	}
+
 	return p
 }
 
-func (p *process) resourceLoop() {
-	for {
-		if p.isCounterDown() {
-			wg.Done()
-			return
-		}
+func (p *process) occupy(rsc *resource) {
 
-		if p.isTaken {
-			p.release()
-		} else {
-			p.request()
-		}
-
-		timeout := time.Duration(100+rand.Intn(900)) * time.Millisecond
-		time.Sleep(timeout)
-	}
+	return
 }
 
 func (p *process) request() {
@@ -87,8 +72,9 @@ func (p *process) release() {
 	}
 	r := p.requestQueue[i]
 
-	p.resource.release(p.me)
-	p.isTaken = false
+	rsc.release(p.me)
+
+	p.isHoldingResource = false
 
 	// TODO: 这算不算一个 event 呢
 	p.clock.tick()
@@ -102,7 +88,7 @@ func (p *process) release() {
 }
 
 func (p *process) messaging(mt msgType, r *request) {
-	for i, ch := range p.peers {
+	for i, ch := range p.chans {
 		if i == p.me {
 			continue
 		}
@@ -119,11 +105,11 @@ func (p *process) messaging(mt msgType, r *request) {
 }
 
 func (p *process) isCounterDown() bool {
-	return p.takenCounterDown == 0 && !p.isTaken
+	return p.takenCounterDown == 0 && !p.isHoldingResource
 }
 
 func (p *process) receiveLoop() {
-	msgChan := p.peers[p.me]
+	msgChan := p.chans[p.me]
 	for {
 		msg := <-msgChan
 
@@ -161,7 +147,7 @@ func (p *process) delete() {
 }
 
 func (p *process) updateMinReceiveTime() {
-	idx := (p.me + 1) % len(p.peers)
+	idx := (p.me + 1) % len(p.chans)
 	minTime := p.receiveTime[idx]
 	for i, t := range p.receiveTime {
 		if i == p.me {
@@ -172,7 +158,7 @@ func (p *process) updateMinReceiveTime() {
 	p.minReceiveTime = minTime
 }
 
-func (p *process) requestLoop() {
+func (p *process) occupyLoop() {
 	for {
 		<-p.toCheckRule5Chan
 
@@ -181,8 +167,10 @@ func (p *process) requestLoop() {
 		if len(p.requestQueue) > 0 && // p.requestQueue 中还有元素
 			p.requestQueue[0].process == p.me && // 排在首位的 repuest 是 p 自己的
 			p.requestQueue[0].time < p.minReceiveTime { // p 在 request 后，收到过所有其他 p 的回复
-			p.resource.request(p.me)
-			p.isTaken = true
+
+			p.occupy(rsc)
+
+			p.isHoldingResource = true
 
 			// TODO: 这里需要 tick 一下吗
 			p.clock.tick()
