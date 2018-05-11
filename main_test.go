@@ -23,6 +23,14 @@ func Test_start(t *testing.T) {
 			},
 		},
 
+		// {
+		// 	"9 process, 99 occupy",
+		// 	args{
+		// 		size:         9,
+		// 		occupyNumber: 99,
+		// 	},
+		// },
+
 		// TODO: Add test cases.
 	}
 	for _, tt := range tests {

@@ -69,7 +69,7 @@ func (p *process) occupy() {
 
 	rsc.occupy(p.me)
 
-	p.occupying = p.requestQueue[0]
+	p.isOccupying = true
 
 	p.clock.tick()
 
@@ -92,7 +92,7 @@ func (p *process) release() {
 	r := p.requestQueue[0]
 
 	rsc.release(p.me)
-	p.occupying = nil
+	p.isOccupying = false
 
 	p.delete(p.requestQueue[0])
 

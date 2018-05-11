@@ -20,4 +20,6 @@ func (p *process) delete(r *request) {
 
 	p.clock.tick()
 
+	// p.requestQueue 变化时，都需要检查是否符合了 rule5
+	p.toCheckRule5Chan <- struct{}{}
 }

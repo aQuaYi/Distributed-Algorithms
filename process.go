@@ -15,7 +15,7 @@ type process struct {
 	minReceiveTime   int           // lastReceiveTime 中的最小值
 	toCheckRule5Chan chan struct{} // 每次收到 message 后，都靠这个 chan 来通知检查此 process 是否已经满足 rule 5，以便决定是否占有 resource
 
-	occupying *request
+	isOccupying bool
 }
 
 func newProcess(me int, chans []chan *message) *process {
@@ -102,7 +102,7 @@ func (p *process) occupyLoop() {
 		if len(p.requestQueue) > 0 && // p.requestQueue 中还有元素
 			p.requestQueue[0].process == p.me && // 排在首位的 repuest 是 p 自己的
 			p.requestQueue[0].time < p.minReceiveTime && // p 在 request 后，收到过所有其他 p 的回复
-			p.occupying != p.requestQueue[0] { // 不能是正占用的资源
+			!p.isOccupying { // 不能是正占用的资源
 
 			p.occupy()
 		}
