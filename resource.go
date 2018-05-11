@@ -17,6 +17,7 @@ var (
 )
 
 func init() {
+	rand.Seed(time.Now().UnixNano())
 	rsc = &resource{
 		grantedTo: NULL,
 	}
@@ -33,6 +34,7 @@ func (r *resource) occupy(p int) {
 	}
 	r.grantedTo = p
 	occupyOrder = append(occupyOrder, p)
+	debugPrintf("P%d occupy resource ~~~~~", p)
 }
 
 func (r *resource) release(p int) {
@@ -41,6 +43,7 @@ func (r *resource) release(p int) {
 		panic(msg)
 	}
 	r.grantedTo = NULL
+	debugPrintf("P%d release resource ~~~~~", p)
 }
 
 func (p *process) request() {

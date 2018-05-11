@@ -25,7 +25,6 @@ func requestLoop(ps []*process, occupyNumber int) (requestOrder []int) {
 	idx := 0
 
 	for idx < occupyNumber {
-		idx++
 
 		i := rand.Intn(len(ps))
 
@@ -36,7 +35,7 @@ func requestLoop(ps []*process, occupyNumber int) (requestOrder []int) {
 		// 等待一段时间，再进行下一个 request
 		waitingTime := time.Duration(100+rand.Intn(900)) * time.Millisecond
 		time.Sleep(waitingTime)
-
+		idx++
 	}
 
 	return

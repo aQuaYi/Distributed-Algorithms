@@ -29,6 +29,7 @@ func newSystem(size int) *system {
 func (s *system) kill() {
 
 	// TODO: 添加退出机制
+	debugPrintf("system 停机 20 秒，等待结束")
 
 	time.Sleep(20 * time.Second)
 }
