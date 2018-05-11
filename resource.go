@@ -49,7 +49,7 @@ func (p *process) request() {
 
 	p.rwmu.Lock()
 
-	debugPrintf("P%d request %s", p.me, r)
+	debugPrintf("[%d]P%d request %s", p.clock.getTime(), p.me, r)
 
 	p.append(r)
 
@@ -70,7 +70,7 @@ func (p *process) occupy() {
 
 	// 经过一段时间，就释放资源
 	go func(p *process) {
-		occupyPeriod := time.Duration(100+rand.Intn(900)) * time.Millisecond
+		occupyPeriod := time.Duration(10+rand.Intn(90)) * time.Millisecond
 		time.Sleep(occupyPeriod)
 
 		p.rwmu.Lock()

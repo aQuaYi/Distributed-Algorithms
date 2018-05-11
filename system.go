@@ -1,9 +1,5 @@
 package mutual
 
-import (
-	"time"
-)
-
 type system struct {
 	processes []*process
 }
@@ -13,7 +9,7 @@ func newSystem(size int, r *resource) *system {
 	chans := make([]chan *message, size)
 	for i := range chans {
 		// TODO: chan 可以带缓冲吗？
-		chans[i] = make(chan *message)
+		chans[i] = make(chan *message, 3)
 	}
 
 	ps := make([]*process, size)
@@ -27,9 +23,7 @@ func newSystem(size int, r *resource) *system {
 }
 
 func (s *system) kill() {
-
-	// TODO: 添加退出机制
-	debugPrintf("system 停机 20 秒，等待结束")
-
-	time.Sleep(20 * time.Second)
+	for i := range s.processes {
+		s.processes[i].kill()
+	}
 }
