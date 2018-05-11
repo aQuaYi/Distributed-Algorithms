@@ -2,6 +2,8 @@ package mutual
 
 import (
 	"fmt"
+	"math/rand"
+	"time"
 )
 
 const (
@@ -39,4 +41,58 @@ func (r *resource) release(p int) {
 		panic(msg)
 	}
 	r.grantedTo = NULL
+}
+
+func (p *process) request() {
+	r := &request{
+		time:    p.clock.getTime(),
+		process: p.me,
+	}
+
+	p.rwmu.Lock()
+
+	p.append(r)
+
+	p.clock.tick()
+
+	p.messaging(requestResource, r)
+
+	p.rwmu.Unlock()
+}
+
+func (p *process) occupy() {
+
+	rsc.occupy(p.me)
+
+	p.occupying = p.requestQueue[0]
+
+	p.clock.tick()
+
+	// 经过一段时间，就释放资源
+	go func(p *process) {
+		occupyPeriod := time.Duration(100+rand.Intn(900)) * time.Millisecond
+		time.Sleep(occupyPeriod)
+
+		p.rwmu.Lock()
+
+		p.release()
+
+		p.clock.tick()
+
+		p.rwmu.Unlock()
+	}(p)
+}
+
+func (p *process) release() {
+	r := p.requestQueue[0]
+
+	rsc.release(p.me)
+	p.occupying = nil
+
+	p.delete(p.requestQueue[0])
+
+	// TODO: 这算不算一个 event 呢
+	p.clock.tick()
+
+	p.messaging(releaseResource, r)
 }

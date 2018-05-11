@@ -1,14 +1,19 @@
 package mutual
 
+import (
+	"time"
+)
+
 type system struct {
 	processes []*process
 }
 
 // size: process 的数量
 func newSystem(size int) *system {
-	chans := make([]chan message, size)
+	chans := make([]chan *message, size)
 	for i := range chans {
-		chans[i] = make(chan message)
+		// TODO: chan 可以带缓冲吗？
+		chans[i] = make(chan *message)
 	}
 
 	ps := make([]*process, size)
@@ -19,4 +24,8 @@ func newSystem(size int) *system {
 	return &system{
 		processes: ps,
 	}
+}
+
+func (s *system) kill() {
+	time.Sleep(20 * time.Second)
 }

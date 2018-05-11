@@ -7,11 +7,12 @@ import (
 
 type clock struct {
 	time int
-	rwmu *sync.RWMutex
+	// clock 使用单独的锁
+	// 避免与 process 的锁冲突
+	rwmu sync.RWMutex
 }
 
-// 每个 process 的 clock 的 initial time
-// 都是随机的
+// 每个 process 的 clock 的 initial time，都是随机的
 func newClock() *clock {
 	return &clock{
 		time: 1 + rand.Intn(100),
