@@ -10,6 +10,7 @@ const (
 )
 
 var (
+	// 全局变量，随时随地都可以访问
 	rsc *resource
 )
 

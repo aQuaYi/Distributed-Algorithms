@@ -16,3 +16,8 @@ const (
 	releaseResource
 	acknowledgment
 )
+
+type request struct {
+	time    int // request 的时间
+	process int // request 的 process
+}

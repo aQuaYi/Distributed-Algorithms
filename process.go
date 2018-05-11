@@ -1,13 +1,10 @@
 package mutual
 
 import (
+	"math/rand"
 	"sync"
+	"time"
 )
-
-type request struct {
-	time    int // request 的时间
-	process int // request 的 process
-}
 
 type process struct {
 	rwmu             *sync.RWMutex
@@ -20,7 +17,7 @@ type process struct {
 	minReceiveTime   int           // lastReceiveTime 中的最小值
 	toCheckRule5Chan chan struct{} // 每次收到 message 后，都靠这个 chan 来通知检查此 process 是否已经满足 rule 5，以便决定是否占有 resource
 
-	isHoldingResource bool // process 正在占用资源
+	occupying *sync.Mutex
 
 	takenCounterDown int // 每个 preocess 想要占用 resource 的次数
 }
@@ -39,16 +36,22 @@ func newProcess(me, takenTimes, initTakonProcess int, r *resource, chans []chan 
 		takenCounterDown: takenTimes,
 	}
 
-	if me == initTakonProcess {
-		p.isHoldingResource = true
-	}
-
 	return p
 }
 
-func (p *process) occupy(rsc *resource) {
+func (p *process) occupy() {
+	// 可以连续占用资源，但是不能，同时重复占用资源
+	p.occupying.Lock()
 
-	return
+	rsc.occupy(p.me)
+
+	go func(p *process) {
+		timeout := time.Duration(100+rand.Intn(900)) * time.Millisecond
+		time.Sleep(timeout)
+		p.release()
+		p.occupying.Unlock()
+	}(p)
+
 }
 
 func (p *process) request() {
@@ -73,8 +76,6 @@ func (p *process) release() {
 	r := p.requestQueue[i]
 
 	rsc.release(p.me)
-
-	p.isHoldingResource = false
 
 	// TODO: 这算不算一个 event 呢
 	p.clock.tick()
@@ -102,10 +103,6 @@ func (p *process) messaging(mt msgType, r *request) {
 		// 所以，发送完成后，需要 clock.tick()
 		p.clock.tick()
 	}
-}
-
-func (p *process) isCounterDown() bool {
-	return p.takenCounterDown == 0 && !p.isHoldingResource
 }
 
 func (p *process) receiveLoop() {
@@ -168,9 +165,7 @@ func (p *process) occupyLoop() {
 			p.requestQueue[0].process == p.me && // 排在首位的 repuest 是 p 自己的
 			p.requestQueue[0].time < p.minReceiveTime { // p 在 request 后，收到过所有其他 p 的回复
 
-			p.occupy(rsc)
-
-			p.isHoldingResource = true
+			p.occupy()
 
 			// TODO: 这里需要 tick 一下吗
 			p.clock.tick()

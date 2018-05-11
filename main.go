@@ -14,17 +14,21 @@ func start(processNumber, takenTimes int) {
 	wg.Wait()
 }
 
-func resourceLoop(ps []*process, occupyNumber int) (requestOrder []int) {
+func requestLoop(ps []*process, occupyNumber int) (requestOrder []int) {
 	requestOrder = make([]int, occupyNumber)
+	idx := 0
 
-	for occupyNumber > 0 {
-		occupyNumber--
+	for idx < occupyNumber {
+		idx++
 
 		//
 		timeout := time.Duration(100+rand.Intn(900)) * time.Millisecond
 		time.Sleep(timeout)
 
 		i := rand.Intn(len(ps))
+
+		requestOrder[idx] = i
+
 		p := ps[i]
 		p.request()
 	}
