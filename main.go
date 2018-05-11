@@ -44,5 +44,7 @@ func requestLoop(ps []*process, occupyNumber int) (requestOrder []int) {
 		idx++
 	}
 
+	debugPrintf("完成全部 request 工作，len(requestOrder)=%d, requestOrder=%v", occupyNumber, requestOrder)
+
 	return
 }

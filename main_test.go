@@ -34,28 +34,55 @@ func Test_start(t *testing.T) {
 		// 	},
 		// },
 
-		{
-			"9 process, 999 occupy",
-			args{
-				size:         9,
-				occupyNumber: 999,
-				rsc:          newResource(),
-			},
-		},
+		// {
+		// 	"3 process, 999 occupy",
+		// 	args{
+		// 		size:         3,
+		// 		occupyNumber: 999,
+		// 		rsc:          newResource(),
+		// 	},
+		// },
 
 		{
-			"99 process, 999 occupy",
+			"6 process, 999 occupy",
 			args{
-				size:         99,
+				size:         6,
 				occupyNumber: 999,
 				rsc:          newResource(),
 			},
 		},
 
 		// {
+		// 	"9 process, 999 occupy",
+		// 	args{
+		// 		size:         9,
+		// 		occupyNumber: 999,
+		// 		rsc:          newResource(),
+		// 	},
+		// },
+
+		// {
+		// 	"99 process, 999 occupy",
+		// 	args{
+		// 		size:         99,
+		// 		occupyNumber: 999,
+		// 		rsc:          newResource(),
+		// 	},
+		// },
+
+		// {
 		// 	"3 process, 9999 occupy",
 		// 	args{
 		// 		size:         3,
+		// 		occupyNumber: 9999,
+		// 		rsc:          newResource(),
+		// 	},
+		// },
+
+		// {
+		// 	"99 process, 9999 occupy",
+		// 	args{
+		// 		size:         99,
 		// 		occupyNumber: 9999,
 		// 		rsc:          newResource(),
 		// 	},
