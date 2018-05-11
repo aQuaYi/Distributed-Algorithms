@@ -43,14 +43,14 @@ func Test_start(t *testing.T) {
 		// 	},
 		// },
 
-		{
-			"6 process, 999 occupy",
-			args{
-				size:         6,
-				occupyNumber: 999,
-				rsc:          newResource(),
-			},
-		},
+		// {
+		// 	"6 process, 999 occupy",
+		// 	args{
+		// 		size:         6,
+		// 		occupyNumber: 999,
+		// 		rsc:          newResource(),
+		// 	},
+		// },
 
 		// {
 		// 	"9 process, 999 occupy",
@@ -79,14 +79,14 @@ func Test_start(t *testing.T) {
 		// 	},
 		// },
 
-		// {
-		// 	"99 process, 9999 occupy",
-		// 	args{
-		// 		size:         99,
-		// 		occupyNumber: 9999,
-		// 		rsc:          newResource(),
-		// 	},
-		// },
+		{
+			"99 process, 9999 occupy",
+			args{
+				size:         99,
+				occupyNumber: 9999,
+				rsc:          newResource(),
+			},
+		},
 
 		// TODO: Add test cases.
 	}
