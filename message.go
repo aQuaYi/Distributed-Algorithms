@@ -3,10 +3,14 @@ package mutual
 import "fmt"
 
 type message struct {
-	msgType  msgType
 	time     int // 发送 message 时， process.clock 的时间
+	msgType  msgType
 	senderID int // message 发送方的 ID
 	request  *request
+}
+
+func (m *message) String() string {
+	return fmt.Sprintf("msg{T%d,P%d,%s,request[%s]}", m.time, m.senderID, m.msgType, m.request)
 }
 
 type msgType int
@@ -18,6 +22,19 @@ const (
 	releaseResource
 	acknowledgment
 )
+
+func (mt msgType) String() string {
+	switch mt {
+	case requestResource:
+		return "申请"
+	case releaseResource:
+		return "释放"
+	case acknowledgment:
+		return "确认"
+	default:
+		panic("出现了多余的 msgType")
+	}
+}
 
 type request struct {
 	time    int // request 的时间

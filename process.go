@@ -7,6 +7,7 @@ import (
 type process struct {
 	rwmu             sync.RWMutex
 	me               int
+	rsc              *resource
 	clock            *clock
 	chans            []chan *message
 	requestQueue     []*request
@@ -18,9 +19,10 @@ type process struct {
 	isOccupying bool
 }
 
-func newProcess(me int, chans []chan *message) *process {
+func newProcess(me int, r *resource, chans []chan *message) *process {
 	p := &process{
 		me:               me,
+		rsc:              r,
 		clock:            newClock(),
 		chans:            chans,
 		requestQueue:     make([]*request, 0, 1024),
@@ -41,6 +43,8 @@ func (p *process) receiveLoop() {
 	msgChan := p.chans[p.me]
 	for {
 		msg := <-msgChan
+
+		debugPrintf("P%d receive %s", p.me, msg)
 
 		p.rwmu.Lock()
 

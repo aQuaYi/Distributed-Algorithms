@@ -6,12 +6,15 @@ import (
 	"time"
 )
 
+func init() {
+	rand.Seed(time.Now().UnixNano())
+}
+
 var wg sync.WaitGroup
 
-func start(size, occupyNumber int) []int {
-	occupyOrder = nil
+func start(size, occupyNumber int, r *resource) []int {
 
-	sys := newSystem(size)
+	sys := newSystem(size, r)
 
 	requestOrder := requestLoop(sys.processes, occupyNumber)
 

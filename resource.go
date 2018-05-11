@@ -11,20 +11,15 @@ const (
 	NULL = -1
 )
 
-var (
-	rsc         *resource // 全局变量，随时随地都可以访问
-	occupyOrder []int     // rsc 被占用的顺序
-)
-
-func init() {
-	rand.Seed(time.Now().UnixNano())
-	rsc = &resource{
-		grantedTo: NULL,
-	}
+type resource struct {
+	grantedTo   int
+	occupyOrder []int
 }
 
-type resource struct {
-	grantedTo int
+func newResource() *resource {
+	return &resource{
+		grantedTo: NULL,
+	}
 }
 
 func (r *resource) occupy(p int) {
@@ -33,8 +28,8 @@ func (r *resource) occupy(p int) {
 		panic(msg)
 	}
 	r.grantedTo = p
-	occupyOrder = append(occupyOrder, p)
-	debugPrintf("P%d occupy resource ~~~~~", p)
+	r.occupyOrder = append(r.occupyOrder, p)
+	debugPrintf("~~~ @resource: P%d occupy ~~~", p)
 }
 
 func (r *resource) release(p int) {
@@ -43,7 +38,7 @@ func (r *resource) release(p int) {
 		panic(msg)
 	}
 	r.grantedTo = NULL
-	debugPrintf("P%d release resource ~~~~~", p)
+	debugPrintf("~~~ @resource: P%d release ~~~", p)
 }
 
 func (p *process) request() {
@@ -67,7 +62,7 @@ func (p *process) request() {
 
 func (p *process) occupy() {
 
-	rsc.occupy(p.me)
+	p.rsc.occupy(p.me)
 
 	p.isOccupying = true
 
@@ -91,7 +86,7 @@ func (p *process) occupy() {
 func (p *process) release() {
 	r := p.requestQueue[0]
 
-	rsc.release(p.me)
+	p.rsc.release(p.me)
 	p.isOccupying = false
 
 	p.delete(p.requestQueue[0])

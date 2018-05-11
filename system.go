@@ -9,7 +9,7 @@ type system struct {
 }
 
 // size: process 的数量
-func newSystem(size int) *system {
+func newSystem(size int, r *resource) *system {
 	chans := make([]chan *message, size)
 	for i := range chans {
 		// TODO: chan 可以带缓冲吗？
@@ -18,7 +18,7 @@ func newSystem(size int) *system {
 
 	ps := make([]*process, size)
 	for i := range ps {
-		ps[i] = newProcess(i, chans)
+		ps[i] = newProcess(i, r, chans)
 	}
 
 	return &system{

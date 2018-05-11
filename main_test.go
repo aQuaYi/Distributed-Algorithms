@@ -9,6 +9,7 @@ func Test_start(t *testing.T) {
 	type args struct {
 		size         int
 		occupyNumber int
+		rsc          *resource
 	}
 	tests := []struct {
 		name string
@@ -20,6 +21,7 @@ func Test_start(t *testing.T) {
 			args{
 				size:         3,
 				occupyNumber: 9,
+				rsc:          newResource(),
 			},
 		},
 
@@ -35,8 +37,8 @@ func Test_start(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			if got := start(tt.args.size, tt.args.occupyNumber); !reflect.DeepEqual(got, occupyOrder) {
-				t.Errorf("start() = %v, want %v", got, occupyOrder)
+			if got := start(tt.args.size, tt.args.occupyNumber, tt.args.rsc); !reflect.DeepEqual(got, tt.args.rsc.occupyOrder) {
+				t.Errorf("start() = %v, want %v", got, tt.args.rsc.occupyOrder)
 			}
 		})
 	}
