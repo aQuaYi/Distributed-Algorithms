@@ -10,8 +10,8 @@ const (
 )
 
 var (
-	// 全局变量，随时随地都可以访问
-	rsc *resource
+	rsc         *resource // 全局变量，随时随地都可以访问
+	occupyOrder []int     // rsc 被占用的顺序
 )
 
 func init() {
@@ -30,6 +30,7 @@ func (r *resource) occupy(p int) {
 		panic(msg)
 	}
 	r.grantedTo = p
+	occupyOrder = append(occupyOrder, p)
 }
 
 func (r *resource) release(p int) {

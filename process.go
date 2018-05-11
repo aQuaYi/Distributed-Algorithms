@@ -18,40 +18,49 @@ type process struct {
 	toCheckRule5Chan chan struct{} // 每次收到 message 后，都靠这个 chan 来通知检查此 process 是否已经满足 rule 5，以便决定是否占有 resource
 
 	occupying *sync.Mutex
-
-	takenCounterDown int // 每个 preocess 想要占用 resource 的次数
 }
 
-func newProcess(me, takenTimes, initTakonProcess int, r *resource, chans []chan message) *process {
-	rq := make([]*request, 1, len(chans)*takenTimes*2)
+func newProcess(me int, chans []chan message) *process {
 	p := &process{
 		me:               me,
 		clock:            newClock(),
 		chans:            chans,
-		requestQueue:     rq,
+		requestQueue:     make([]*request, 0, 1024),
 		sentTime:         make([]int, len(chans)),
 		receiveTime:      make([]int, len(chans)),
 		minReceiveTime:   0,
 		toCheckRule5Chan: make(chan struct{}, 1),
-		takenCounterDown: takenTimes,
 	}
 
 	return p
 }
 
 func (p *process) occupy() {
-	// 可以连续占用资源，但是不能，同时重复占用资源
+	// 可以连续占用资源，但是不能重复占用资源
 	p.occupying.Lock()
 
 	rsc.occupy(p.me)
 
+	// 经过一段时间，就释放资源
 	go func(p *process) {
 		timeout := time.Duration(100+rand.Intn(900)) * time.Millisecond
 		time.Sleep(timeout)
 		p.release()
 		p.occupying.Unlock()
 	}(p)
+}
 
+func (p *process) release() {
+	r := p.requestQueue[0]
+
+	rsc.release(p.me)
+
+	p.delete()
+
+	// TODO: 这算不算一个 event 呢
+	p.clock.tick()
+
+	p.messaging(releaseResource, r)
 }
 
 func (p *process) request() {
@@ -66,26 +75,6 @@ func (p *process) request() {
 	p.clock.tick()
 
 	p.messaging(requestResource, r)
-}
-
-func (p *process) release() {
-	i := 0
-	for p.requestQueue[i].process != p.me {
-		i++
-	}
-	r := p.requestQueue[i]
-
-	rsc.release(p.me)
-
-	// TODO: 这算不算一个 event 呢
-	p.clock.tick()
-
-	p.delete()
-
-	// TODO: 这算不算一个 event 呢
-	p.clock.tick()
-
-	p.messaging(releaseResource, r)
 }
 
 func (p *process) messaging(mt msgType, r *request) {
