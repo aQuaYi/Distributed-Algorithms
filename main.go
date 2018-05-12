@@ -6,7 +6,8 @@ import (
 )
 
 func init() {
-	rand.Seed(time.Now().UnixNano())
+	// TODO: 添加随机种子
+	// rand.Seed(time.Now().UnixNano())
 }
 
 func start(size, occupyNumber int, r *resource) []int {
@@ -34,7 +35,7 @@ func requestLoop(ps []*process, occupyNumber int) (requestOrder []int) {
 		ps[i].request()
 
 		// 等待一段时间，再进行下一个 request
-		waitingTime := time.Duration(50+rand.Intn(50)) * time.Millisecond
+		waitingTime := time.Duration(5+rand.Intn(5)) * time.Millisecond
 		time.Sleep(waitingTime)
 		idx++
 	}

@@ -16,14 +16,14 @@ func Test_start(t *testing.T) {
 		args args
 	}{
 
-		{
-			"3 process, 9 occupy",
-			args{
-				size:         3,
-				occupyNumber: 9,
-				rsc:          newResource(),
-			},
-		},
+		// {
+		// 	"3 process, 9 occupy",
+		// 	args{
+		// 		size:         3,
+		// 		occupyNumber: 9,
+		// 		rsc:          newResource(),
+		// 	},
+		// },
 
 		// {
 		// 	"9 process, 99 occupy",
@@ -69,6 +69,24 @@ func Test_start(t *testing.T) {
 		// 		rsc:          newResource(),
 		// 	},
 		// },
+
+		// {
+		// 	"3 process, 99 occupy",
+		// 	args{
+		// 		size:         3,
+		// 		occupyNumber: 99,
+		// 		rsc:          newResource(),
+		// 	},
+		// },
+
+		{
+			"5 process, 500 occupy",
+			args{
+				size:         5,
+				occupyNumber: 500,
+				rsc:          newResource(),
+			},
+		},
 
 		// {
 		// 	"3 process, 999 occupy",

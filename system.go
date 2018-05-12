@@ -9,7 +9,7 @@ func newSystem(size int, r *resource) *system {
 	chans := make([]chan *message, size)
 	for i := range chans {
 		// TODO: chan 可以带缓冲吗？
-		chans[i] = make(chan *message, 100)
+		chans[i] = make(chan *message)
 	}
 
 	ps := make([]*process, size)

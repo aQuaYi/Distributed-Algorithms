@@ -46,17 +46,17 @@ func (r *resource) release(p int) {
 
 func (p *process) request() {
 	r := &request{
-		time:    p.clock.getTime(),
-		process: p.me,
+		timestamp: p.clock.getTime(),
+		process:   p.me,
 	}
+
+	p.clock.tick()
 
 	p.rwmu.Lock()
 
-	debugPrintf("[%d]P%d request %s", p.clock.getTime(), p.me, r)
+	debugPrintf("[%d]P%d request %s, RQ%v", r.timestamp, p.me, r, p.requestQueue)
 
 	p.append(r)
-
-	p.clock.tick()
 
 	p.messaging(requestResource, r)
 
@@ -65,7 +65,7 @@ func (p *process) request() {
 
 func (p *process) occupy() {
 
-	p.rsc.occupy(p.me)
+	p.resource.occupy(p.me)
 
 	p.isOccupying = true
 
@@ -89,13 +89,13 @@ func (p *process) occupy() {
 func (p *process) release() {
 	r := p.requestQueue[0]
 
-	p.rsc.release(p.me)
+	p.resource.release(p.me)
 	p.isOccupying = false
 
 	p.delete(p.requestQueue[0])
 
-	// TODO: 这算不算一个 event 呢
+	p.messaging(releaseResource, r)
+
 	p.clock.tick()
 
-	p.messaging(releaseResource, r)
 }

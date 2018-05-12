@@ -8,7 +8,7 @@ import (
 type process struct {
 	rwmu             sync.RWMutex
 	me               int
-	rsc              *resource
+	resource         *resource
 	clock            *clock
 	chans            []chan *message
 	requestQueue     []*request
@@ -23,14 +23,14 @@ type process struct {
 func newProcess(me int, r *resource, chans []chan *message) *process {
 	p := &process{
 		me:               me,
-		rsc:              r,
+		resource:         r,
 		clock:            newClock(),
 		chans:            chans,
 		requestQueue:     make([]*request, 0, 1024),
 		sentTime:         make([]int, len(chans)),
 		receiveTime:      make([]int, len(chans)),
 		minReceiveTime:   0,
-		toCheckRule5Chan: make(chan struct{}, 3),
+		toCheckRule5Chan: make(chan struct{}),
 	}
 
 	go p.receiveLoop()
@@ -52,30 +52,33 @@ func (p *process) receiveLoop() {
 		// 根据 IR2
 		// process 的 clock 需要根据 msg.time 进行更新
 		// 无论 msg 是什么类型的消息
-		p.clock.update(msg.time)
+		p.clock.update(msg.timestamp)
 		p.receiveTime[msg.senderID] = p.clock.getTime()
 		p.updateMinReceiveTime()
+
+		debugPrintf("[%d]P%d MRT=%d, RT%v, RQ%v ", p.clock.getTime(), p.me, p.minReceiveTime, p.receiveTime, p.requestQueue)
 
 		switch msg.msgType {
 		case requestResource:
 			p.append(msg.request)
-
 			// rule 2
 			// 收到 request message 后
 			// 需要发送一个 acknowledgement message
-			if p.sentTime[msg.senderID] <= msg.time {
-				t := p.clock.getTime()
-				p.sentTime[msg.senderID] = t
-
-				p.send(msg.senderID, &message{
-					msgType: acknowledgment,
-					time:    t,
-				})
-
+			if p.sentTime[msg.senderID] <= p.clock.getTime() {
+				ts := p.clock.tick()
+				p.sentTime[msg.senderID] = ts
+				p.chans[msg.senderID] <- newMessage(acknowledgment, ts, p.me, nil)
 			}
-
 		case releaseResource:
 			p.delete(msg.request)
+			// rule 2
+			// 收到 request message 后
+			// 需要发送一个 acknowledgement message
+			if p.sentTime[msg.senderID] <= p.clock.getTime() {
+				ts := p.clock.tick()
+				p.sentTime[msg.senderID] = ts
+				p.chans[msg.senderID] <- newMessage(acknowledgment, ts, p.me, nil)
+			}
 		}
 
 		p.rwmu.Unlock()
@@ -98,23 +101,24 @@ func (p *process) updateMinReceiveTime() {
 }
 
 func (p *process) occupyLoop() {
-	timer := time.NewTicker(10 * time.Millisecond)
+	ticker := time.NewTicker(10 * time.Millisecond)
 	for {
-
 		select {
 		case <-p.toCheckRule5Chan:
-		case <-timer.C:
+		case <-ticker.C:
 		}
 
 		p.rwmu.Lock()
 
 		if len(p.requestQueue) > 0 && // p.requestQueue 中还有元素
 			p.requestQueue[0].process == p.me && // 排在首位的 repuest 是 p 自己的
-			p.requestQueue[0].time < p.minReceiveTime && // p 在 request 后，收到过所有其他 p 的回复
+			p.requestQueue[0].timestamp < p.minReceiveTime && // p 在 request 后，收到过所有其他 p 的回复
 			!p.isOccupying { // 不能是正占用的资源
 
 			p.occupy()
 		}
+
+		p.clock.tick()
 
 		p.rwmu.Unlock()
 	}
