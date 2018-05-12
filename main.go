@@ -2,7 +2,6 @@ package mutual
 
 import (
 	"math/rand"
-	"sync"
 	"time"
 )
 
@@ -10,16 +9,14 @@ func init() {
 	rand.Seed(time.Now().UnixNano())
 }
 
-var wg sync.WaitGroup
-
 func start(size, occupyNumber int, r *resource) []int {
-	wg.Add(occupyNumber)
+	r.occupied.Add(occupyNumber)
 
 	sys := newSystem(size, r)
 
 	requestOrder := requestLoop(sys.processes, occupyNumber)
 
-	wg.Wait()
+	r.occupied.Wait()
 
 	return requestOrder
 }

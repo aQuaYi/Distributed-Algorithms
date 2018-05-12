@@ -3,6 +3,7 @@ package mutual
 import (
 	"fmt"
 	"math/rand"
+	"sync"
 	"time"
 )
 
@@ -14,6 +15,7 @@ const (
 type resource struct {
 	grantedTo   int
 	occupyOrder []int
+	occupied    sync.WaitGroup
 }
 
 func newResource() *resource {
@@ -29,7 +31,7 @@ func (r *resource) occupy(p int) {
 	}
 	r.grantedTo = p
 	r.occupyOrder = append(r.occupyOrder, p)
-	wg.Done()
+	r.occupied.Done()
 	debugPrintf("~~~ @resource: P%d occupy ~~~", p)
 }
 
