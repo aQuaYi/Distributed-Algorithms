@@ -19,7 +19,7 @@ func newMessage(mt msgType, timestamp int, senderID int, request *request) *mess
 }
 
 func (m *message) String() string {
-	return fmt.Sprintf("msg{%s,T%d,P%d,request%s}", m.msgType, m.timestamp, m.senderID, m.request)
+	return fmt.Sprintf("msg{%s,T%d,P%d,%s}", m.msgType, m.timestamp, m.senderID, m.request)
 }
 
 type msgType int

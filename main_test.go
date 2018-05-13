@@ -107,7 +107,9 @@ func Test_start(t *testing.T) {
 		// },
 
 	}
+
 	for _, tt := range tests {
+		t.Log("运行", tt.name)
 		t.Run(tt.name, func(t *testing.T) {
 			if got := start(tt.args.size, tt.args.occupyNumber, tt.args.rsc); !reflect.DeepEqual(got, tt.args.rsc.occupyOrder) {
 				t.Errorf("start() = %v, want %v", got, tt.args.rsc.occupyOrder)

@@ -49,9 +49,13 @@ func (p *process) handleRequest() {
 		process:   p.me,
 	}
 
+	debugPrintf("[%d]P%d handleRequest，生成 r=%s", p.clock.getTime(), p.me, r)
+
 	// 根据 Rule1
 	// 把 r 放入自身的 request queue
 	p.push(r)
+
+	debugPrintf("[%d]P%d handleRequest，已加入 request queue %v", p.clock.getTime(), p.me, p.requestQueue)
 
 	// 根据 Rule1
 	// 给其他的 process 发消息
@@ -74,9 +78,13 @@ func (p *process) handleRequest() {
 			p.sendChan <- sm
 		}(i)
 	}
+
+	debugPrintf("[%d]P%d handleRequest，已分配好了所有发送消息的任务", p.clock.getTime(), p.me)
+
 }
 
 func (p *process) handleOccupy() {
+	debugPrintf("[%d]P%d handleOccupy request queue %v", p.clock.getTime(), p.me, p.requestQueue)
 	p.isOccupying = true
 	p.resource.occupy(p.me)
 	randSleep()
@@ -88,6 +96,8 @@ func (p *process) handleOccupy() {
 func (p *process) handleRelease() {
 	// 根据 Rule3
 	// 删除自身的 request
+	debugPrintf("[%d]P%d handleRelease request queue %v", p.clock.getTime(), p.me, p.requestQueue)
+
 	r := heap.Pop(&p.requestQueue).(*request)
 
 	// 根据 Rule3
