@@ -154,14 +154,17 @@ type sendMsg struct {
 }
 
 func (p *process) handleSend(sm *sendMsg) {
+	sm.msg.timestamp = p.clock.getTime()
+
 	debugPrintf("[%d]P%d -> P%d，消息内容 %s", p.clock.getTime(), p.me, sm.receiveID, sm.msg)
 
-	sm.msg.timestamp = p.clock.getTime()
 	p.sentTime[sm.receiveID] = max(p.sentTime[sm.receiveID], p.clock.getTime())
 
-	go func() {
-		p.chans[sm.receiveID] <- sm.msg
-	}()
+	// go func() {
+	// 	p.chans[sm.receiveID] <- sm.msg
+	// }()
+
+	p.chans[sm.receiveID] <- sm.msg
 
 }
 
@@ -170,7 +173,9 @@ func (p *process) push(r *request) {
 }
 
 func (p *process) pop(r *request) {
-	pr := heap.Pop(&p.requestQueue)
+	debugPrintf("[%d]P%d pop(%s) MRT=%d RT%v RQ%s", p.clock.getTime(), p.me, r, p.minReceiveTime, p.receiveTime, p.requestQueue)
+
+	pr := heap.Pop(&p.requestQueue).(*request)
 	if pr != r {
 		msg := fmt.Sprintf("P%d 删除的 %s 不是需要删除的 %s", p.me, pr, r)
 		panic(msg)

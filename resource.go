@@ -23,24 +23,24 @@ func newResource() *resource {
 	}
 }
 
-func (r *resource) occupy(p int) {
+func (r *resource) occupy(req *request) {
 	if r.grantedTo != NULL {
-		msg := fmt.Sprintf("资源正在被 P%d 占据，P%d 却想获取资源。", r.grantedTo, p)
+		msg := fmt.Sprintf("资源正在被 P%d 占据，P%d 却想获取资源。", r.grantedTo, req.process)
 		panic(msg)
 	}
-	r.grantedTo = p
-	r.occupyOrder = append(r.occupyOrder, p)
+	r.grantedTo = req.process
+	r.occupyOrder = append(r.occupyOrder, req.process)
 	r.occupied.Done()
-	debugPrintf("~~~ @resource: P%d occupy ~~~", p)
+	debugPrintf("~~~ @resource: %s occupy ~~~", req)
 }
 
-func (r *resource) release(p int) {
-	if r.grantedTo != p {
-		msg := fmt.Sprintf("P%d 想要释放正在被 P%d 占据的资源。", p, r.grantedTo)
+func (r *resource) release(req *request) {
+	if r.grantedTo != req.process {
+		msg := fmt.Sprintf("P%d 想要释放正在被 P%d 占据的资源。", req.process, r.grantedTo)
 		panic(msg)
 	}
 	r.grantedTo = NULL
-	debugPrintf("~~~ @resource: P%d release ~~~", p)
+	debugPrintf("~~~ @resource: %s release ~~~", req)
 }
 
 func (p *process) handleRequest() {
@@ -84,20 +84,26 @@ func (p *process) handleRequest() {
 }
 
 func (p *process) handleOccupy() {
-	debugPrintf("[%d]P%d handleOccupy request queue %v", p.clock.getTime(), p.me, p.requestQueue)
+	req := p.requestQueue[0]
+	debugPrintf("[%d]P%d handleOccupy %s request queue %v", p.clock.getTime(), p.me, req, p.requestQueue)
+
 	p.isOccupying = true
-	p.resource.occupy(p.me)
+
+	p.resource.occupy(req)
 	randSleep()
-	p.resource.release(p.me)
-	p.isOccupying = false
+
 	p.handleRelease()
 }
 
 func (p *process) handleRelease() {
+	req := p.requestQueue[0]
+
 	// 根据 Rule3
 	// 删除自身的 request
-	debugPrintf("[%d]P%d handleRelease request queue %v", p.clock.getTime(), p.me, p.requestQueue)
+	debugPrintf("[%d]P%d handleRelease %s request queue %v", p.clock.getTime(), p.me, req, p.requestQueue)
 
+	p.resource.release(req)
+	p.isOccupying = false
 	r := heap.Pop(&p.requestQueue).(*request)
 
 	// 根据 Rule3
@@ -108,17 +114,17 @@ func (p *process) handleRelease() {
 			continue
 		}
 
-		go func(i int) {
+		go func(i int, req *request) {
 			sm := &sendMsg{
 				receiveID: i,
 				msg: &message{
 					msgType: releaseResource,
 					// timestamp 留在真正发送前更新
 					senderID: p.me,
-					request:  r,
+					request:  req,
 				},
 			}
 			p.sendChan <- sm
-		}(i)
+		}(i, r)
 	}
 }
