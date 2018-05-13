@@ -1,6 +1,10 @@
 package mutual
 
-import "log"
+import (
+	"log"
+	"math/rand"
+	"time"
+)
 
 func init() {
 	log.SetFlags(log.LstdFlags | log.Lmicroseconds)
@@ -29,4 +33,9 @@ func min(a, b int) int {
 		return a
 	}
 	return b
+}
+
+func randSleep() {
+	timeout := time.Duration(5+rand.Intn(25)) * time.Millisecond
+	time.Sleep(timeout)
 }

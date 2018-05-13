@@ -2,7 +2,6 @@ package mutual
 
 import (
 	"math/rand"
-	"time"
 )
 
 func init() {
@@ -35,8 +34,8 @@ func requestLoop(ps []*process, occupyNumber int) (requestOrder []int) {
 		ps[i].request()
 
 		// 等待一段时间，再进行下一个 request
-		waitingTime := time.Duration(5+rand.Intn(5)) * time.Millisecond
-		time.Sleep(waitingTime)
+		randSleep()
+
 		idx++
 	}
 

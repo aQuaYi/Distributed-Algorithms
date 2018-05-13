@@ -45,18 +45,6 @@ func (mt msgType) String() string {
 	}
 }
 
-type request struct {
-	timestamp int // request 的时间
-	process   int // request 的 process
-}
-
-func (r *request) String() string {
-	if r == nil {
-		return "<>"
-	}
-	return fmt.Sprintf("<%d:%d>", r.timestamp, r.process)
-}
-
 func (p *process) messaging(mt msgType, r *request) {
 
 	for i := range p.chans {

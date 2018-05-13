@@ -16,14 +16,14 @@ func Test_start(t *testing.T) {
 		args args
 	}{
 
-		// {
-		// 	"3 process, 9 occupy",
-		// 	args{
-		// 		size:         3,
-		// 		occupyNumber: 9,
-		// 		rsc:          newResource(),
-		// 	},
-		// },
+		{
+			"3 process, 9 occupy",
+			args{
+				size:         3,
+				occupyNumber: 9,
+				rsc:          newResource(),
+			},
+		},
 
 		// {
 		// 	"9 process, 99 occupy",
@@ -79,14 +79,14 @@ func Test_start(t *testing.T) {
 		// 	},
 		// },
 
-		{
-			"5 process, 500 occupy",
-			args{
-				size:         5,
-				occupyNumber: 500,
-				rsc:          newResource(),
-			},
-		},
+		// {
+		// 	"5 process, 500 occupy",
+		// 	args{
+		// 		size:         5,
+		// 		occupyNumber: 500,
+		// 		rsc:          newResource(),
+		// 	},
+		// },
 
 		// {
 		// 	"3 process, 999 occupy",
@@ -106,7 +106,6 @@ func Test_start(t *testing.T) {
 		// 	},
 		// },
 
-		// TODO: Add test cases.
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {

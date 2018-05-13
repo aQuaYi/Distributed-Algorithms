@@ -1,10 +1,9 @@
 package mutual
 
 import (
+	"container/heap"
 	"fmt"
-	"math/rand"
 	"sync"
-	"time"
 )
 
 const (
@@ -44,58 +43,72 @@ func (r *resource) release(p int) {
 	debugPrintf("~~~ @resource: P%d release ~~~", p)
 }
 
-func (p *process) request() {
+func (p *process) handleRequest() {
 	r := &request{
 		timestamp: p.clock.getTime(),
 		process:   p.me,
 	}
 
-	p.clock.tick()
+	// 根据 Rule1
+	// 把 r 放入自身的 request queue
+	p.push(r)
 
-	p.rwmu.Lock()
+	// 根据 Rule1
+	// 给其他的 process 发消息
 
-	debugPrintf("[%d]P%d request %s, RQ%v", r.timestamp, p.me, r, p.requestQueue)
+	for i := range p.chans {
+		if i == p.me {
+			continue
+		}
 
-	p.append(r)
-
-	p.messaging(requestResource, r)
-
-	p.rwmu.Unlock()
+		go func(i int) {
+			sm := &sendMsg{
+				receiveID: i,
+				msg: &message{
+					msgType: requestResource,
+					// timestamp 留在真正发送前更新
+					senderID: p.me,
+					request:  r,
+				},
+			}
+			p.sendChan <- sm
+		}(i)
+	}
 }
 
-func (p *process) occupy() {
-
-	p.resource.occupy(p.me)
-
+func (p *process) handleOccupy() {
 	p.isOccupying = true
-
-	p.clock.tick()
-
-	// 经过一段时间，就释放资源
-	go func(p *process) {
-		occupyTime := time.Duration(5+rand.Intn(20)) * time.Millisecond
-		time.Sleep(occupyTime)
-
-		p.rwmu.Lock()
-
-		p.release()
-
-		p.clock.tick()
-
-		p.rwmu.Unlock()
-	}(p)
-}
-
-func (p *process) release() {
-	r := p.requestQueue[0]
-
+	p.resource.occupy(p.me)
+	randSleep()
 	p.resource.release(p.me)
 	p.isOccupying = false
+	p.handleRelease()
+}
 
-	p.delete(p.requestQueue[0])
+func (p *process) handleRelease() {
+	// 根据 Rule3
+	// 删除自身的 request
+	r := heap.Pop(&p.requestQueue).(*request)
 
-	p.messaging(releaseResource, r)
+	// 根据 Rule3
+	// 给其他的 process 发消息
 
-	p.clock.tick()
+	for i := range p.chans {
+		if i == p.me {
+			continue
+		}
 
+		go func(i int) {
+			sm := &sendMsg{
+				receiveID: i,
+				msg: &message{
+					msgType: releaseResource,
+					// timestamp 留在真正发送前更新
+					senderID: p.me,
+					request:  r,
+				},
+			}
+			p.sendChan <- sm
+		}(i)
+	}
 }
