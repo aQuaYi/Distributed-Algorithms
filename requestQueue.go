@@ -46,6 +46,9 @@ type rpq []*request
 func (pq rpq) Len() int { return len(pq) }
 
 func (pq rpq) Less(i, j int) bool {
+	if pq[i].timestamp == pq[j].timestamp {
+		return pq[i].process < pq[j].process
+	}
 	return pq[i].timestamp < pq[j].timestamp
 }
 

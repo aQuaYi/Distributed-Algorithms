@@ -40,7 +40,7 @@ func (r *resource) release(req *request) {
 		panic(msg)
 	}
 	r.grantedTo = NULL
-	debugPrintf("~~~ @resource: %s release ~~~", req)
+	debugPrintf("~~~ @resource: %s release ~~~ %v", req, r.occupyOrder[max(0, len(r.occupyOrder)-6):])
 }
 
 func (p *process) handleRequest() {

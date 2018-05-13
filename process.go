@@ -106,7 +106,7 @@ func eventLoop(p *process) {
 }
 
 func (p *process) handleMsg(msg *message) {
-	debugPrintf("[%d]P%d receive %s", p.clock.getTime(), p.me, msg)
+	debugPrintf("[%d]P%d receive %s RQ%s", p.clock.getTime(), p.me, msg, p.requestQueue)
 
 	// 接收到了一个新的消息
 	// 根据 IR2
