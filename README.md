@@ -18,4 +18,29 @@ system 由多个 process 组成，却只有一个 resource 可供使用。resour
 
 ## 思路
 
+## Lamport timestamps
+
+论上的 IR1 和 IR2，最后演变成了 [Lamport timestamps](https://en.wikipedia.org/wiki/Lamport_timestamps) 规则：
+
+1. 进程在每做一件事情之前，计数器+1
+1. 当进程发送消息的时候，需要带上计数器的值
+1. 当进程接收消息的时候，需要按照消息中的值，更新自己的计数器。更新规则为 max(自身值，消息值)+1
+
+以下是算法的伪代码
+
+```code
+// 在进程内
+time = time + 1
+doOneThing()
+
+// 进程发现消息时
+time = time + 1
+timeStamp = time
+send(message, timeStamp)
+
+// 进程接收消息时
+message, timeStamp = receive()
+time = max(time, timeStamp) + 1
+```
+
 ## 代码说明
