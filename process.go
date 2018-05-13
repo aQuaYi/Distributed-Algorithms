@@ -73,13 +73,12 @@ func (p *process) handleCheckRule5() {
 		p.requestQueue[0].timestamp < p.minReceiveTime && // p 在 request 后，收到过所有其他 p 的回复
 		!p.isOccupying { // 不能是正占用的资源
 
-		go func() {
-			debugPrintf("[%d]P%d 满足 Rule5 MRT=%d RT%v PQ%v", p.clock.getTime(), p.me, p.minReceiveTime, p.receiveTime, p.requestQueue)
-			p.occupyChan <- struct{}{}
-		}()
+		debugPrintf("[%d]P%d 满足 Rule5 MRT=%d RT%v PQ%v", p.clock.getTime(), p.me, p.minReceiveTime, p.receiveTime, p.requestQueue)
+		p.handleOccupy()
 
-		debugPrintf("[%d]P%d 不满足 Rule5 MRT=%d RT%v PQ%v", p.clock.getTime(), p.me, p.minReceiveTime, p.receiveTime, p.requestQueue)
 	}
+
+	debugPrintf("[%d]P%d 不满足 Rule5 MRT=%d RT%v PQ%v", p.clock.getTime(), p.me, p.minReceiveTime, p.receiveTime, p.requestQueue)
 }
 
 func eventLoop(p *process) {
@@ -96,8 +95,8 @@ func eventLoop(p *process) {
 				p.handleRequest()
 			case sm := <-p.sendChan:
 				p.handleSend(sm)
-			case <-p.occupyChan:
-				p.handleOccupy()
+			// case <-p.occupyChan:
+			// p.handleOccupy()
 			case <-p.toCheckRule5Chan:
 				p.handleCheckRule5()
 			}
@@ -159,7 +158,11 @@ func (p *process) handleSend(sm *sendMsg) {
 
 	sm.msg.timestamp = p.clock.getTime()
 	p.sentTime[sm.receiveID] = max(p.sentTime[sm.receiveID], p.clock.getTime())
-	p.chans[sm.receiveID] <- sm.msg
+
+	go func() {
+		p.chans[sm.receiveID] <- sm.msg
+	}()
+
 }
 
 func (p *process) push(r *request) {
