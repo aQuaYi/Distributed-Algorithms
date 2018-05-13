@@ -91,8 +91,8 @@ func eventLoop(p *process) {
 			select {
 			case msg := <-p.chans[p.me]:
 				p.handleMsg(msg)
-			case <-p.requestChan:
-				p.handleRequest()
+			// case <-p.requestChan:
+			// 	p.handleRequest()
 			case sm := <-p.sendChan:
 				p.handleSend(sm)
 			// case <-p.occupyChan:
@@ -180,7 +180,7 @@ func (p *process) pop(r *request) {
 	}
 }
 
-func (p *process) request() {
-	debugPrintf("[%d]P%d 准备 request", p.clock.getTime(), p.me)
-	p.requestChan <- struct{}{}
-}
+// func (p *process) request() {
+// 	debugPrintf("[%d]P%d 准备 request", p.clock.getTime(), p.me)
+// 	p.requestChan <- struct{}{}
+// }

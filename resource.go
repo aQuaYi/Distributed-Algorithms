@@ -1,6 +1,7 @@
 package mutual
 
 import (
+	"container/heap"
 	"fmt"
 	"sync"
 )
@@ -29,7 +30,7 @@ func (r *resource) occupy(req *request) {
 	}
 	r.grantedTo = req.process
 	r.occupyOrder = append(r.occupyOrder, req.process)
-	debugPrintf("~~~ @resource: %s occupy ~~~", req)
+	debugPrintf("~~~ @resource: %s occupy ~~~ %v", req, r.occupyOrder[max(0, len(r.occupyOrder)-6):])
 }
 
 func (r *resource) release(req *request) {
@@ -42,7 +43,7 @@ func (r *resource) release(req *request) {
 	r.occupied.Done()
 }
 
-func (p *process) handleRequest() {
+func (p *process) request() {
 	r := &request{
 		timestamp: p.clock.getTime(),
 		process:   p.me,
@@ -82,15 +83,16 @@ func (p *process) handleRequest() {
 		if i == p.me {
 			continue
 		}
+
 		p.chans[i] <- &message{
 			msgType:   requestResource,
-			timestamp: p.clock.getTime(),
+			timestamp: p.clock.tick(),
 			senderID:  p.me,
 			request:   r,
 		}
 	}
 
-	debugPrintf("[%d]P%d handleRequest，已分配好了所有发送消息的任务", p.clock.getTime(), p.me)
+	debugPrintf("[%d]P%d 已经完成所有的 request 通知任务", p.clock.getTime(), p.me)
 
 }
 
@@ -110,12 +112,14 @@ func (p *process) handleOccupy() {
 func (p *process) handleRelease() {
 	req := p.requestQueue[0]
 
-	// 根据 Rule3
-	// 删除自身的 request
-	debugPrintf("[%d]P%d handleRelease %s request queue %v", p.clock.getTime(), p.me, req, p.requestQueue)
-
 	p.resource.release(req)
 	p.isOccupying = false
+
+	// 根据 Rule3
+	// 删除自身的 request
+	heap.Pop(&p.requestQueue)
+
+	debugPrintf("[%d]P%d handleRelease %s request queue %v", p.clock.getTime(), p.me, req, p.requestQueue)
 
 	// 根据 Rule3
 	// 给其他的 process 发消息
@@ -126,7 +130,7 @@ func (p *process) handleRelease() {
 		}
 		p.chans[i] <- &message{
 			msgType:   releaseResource,
-			timestamp: p.clock.getTime(),
+			timestamp: p.clock.tick(),
 			senderID:  p.me,
 			request:   req,
 		}

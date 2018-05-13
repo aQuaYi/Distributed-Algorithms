@@ -1,0 +1,18 @@
+{
+	"onDidClearBookmarkEmitter": {},
+	"onDidClearAllBookmarksEmitter": {},
+	"onDidAddBookmarkEmitter": {},
+	"onDidRemoveBookmarkEmitter": {},
+	"onDidUpdateBookmarkEmitter": {},
+	"bookmarks": [
+		{
+			"fsPath": "$ROOTPATH$/output.test.txt",
+			"bookmarks": [
+				3088,
+				3154,
+				11967,
+				12053
+			]
+		}
+	]
+}

@@ -1,7 +1,6 @@
 package mutual
 
 import (
-	"math/rand"
 	"sync"
 )
 
@@ -15,7 +14,8 @@ type clock struct {
 // 每个 process 的 clock 的 initial time，都是随机的
 func newClock() *clock {
 	return &clock{
-		time: 1 + rand.Intn(100),
+		// time: 1 + rand.Intn(100),
+		time: 0,
 	}
 }
 
