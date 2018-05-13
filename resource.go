@@ -30,7 +30,6 @@ func (r *resource) occupy(req *request) {
 	}
 	r.grantedTo = req.process
 	r.occupyOrder = append(r.occupyOrder, req.process)
-	r.occupied.Done()
 	debugPrintf("~~~ @resource: %s occupy ~~~", req)
 }
 
@@ -41,6 +40,7 @@ func (r *resource) release(req *request) {
 	}
 	r.grantedTo = NULL
 	debugPrintf("~~~ @resource: %s release ~~~ %v", req, r.occupyOrder[max(0, len(r.occupyOrder)-6):])
+	r.occupied.Done()
 }
 
 func (p *process) handleRequest() {
