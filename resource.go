@@ -1,7 +1,6 @@
 package mutual
 
 import (
-	"container/heap"
 	"fmt"
 	"sync"
 )
@@ -60,23 +59,35 @@ func (p *process) handleRequest() {
 	// 根据 Rule1
 	// 给其他的 process 发消息
 
+	// for i := range p.chans {
+	// 	if i == p.me {
+	// 		continue
+	// 	}
+	// 	go func(i int) {
+	// 		sm := &sendMsg{
+	// 			receiveID: i,
+	// 			msg: &message{
+	// 				msgType: requestResource,
+	// 				// timestamp 留在真正发送前更新
+	// 				senderID: p.me,
+	// 				request:  r,
+	// 			},
+	// 		}
+	// 		p.sendChan <- sm
+	// 	}(i)
+	// }
+	// debugPrintf("[%d]P%d handleRequest，已分配好了所有发送消息的任务", p.clock.getTime(), p.me)
+
 	for i := range p.chans {
 		if i == p.me {
 			continue
 		}
-
-		go func(i int) {
-			sm := &sendMsg{
-				receiveID: i,
-				msg: &message{
-					msgType: requestResource,
-					// timestamp 留在真正发送前更新
-					senderID: p.me,
-					request:  r,
-				},
-			}
-			p.sendChan <- sm
-		}(i)
+		p.chans[i] <- &message{
+			msgType:   requestResource,
+			timestamp: p.clock.getTime(),
+			senderID:  p.me,
+			request:   r,
+		}
 	}
 
 	debugPrintf("[%d]P%d handleRequest，已分配好了所有发送消息的任务", p.clock.getTime(), p.me)
@@ -90,6 +101,7 @@ func (p *process) handleOccupy() {
 	p.isOccupying = true
 
 	p.resource.occupy(req)
+
 	randSleep()
 
 	p.handleRelease()
@@ -104,7 +116,6 @@ func (p *process) handleRelease() {
 
 	p.resource.release(req)
 	p.isOccupying = false
-	r := heap.Pop(&p.requestQueue).(*request)
 
 	// 根据 Rule3
 	// 给其他的 process 发消息
@@ -113,18 +124,29 @@ func (p *process) handleRelease() {
 		if i == p.me {
 			continue
 		}
-
-		go func(i int, req *request) {
-			sm := &sendMsg{
-				receiveID: i,
-				msg: &message{
-					msgType: releaseResource,
-					// timestamp 留在真正发送前更新
-					senderID: p.me,
-					request:  req,
-				},
-			}
-			p.sendChan <- sm
-		}(i, r)
+		p.chans[i] <- &message{
+			msgType:   releaseResource,
+			timestamp: p.clock.getTime(),
+			senderID:  p.me,
+			request:   req,
+		}
 	}
+
+	// for i := range p.chans {
+	// 	if i == p.me {
+	// 		continue
+	// 	}
+	// 	go func(i int, req *request) {
+	// 		sm := &sendMsg{
+	// 			receiveID: i,
+	// 			msg: &message{
+	// 				msgType: releaseResource,
+	// 				// timestamp 留在真正发送前更新
+	// 				senderID: p.me,
+	// 				request:  req,
+	// 			},
+	// 		}
+	// 		p.sendChan <- sm
+	// 	}(i, r)
+	// }
 }

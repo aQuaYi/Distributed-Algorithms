@@ -121,25 +121,23 @@ func (p *process) handleMsg(msg *message) {
 	switch msg.msgType {
 	case requestResource:
 		p.push(r)
-		// rule 2
-		// 收到 request message 后
-		// 需要发送一个 acknowledgement message
-		if p.sentTime[msg.senderID] <= r.timestamp {
-			go func() {
-				p.sendChan <- &sendMsg{
-					receiveID: msg.senderID,
-					msg: &message{
-						msgType: acknowledgment,
-						// timestamp 真正发送的时候更新
-						senderID: p.me,
-						// request: nil,
-					},
-				}
-			}()
-		}
-
 	case releaseResource:
 		p.pop(r)
+	}
+
+	// 只要不是 acknowledgement 消息，都回复一个 acknowledgement
+	if msg.msgType != acknowledgment {
+		go func() {
+			p.sendChan <- &sendMsg{
+				receiveID: msg.senderID,
+				msg: &message{
+					msgType: acknowledgment,
+					// timestamp 真正发送的时候更新
+					senderID: p.me,
+					// request: nil,
+				},
+			}
+		}()
 	}
 
 	go func() {
