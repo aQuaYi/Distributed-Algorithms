@@ -9,7 +9,7 @@ type process struct {
 	me           int
 	clock        *clock
 	chans        []chan *message
-	requestQueue rpq
+	requestQueue requestPriorityQueue
 
 	resource *resource
 
@@ -32,7 +32,7 @@ func newProcess(me int, r *resource, chans []chan *message) *process {
 		resource:       r,
 		clock:          newClock(),
 		chans:          chans,
-		requestQueue:   make(rpq, 0, 1024),
+		requestQueue:   make(requestPriorityQueue, 0, 1024),
 		sentTime:       make([]int, len(chans)),
 		receiveTime:    make([]int, len(chans)),
 		minReceiveTime: 0,

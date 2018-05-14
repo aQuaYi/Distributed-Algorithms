@@ -9,15 +9,17 @@ func init() {
 	rand.Seed(time.Now().UnixNano())
 }
 
-func start(processes, occupieds int, r *resource) {
-	r.occupieds.Add(occupieds)
+func start(processes, occupieds int) *resource {
 
-	sys := newSystem(processes, r)
+	sys, resource := newSystem(processes)
+
+	resource.occupieds.Add(occupieds)
 
 	requestLoop(sys.processes, occupieds)
 
-	r.occupieds.Wait()
+	resource.occupieds.Wait()
 
+	return resource
 }
 
 func requestLoop(ps []*process, occupieds int) {

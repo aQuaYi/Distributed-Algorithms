@@ -4,13 +4,13 @@ type system struct {
 	processes []*process
 }
 
-// size: process 的数量
-func newSystem(size int, r *resource) *system {
+func newSystem(size int) (*system, *resource) {
 	chans := make([]chan *message, size)
 	for i := range chans {
-		// TODO: chan 可以带缓冲吗？
-		chans[i] = make(chan *message, 1000)
+		chans[i] = make(chan *message, 100)
 	}
+
+	r := newResource()
 
 	ps := make([]*process, size)
 	for i := range ps {
@@ -19,5 +19,5 @@ func newSystem(size int, r *resource) *system {
 
 	return &system{
 		processes: ps,
-	}
+	}, r
 }

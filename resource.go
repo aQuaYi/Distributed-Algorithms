@@ -11,10 +11,10 @@ const (
 )
 
 type resource struct {
-	grantedTo    int
-	processOrder []int
-	timeOrder    []int
-	occupieds    sync.WaitGroup
+	grantedTo int
+	procOrder []int
+	timeOrder []int
+	occupieds sync.WaitGroup
 }
 
 func newResource() *resource {
@@ -29,9 +29,9 @@ func (r *resource) occupy(req *request) {
 		panic(msg)
 	}
 	r.grantedTo = req.process
-	r.processOrder = append(r.processOrder, req.process)
+	r.procOrder = append(r.procOrder, req.process)
 	r.timeOrder = append(r.timeOrder, req.timestamp)
-	debugPrintf("~~~ @resource: %s occupy ~~~ %v", req, r.processOrder[max(0, len(r.processOrder)-6):])
+	debugPrintf("~~~ @resource: %s occupy ~~~ %v", req, r.procOrder[max(0, len(r.procOrder)-6):])
 }
 
 func (r *resource) release(req *request) {
@@ -40,7 +40,7 @@ func (r *resource) release(req *request) {
 		panic(msg)
 	}
 	r.grantedTo = NULL
-	debugPrintf("~~~ @resource: %s release ~~~ %v", req, r.processOrder[max(0, len(r.processOrder)-6):])
+	debugPrintf("~~~ @resource: %s release ~~~ %v", req, r.procOrder[max(0, len(r.procOrder)-6):])
 	r.occupieds.Done()
 }
 
