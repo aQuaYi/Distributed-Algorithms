@@ -14,28 +14,35 @@ func Test_start(t *testing.T) {
 		args args
 	}{
 
-		// {
-		// 	"3 process, 9 occupy",
-		// 	args{
-		// 		size:         3,
-		// 		occupyNumber: 9,
-		// 		resource:     newResource(),
-		// 	},
-		// },
-
 		{
-			"20 process, 200 occupy",
+			"3 process, 9 occupy",
 			args{
-				processes: 20,
-				occupieds: 200,
+				processes: 3,
+				occupieds: 9,
 			},
 		},
+
+		// {
+		// 	"20 process, 200 occupy",
+		// 	args{
+		// 		processes: 20,
+		// 		occupieds: 200,
+		// 	},
+		// },
 
 		// {
 		// 	"20 process, 400 occupy",
 		// 	args{
 		// 		processes: 20,
 		// 		occupieds: 400,
+		// 	},
+		// },
+
+		// {
+		// 	"20 process, 600 occupy",
+		// 	args{
+		// 		processes: 20,
+		// 		occupieds: 600,
 		// 	},
 		// },
 

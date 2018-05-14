@@ -40,7 +40,9 @@ func (r *resource) release(req *request) {
 		panic(msg)
 	}
 	r.grantedTo = NULL
+
 	debugPrintf("~~~ @resource: %s release ~~~ %v", req, r.procOrder[max(0, len(r.procOrder)-6):])
+
 	r.occupieds.Done()
 }
 

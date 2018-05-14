@@ -47,11 +47,7 @@ func (p *process) handleMsg(msg *message) {
 	// NOTICE: 与论文中不同
 	// 我总是发送 acknowledgement 信息
 	if msg.msgType != acknowledgment {
-		p.chans[msg.from] <- &message{
-			msgType:   acknowledgment,
-			timestamp: nowTime,
-			from:      p.me,
-		}
+		p.chans[msg.from] <- newMessage(acknowledgment, nowTime, p.me, nil)
 	}
 
 	// 每次收到了消息，都会触发检查，是否已经满足 Rule5
@@ -78,13 +74,7 @@ func (p *process) handleRequest() {
 		if i == p.me {
 			continue
 		}
-		p.chans[i] <- &message{
-			msgType:   requestResource,
-			timestamp: timestamp,
-			from:      p.me,
-			request:   r,
-		}
-		p.sentTime[i] = timestamp
+		p.chans[i] <- newMessage(requestResource, timestamp, p.me, r)
 	}
 
 	// Rule1.1 把 r 放入自身的 request queue
@@ -112,13 +102,7 @@ func (p *process) handleRelease() {
 		if i == p.me {
 			continue
 		}
-		p.chans[i] <- &message{
-			msgType:   releaseResource,
-			timestamp: timestamp,
-			from:      p.me,
-			request:   req,
-		}
-		p.sentTime[i] = timestamp
+		p.chans[i] <- newMessage(releaseResource, timestamp, p.me, req)
 	}
 }
 

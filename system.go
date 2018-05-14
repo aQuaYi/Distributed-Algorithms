@@ -4,13 +4,11 @@ type system struct {
 	processes []*process
 }
 
-func newSystem(size int) (*system, *resource) {
+func newSystem(size int, r *resource) *system {
 	chans := make([]chan *message, size)
 	for i := range chans {
 		chans[i] = make(chan *message, 100)
 	}
-
-	r := newResource()
 
 	ps := make([]*process, size)
 	for i := range ps {
@@ -19,5 +17,5 @@ func newSystem(size int) (*system, *resource) {
 
 	return &system{
 		processes: ps,
-	}, r
+	}
 }

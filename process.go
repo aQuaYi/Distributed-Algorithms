@@ -13,7 +13,6 @@ type process struct {
 
 	resource *resource
 
-	sentTime       []int // 最近一次给别的 process 发送的消息，所携带的最后时间
 	receiveTime    []int // 最近一次从别的 process 收到的消息，所携带的最后时间
 	minReceiveTime int   // lastReceiveTime 中的最小值
 
@@ -33,7 +32,6 @@ func newProcess(me int, r *resource, chans []chan *message) *process {
 		clock:          newClock(),
 		chans:          chans,
 		requestQueue:   make(requestPriorityQueue, 0, 1024),
-		sentTime:       make([]int, len(chans)),
 		receiveTime:    make([]int, len(chans)),
 		minReceiveTime: 0,
 
