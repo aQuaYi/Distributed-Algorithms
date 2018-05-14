@@ -112,7 +112,7 @@ func Test_start(t *testing.T) {
 		t.Log("运行", tt.name)
 		t.Run(tt.name, func(t *testing.T) {
 			if want := start(tt.args.size, tt.args.occupyNumber, tt.args.rsc); !reflect.DeepEqual(want, tt.args.rsc.occupyOrder) {
-				t.Errorf("want \n%v, got \n%v", want, tt.args.rsc.occupyOrder)
+				t.Errorf("want \n%v\ngot \n%v", want, tt.args.rsc.occupyOrder)
 			}
 		})
 	}

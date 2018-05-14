@@ -12,24 +12,23 @@ func init() {
 func start(size, occupyNumber int, r *resource) []int {
 	r.occupied.Add(occupyNumber)
 
-	sys := newSystem(size, r)
+	recorder, channel := newRecorder()
 
-	requestOrder := requestLoop(sys.processes, occupyNumber)
+	sys := newSystem(size, r, channel)
+
+	requestLoop(sys.processes, occupyNumber)
 
 	r.occupied.Wait()
 
-	return requestOrder
+	return *recorder
 }
 
-func requestLoop(ps []*process, occupyNumber int) (requestOrder []int) {
-	requestOrder = make([]int, occupyNumber)
+func requestLoop(ps []*process, occupyNumber int) {
 	idx := 0
 
 	for idx < occupyNumber {
 
 		i := rand.Intn(len(ps))
-
-		requestOrder[idx] = i
 
 		ps[i].request()
 
@@ -39,7 +38,7 @@ func requestLoop(ps []*process, occupyNumber int) (requestOrder []int) {
 		idx++
 	}
 
-	debugPrintf("完成全部 request 工作，len(requestOrder)=%d, requestOrder=%v", occupyNumber, requestOrder)
+	debugPrintf("完成全部 request 工作", occupyNumber)
 
 	return
 }

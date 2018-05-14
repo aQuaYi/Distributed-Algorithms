@@ -49,6 +49,8 @@ func (p *process) request() {
 		process:   p.me,
 	}
 
+	p.orderChan <- p.me
+
 	debugPrintf("[%d]P%d handleRequest，生成 r=%s", p.clock.getTime(), p.me, r)
 
 	// 根据 Rule1

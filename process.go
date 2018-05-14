@@ -25,11 +25,13 @@ type process struct {
 	sendChan    chan *sendMsg
 	occupyChan  chan struct{}
 
+	orderChan chan int // 用于记录全局的 request 顺序
+
 	// TODO: 删除此处内容
 	isOccupying bool
 }
 
-func newProcess(me int, r *resource, chans []chan *message) *process {
+func newProcess(me int, r *resource, channel chan int, chans []chan *message) *process {
 	p := &process{
 		me:             me,
 		resource:       r,
@@ -44,6 +46,8 @@ func newProcess(me int, r *resource, chans []chan *message) *process {
 		requestChan:      make(chan struct{}),
 		sendChan:         make(chan *sendMsg),
 		occupyChan:       make(chan struct{}),
+
+		orderChan: channel,
 	}
 
 	eventLoop(p)
