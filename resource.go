@@ -12,9 +12,10 @@ const (
 )
 
 type resource struct {
-	grantedTo   int
-	occupyOrder []int
-	occupied    sync.WaitGroup
+	grantedTo    int
+	processOrder []int
+	timeOrder    []int
+	occupied     sync.WaitGroup
 }
 
 func newResource() *resource {
@@ -29,8 +30,9 @@ func (r *resource) occupy(req *request) {
 		panic(msg)
 	}
 	r.grantedTo = req.process
-	r.occupyOrder = append(r.occupyOrder, req.process)
-	debugPrintf("~~~ @resource: %s occupy ~~~ %v", req, r.occupyOrder[max(0, len(r.occupyOrder)-6):])
+	r.processOrder = append(r.processOrder, req.process)
+	r.timeOrder = append(r.timeOrder, req.timestamp)
+	debugPrintf("~~~ @resource: %s occupy ~~~ %v", req, r.processOrder[max(0, len(r.processOrder)-6):])
 }
 
 func (r *resource) release(req *request) {
@@ -39,7 +41,7 @@ func (r *resource) release(req *request) {
 		panic(msg)
 	}
 	r.grantedTo = NULL
-	debugPrintf("~~~ @resource: %s release ~~~ %v", req, r.occupyOrder[max(0, len(r.occupyOrder)-6):])
+	debugPrintf("~~~ @resource: %s release ~~~ %v", req, r.processOrder[max(0, len(r.processOrder)-6):])
 	r.occupied.Done()
 }
 
@@ -61,25 +63,6 @@ func (p *process) request() {
 
 	// 根据 Rule1
 	// 给其他的 process 发消息
-
-	// for i := range p.chans {
-	// 	if i == p.me {
-	// 		continue
-	// 	}
-	// 	go func(i int) {
-	// 		sm := &sendMsg{
-	// 			receiveID: i,
-	// 			msg: &message{
-	// 				msgType: requestResource,
-	// 				// timestamp 留在真正发送前更新
-	// 				senderID: p.me,
-	// 				request:  r,
-	// 			},
-	// 		}
-	// 		p.sendChan <- sm
-	// 	}(i)
-	// }
-	// debugPrintf("[%d]P%d handleRequest，已分配好了所有发送消息的任务", p.clock.getTime(), p.me)
 
 	for i := range p.chans {
 		if i == p.me {
@@ -138,21 +121,4 @@ func (p *process) handleRelease() {
 		}
 	}
 
-	// for i := range p.chans {
-	// 	if i == p.me {
-	// 		continue
-	// 	}
-	// 	go func(i int, req *request) {
-	// 		sm := &sendMsg{
-	// 			receiveID: i,
-	// 			msg: &message{
-	// 				msgType: releaseResource,
-	// 				// timestamp 留在真正发送前更新
-	// 				senderID: p.me,
-	// 				request:  req,
-	// 			},
-	// 		}
-	// 		p.sendChan <- sm
-	// 	}(i, r)
-	// }
 }

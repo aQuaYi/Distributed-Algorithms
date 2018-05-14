@@ -36,6 +36,6 @@ func min(a, b int) int {
 }
 
 func randSleep() {
-	timeout := time.Duration(5+rand.Intn(25)) * time.Millisecond
+	timeout := time.Duration(2+rand.Intn(10)) * time.Millisecond
 	time.Sleep(timeout)
 }

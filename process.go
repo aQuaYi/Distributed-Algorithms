@@ -103,6 +103,7 @@ func eventLoop(p *process) {
 			// p.handleOccupy()
 			case <-p.toCheckRule5Chan:
 				p.handleCheckRule5()
+
 			}
 		}
 
