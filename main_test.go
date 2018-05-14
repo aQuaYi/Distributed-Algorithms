@@ -15,14 +15,14 @@ func Test_start(t *testing.T) {
 		args args
 	}{
 
-		// {
-		// 	"3 process, 9 occupy",
-		// 	args{
-		// 		size:         3,
-		// 		occupyNumber: 9,
-		// 		resource:     newResource(),
-		// 	},
-		// },
+		{
+			"3 process, 9 occupy",
+			args{
+				size:         3,
+				occupyNumber: 9,
+				resource:     newResource(),
+			},
+		},
 
 		// {
 		// 	"9 process, 99 occupy",
@@ -51,14 +51,14 @@ func Test_start(t *testing.T) {
 		// 	},
 		// },
 
-		{
-			"99 process, 999 occupy",
-			args{
-				size:         99,
-				occupyNumber: 999,
-				resource:     newResource(),
-			},
-		},
+		// {
+		// 	"99 process, 999 occupy",
+		// 	args{
+		// 		size:         99,
+		// 		occupyNumber: 999,
+		// 		resource:     newResource(),
+		// 	},
+		// },
 
 		// {
 		// 	"99 process, 9999 occupy",
@@ -72,7 +72,7 @@ func Test_start(t *testing.T) {
 	}
 
 	for _, tt := range tests {
-		t.Log("运行", tt.name)
+		t.Logf("运行 %s", tt.name)
 		start(tt.args.size, tt.args.occupyNumber, tt.args.resource)
 		r := tt.args.resource
 		for i := 1; i < tt.args.occupyNumber; i++ {

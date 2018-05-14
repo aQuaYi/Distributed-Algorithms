@@ -31,7 +31,7 @@ func (p *process) handleMsg(msg *message) {
 	// 无论 msg 是什么类型的消息
 	nowTime := p.clock.update(msg.timestamp)
 
-	p.receiveTime[msg.senderID] = nowTime
+	p.receiveTime[msg.from] = nowTime
 
 	p.updateMinReceiveTime()
 
@@ -50,10 +50,10 @@ func (p *process) handleMsg(msg *message) {
 	}
 
 	if msg.msgType != acknowledgment {
-		p.chans[msg.senderID] <- &message{
+		p.chans[msg.from] <- &message{
 			msgType:   acknowledgment,
 			timestamp: nowTime,
-			senderID:  p.me,
+			from:      p.me,
 		}
 	}
 
@@ -84,7 +84,7 @@ func (p *process) handleRequest() {
 		p.chans[i] <- &message{
 			msgType:   requestResource,
 			timestamp: timestamp,
-			senderID:  p.me,
+			from:      p.me,
 			request:   r,
 		}
 		p.sentTime[i] = timestamp
@@ -118,7 +118,7 @@ func (p *process) handleRelease() {
 		p.chans[i] <- &message{
 			msgType:   releaseResource,
 			timestamp: timestamp,
-			senderID:  p.me,
+			from:      p.me,
 			request:   req,
 		}
 		p.sentTime[i] = timestamp

@@ -2,43 +2,34 @@ package mutual
 
 import (
 	"math/rand"
+	"time"
 )
 
 func init() {
-	// TODO: 添加随机种子
-	// rand.Seed(time.Now().UnixNano())
+	rand.Seed(time.Now().UnixNano())
 }
 
-func start(size, occupyNumber int, r *resource) []int {
-	r.occupied.Add(occupyNumber)
+func start(processes, occupieds int, r *resource) {
+	r.occupieds.Add(occupieds)
 
-	recorder := newRecorder()
+	sys := newSystem(processes, r)
 
-	sys := newSystem(size, r)
+	requestLoop(sys.processes, occupieds)
 
-	requestLoop(sys.processes, occupyNumber)
+	r.occupieds.Wait()
 
-	r.occupied.Wait()
-
-	return *recorder
 }
 
-func requestLoop(ps []*process, occupyNumber int) {
-	idx := 0
+func requestLoop(ps []*process, occupieds int) {
+	count := 0
 
-	for idx < occupyNumber {
-
+	for count < occupieds {
+		count++
 		i := rand.Intn(len(ps))
-
 		ps[i].request()
-
 		// 等待一段时间，再进行下一个 request
 		randSleep()
-
-		idx++
 	}
 
 	debugPrintf("完成全部 request 工作")
-
-	return
 }

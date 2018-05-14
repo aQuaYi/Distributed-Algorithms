@@ -14,7 +14,7 @@ type resource struct {
 	grantedTo    int
 	processOrder []int
 	timeOrder    []int
-	occupied     sync.WaitGroup
+	occupieds    sync.WaitGroup
 }
 
 func newResource() *resource {
@@ -41,7 +41,7 @@ func (r *resource) release(req *request) {
 	}
 	r.grantedTo = NULL
 	debugPrintf("~~~ @resource: %s release ~~~ %v", req, r.processOrder[max(0, len(r.processOrder)-6):])
-	r.occupied.Done()
+	r.occupieds.Done()
 }
 
 func (p *process) request() {

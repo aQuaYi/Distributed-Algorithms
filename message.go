@@ -5,21 +5,21 @@ import "fmt"
 type message struct {
 	msgType   msgType
 	timestamp int // 发送 message 时， process.clock 的时间
-	senderID  int // message 发送方的 ID
+	from      int // message 发送方的 ID
 	request   *request
 }
 
-func newMessage(mt msgType, timestamp int, senderID int, request *request) *message {
+func newMessage(mt msgType, timestamp int, from int, request *request) *message {
 	return &message{
 		msgType:   mt,
 		timestamp: timestamp,
-		senderID:  senderID,
+		from:      from,
 		request:   request,
 	}
 }
 
 func (m *message) String() string {
-	return fmt.Sprintf("msg{%s,T%d,P%d,%s}", m.msgType, m.timestamp, m.senderID, m.request)
+	return fmt.Sprintf("msg{%s,T%d,P%d,%s}", m.msgType, m.timestamp, m.from, m.request)
 }
 
 type msgType int
@@ -42,19 +42,5 @@ func (mt msgType) String() string {
 		return "确认"
 	default:
 		panic("出现了多余的 msgType")
-	}
-}
-
-func (p *process) messaging(mt msgType, r *request) {
-
-	for i := range p.chans {
-		if i == p.me {
-			continue
-		}
-
-		ts := p.clock.tick()
-		p.sentTime[i] = ts
-		p.chans[i] <- newMessage(mt, ts, p.me, r)
-
 	}
 }
