@@ -33,20 +33,19 @@ func (p *process) handleMsg(msg *message) {
 
 	p.updateMinReceiveTime()
 
-	debugPrintf("[%d]P%d MRT=%d, RT%v, RQ%v ", nowTime, p.me, p.minReceiveTime, p.receiveTime, p.requestQueue)
-
 	r := msg.request
 
 	switch msg.msgType {
 	case requestResource:
 		// 根据 Rule2
 		p.push(r)
-
 	case releaseResource:
 		// 根据 Rule4
 		p.pop(r)
 	}
 
+	// NOTICE: 与论文中不同
+	// 我总是发送 acknowledgement 信息
 	if msg.msgType != acknowledgment {
 		p.chans[msg.from] <- &message{
 			msgType:   acknowledgment,

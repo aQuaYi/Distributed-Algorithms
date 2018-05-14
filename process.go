@@ -23,7 +23,6 @@ type process struct {
 	releaseChan chan struct{}
 	occupyChan  chan struct{}
 
-	// TODO: 删除此处内容
 	isOccupying bool
 }
 
@@ -60,6 +59,8 @@ func (p *process) updateMinReceiveTime() {
 		minTime = min(minTime, t)
 	}
 	p.minReceiveTime = minTime
+
+	debugPrintf("[%d]P%d updated p.minReceiveTime=%d, RT%v, RQ%v ", p.clock.getTime(), p.me, p.minReceiveTime, p.receiveTime, p.requestQueue)
 }
 
 func (p *process) push(r *request) {
