@@ -12,8 +12,6 @@ func eventLoop(p *process) {
 				p.handleMsg(msg)
 			case <-p.requestChan:
 				p.handleRequest()
-			// case <-p.releaseChan:
-			// 	p.handleRelease()
 			case <-p.toCheckRule5Chan:
 				p.handleCheckRule5()
 			}

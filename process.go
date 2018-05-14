@@ -3,11 +3,9 @@ package mutual
 import (
 	"container/heap"
 	"fmt"
-	"sync"
 )
 
 type process struct {
-	rwmu         sync.RWMutex
 	me           int
 	clock        *clock
 	chans        []chan *message
@@ -64,27 +62,6 @@ func (p *process) updateMinReceiveTime() {
 	p.minReceiveTime = minTime
 }
 
-// TODO: finish this
-type sendMsg struct {
-	receiveID int
-	msg       *message
-}
-
-func (p *process) handleSend(sm *sendMsg) {
-	sm.msg.timestamp = p.clock.getTime()
-
-	debugPrintf("[%d]P%d -> P%d，消息内容 %s", p.clock.getTime(), p.me, sm.receiveID, sm.msg)
-
-	p.sentTime[sm.receiveID] = max(p.sentTime[sm.receiveID], p.clock.getTime())
-
-	// go func() {
-	// 	p.chans[sm.receiveID] <- sm.msg
-	// }()
-
-	p.chans[sm.receiveID] <- sm.msg
-
-}
-
 func (p *process) push(r *request) {
 	heap.Push(&p.requestQueue, r)
 	debugPrintf("[%d]P%d push(%s) 后，request queue %v", p.clock.getTime(), p.me, r, p.requestQueue)
@@ -99,8 +76,3 @@ func (p *process) pop(r *request) {
 
 	debugPrintf("[%d]P%d pop(%s) 后，request queue %v", p.clock.getTime(), p.me, req, p.requestQueue)
 }
-
-// func (p *process) request() {
-// 	debugPrintf("[%d]P%d 准备 request", p.clock.getTime(), p.me)
-// 	p.requestChan <- struct{}{}
-// }
