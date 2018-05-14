@@ -22,16 +22,15 @@ type process struct {
 	toCheckRule5Chan chan struct{} // 每次收到 message 后，都靠这个 chan 来通知检查此 process 是否已经满足 rule 5，以便决定是否占有 resource
 
 	requestChan chan struct{}
+	releaseChan chan struct{}
 	sendChan    chan *sendMsg
 	occupyChan  chan struct{}
-
-	orderChan chan int // 用于记录全局的 request 顺序
 
 	// TODO: 删除此处内容
 	isOccupying bool
 }
 
-func newProcess(me int, r *resource, channel chan int, chans []chan *message) *process {
+func newProcess(me int, r *resource, chans []chan *message) *process {
 	p := &process{
 		me:             me,
 		resource:       r,
@@ -46,8 +45,6 @@ func newProcess(me int, r *resource, channel chan int, chans []chan *message) *p
 		requestChan:      make(chan struct{}),
 		sendChan:         make(chan *sendMsg),
 		occupyChan:       make(chan struct{}),
-
-		orderChan: channel,
 	}
 
 	eventLoop(p)
@@ -67,87 +64,6 @@ func (p *process) updateMinReceiveTime() {
 		minTime = min(minTime, t)
 	}
 	p.minReceiveTime = minTime
-}
-
-func (p *process) handleCheckRule5() {
-	debugPrintf("[%d]P%d 将要检查是否满足了 Rule5", p.clock.getTime(), p.me)
-
-	if len(p.requestQueue) > 0 && // p.requestQueue 中还有元素
-		p.requestQueue[0].process == p.me && // 排在首位的 repuest 是 p 自己的
-		p.requestQueue[0].timestamp < p.minReceiveTime && // p 在 request 后，收到过所有其他 p 的回复
-		!p.isOccupying { // 不能是正占用的资源
-
-		debugPrintf("[%d]P%d 满足 Rule5 MRT=%d RT%v PQ%v", p.clock.getTime(), p.me, p.minReceiveTime, p.receiveTime, p.requestQueue)
-		p.handleOccupy()
-
-	}
-
-	debugPrintf("[%d]P%d 不满足 Rule5 MRT=%d RT%v PQ%v", p.clock.getTime(), p.me, p.minReceiveTime, p.receiveTime, p.requestQueue)
-}
-
-func eventLoop(p *process) {
-	debugPrintf("[%d]P%d 启动 eventLoop", p.clock.getTime(), p.me)
-
-	go func() {
-
-		for {
-			p.clock.tick()
-			select {
-			case msg := <-p.chans[p.me]:
-				p.handleMsg(msg)
-			// case <-p.requestChan:
-			// 	p.handleRequest()
-			case sm := <-p.sendChan:
-				p.handleSend(sm)
-			// case <-p.occupyChan:
-			// p.handleOccupy()
-			case <-p.toCheckRule5Chan:
-				p.handleCheckRule5()
-
-			}
-		}
-
-	}()
-}
-
-func (p *process) handleMsg(msg *message) {
-	debugPrintf("[%d]P%d receive %s RQ%s", p.clock.getTime(), p.me, msg, p.requestQueue)
-
-	// 接收到了一个新的消息
-	// 根据 IR2
-	// process 的 clock 需要根据 msg.time 进行更新
-	// 无论 msg 是什么类型的消息
-	p.clock.update(msg.timestamp)
-	p.receiveTime[msg.senderID] = msg.timestamp
-	p.updateMinReceiveTime()
-	debugPrintf("[%d]P%d MRT=%d, RT%v, RQ%v ", p.clock.getTime(), p.me, p.minReceiveTime, p.receiveTime, p.requestQueue)
-
-	r := msg.request
-	switch msg.msgType {
-	case requestResource:
-		p.push(r)
-	case releaseResource:
-		p.pop(r)
-	}
-
-	// 只要不是 acknowledgement 消息，都回复一个 acknowledgement
-	if msg.msgType != acknowledgment {
-		go func() {
-			p.sendChan <- &sendMsg{
-				receiveID: msg.senderID,
-				msg: &message{
-					msgType: acknowledgment,
-					// timestamp 真正发送的时候更新
-					senderID: p.me,
-					// request: nil,
-				},
-			}
-		}()
-	}
-
-	go func() {
-		p.toCheckRule5Chan <- struct{}{}
-	}()
 }
 
 // TODO: finish this
@@ -173,16 +89,17 @@ func (p *process) handleSend(sm *sendMsg) {
 
 func (p *process) push(r *request) {
 	heap.Push(&p.requestQueue, r)
+	debugPrintf("[%d]P%d push(%s) 后，request queue %v", p.clock.getTime(), p.me, r, p.requestQueue)
 }
 
 func (p *process) pop(r *request) {
-	debugPrintf("[%d]P%d pop(%s) MRT=%d RT%v RQ%s", p.clock.getTime(), p.me, r, p.minReceiveTime, p.receiveTime, p.requestQueue)
-
-	pr := heap.Pop(&p.requestQueue).(*request)
-	if pr != r {
-		msg := fmt.Sprintf("P%d 删除的 %s 不是需要删除的 %s", p.me, pr, r)
+	req := heap.Pop(&p.requestQueue).(*request)
+	if req != r {
+		msg := fmt.Sprintf("需要删除的是 %s，实际删除的是 %s，P%d.RQ%s", r, req, p.me, p.requestQueue)
 		panic(msg)
 	}
+
+	debugPrintf("[%d]P%d pop(%s) 后，request queue %v", p.clock.getTime(), p.me, req, p.requestQueue)
 }
 
 // func (p *process) request() {

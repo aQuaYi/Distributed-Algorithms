@@ -26,10 +26,12 @@ func (c *clock) getTime() int {
 	return t
 }
 
-func (c *clock) update(t int) {
+func (c *clock) update(t int) int {
 	c.rwmu.Lock()
 	c.time = max(c.time, t) + 1
+	time := c.time
 	c.rwmu.Unlock()
+	return time
 }
 
 func (c *clock) tick() int {

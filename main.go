@@ -12,9 +12,9 @@ func init() {
 func start(size, occupyNumber int, r *resource) []int {
 	r.occupied.Add(occupyNumber)
 
-	recorder, channel := newRecorder()
+	recorder := newRecorder()
 
-	sys := newSystem(size, r, channel)
+	sys := newSystem(size, r)
 
 	requestLoop(sys.processes, occupyNumber)
 

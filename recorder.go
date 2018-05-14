@@ -1,6 +1,6 @@
 package mutual
 
-func newRecorder() (*[]int, chan int) {
+func newRecorder() *[]int {
 	res := &[]int{}
 	channel := make(chan int, 1000)
 
@@ -10,5 +10,5 @@ func newRecorder() (*[]int, chan int) {
 		}
 	}()
 
-	return res, channel
+	return res
 }
