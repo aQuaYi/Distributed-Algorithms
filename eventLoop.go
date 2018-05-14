@@ -12,8 +12,8 @@ func eventLoop(p *process) {
 				p.handleMsg(msg)
 			case <-p.requestChan:
 				p.handleRequest()
-			case <-p.releaseChan:
-				p.handleRelease()
+			// case <-p.releaseChan:
+			// 	p.handleRelease()
 			case <-p.toCheckRule5Chan:
 				p.handleCheckRule5()
 			}
@@ -43,27 +43,26 @@ func (p *process) handleMsg(msg *message) {
 	case requestResource:
 		// 根据 Rule2
 		p.push(r)
-		// 必要的话，发送 acknowledgement 消息
-		if p.sentTime[msg.senderID] <= msg.timestamp {
-			p.sendChan <- &sendMsg{
-				receiveID: msg.senderID,
-				msg: &message{
-					msgType:   acknowledgment,
-					timestamp: nowTime,
-					senderID:  p.me,
-				},
-			}
-			p.sentTime[msg.senderID] = nowTime
-		}
+
 	case releaseResource:
 		// 根据 Rule4
 		p.pop(r)
+	}
+
+	if msg.msgType != acknowledgment {
+		p.chans[msg.senderID] <- &message{
+			msgType:   acknowledgment,
+			timestamp: nowTime,
+			senderID:  p.me,
+		}
 	}
 
 	// 每次收到了消息，都会触发检查，是否已经满足 Rule5
 	go func() {
 		p.toCheckRule5Chan <- struct{}{}
 	}()
+
+	debugPrintf("[%d]P%d finish handleMsg %s RQ%s", p.clock.getTime(), p.me, msg, p.requestQueue)
 }
 
 func (p *process) handleRequest() {
@@ -140,4 +139,19 @@ func (p *process) handleCheckRule5() {
 	}
 
 	debugPrintf("[%d]P%d 不满足 Rule5 MRT=%d RT%v PQ%v", p.clock.getTime(), p.me, p.minReceiveTime, p.receiveTime, p.requestQueue)
+}
+func (p *process) handleOccupy() {
+	req := p.requestQueue[0]
+	debugPrintf("[%d]P%d handleOccupy %s request queue %v", p.clock.getTime(), p.me, req, p.requestQueue)
+
+	p.isOccupying = true
+
+	p.resource.occupy(req)
+
+	// 假设条件，process 不会永远占用 resource
+	go func() {
+		randSleep()
+		// p.releaseChan <- struct{}{}
+		p.handleRelease()
+	}()
 }

@@ -47,22 +47,3 @@ func (r *resource) release(req *request) {
 func (p *process) request() {
 	p.requestChan <- struct{}{}
 }
-
-// func (p *process) request() {
-// 	p.releaseChan <- struct{}{}
-// }
-
-func (p *process) handleOccupy() {
-	req := p.requestQueue[0]
-	debugPrintf("[%d]P%d handleOccupy %s request queue %v", p.clock.getTime(), p.me, req, p.requestQueue)
-
-	p.isOccupying = true
-
-	p.resource.occupy(req)
-
-	// 假设条件，process 不会永远占用 resource
-	go func() {
-		randSleep()
-		p.releaseChan <- struct{}{}
-	}()
-}

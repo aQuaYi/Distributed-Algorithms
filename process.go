@@ -23,7 +23,6 @@ type process struct {
 
 	requestChan chan struct{}
 	releaseChan chan struct{}
-	sendChan    chan *sendMsg
 	occupyChan  chan struct{}
 
 	// TODO: 删除此处内容
@@ -43,7 +42,6 @@ func newProcess(me int, r *resource, chans []chan *message) *process {
 
 		toCheckRule5Chan: make(chan struct{}),
 		requestChan:      make(chan struct{}),
-		sendChan:         make(chan *sendMsg),
 		occupyChan:       make(chan struct{}),
 	}
 

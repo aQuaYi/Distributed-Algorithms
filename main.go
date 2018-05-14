@@ -38,7 +38,7 @@ func requestLoop(ps []*process, occupyNumber int) {
 		idx++
 	}
 
-	debugPrintf("完成全部 request 工作", occupyNumber)
+	debugPrintf("完成全部 request 工作")
 
 	return
 }
