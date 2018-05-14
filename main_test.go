@@ -34,15 +34,6 @@ func Test_start(t *testing.T) {
 		// },
 
 		// {
-		// 	"3 process, 999 occupy",
-		// 	args{
-		// 		size:         3,
-		// 		occupyNumber: 999,
-		// 		resource:     newResource(),
-		// 	},
-		// },
-
-		// {
 		// 	"6 process, 999 occupy",
 		// 	args{
 		// 		size:         6,
@@ -51,59 +42,32 @@ func Test_start(t *testing.T) {
 		// 	},
 		// },
 
+		// {
+		// 	"9 process, 999 occupy",
+		// 	args{
+		// 		size:         9,
+		// 		occupyNumber: 999,
+		// 		resource:     newResource(),
+		// 	},
+		// },
+
 		{
-			"9 process, 999 occupy",
+			"99 process, 999 occupy",
 			args{
-				size:         9,
+				size:         99,
 				occupyNumber: 999,
 				resource:     newResource(),
 			},
 		},
 
 		// {
-		// 	"99 process, 999 occupy",
+		// 	"99 process, 9999 occupy",
 		// 	args{
 		// 		size:         99,
-		// 		occupyNumber: 999,
+		// 		occupyNumber: 9999,
 		// 		resource:     newResource(),
 		// 	},
 		// },
-
-		// {
-		// 	"3 process, 99 occupy",
-		// 	args{
-		// 		size:         3,
-		// 		occupyNumber: 99,
-		// 		resource:     newResource(),
-		// 	},
-		// },
-
-		// {
-		// 	"5 process, 500 occupy",
-		// 	args{
-		// 		size:         5,
-		// 		occupyNumber: 500,
-		// 		resource:     newResource(),
-		// 	},
-		// },
-
-		// {
-		// 	"3 process, 999 occupy",
-		// 	args{
-		// 		size:         3,
-		// 		occupyNumber: 999,
-		// 		resource:     newResource(),
-		// 	},
-		// },
-
-		// 	{
-		// 		"99 process, 9999 occupy",
-		// 		args{
-		// 			size:         99,
-		// 			occupyNumber: 9999,
-		// 			rsc:          newResource(),
-		// 		},
-		// 	},
 
 	}
 
