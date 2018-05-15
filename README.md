@@ -1,14 +1,14 @@
 # Mutual Exclusion Algorithm Demo
 
-使用 Go 语言实现了 Lamport 在论文 [《Time, Clocks and the Ordering of Events in a Distributed System》](time-clocks.pdf)中提到的 Mutual Exclusion 算法
+使用 Go 语言实现了 Lamport 在论文 [《Time, Clocks and the Ordering of Events in a Distributed System》](time-clocks.pdf)中提到的 Mutual Exclusion 算法。
 
 ## 问题
 
-system 由多个 process 组成，却只有一个 resource 最多只能被一个 process 占用。由于 process 是分布式的，只能通过各自的 clock 读取时间值，但这些 clock 的时间值不同步，没有办法通过时间上的编排来分别占用 resource。。需要靠算法满足以下要求：
+system 由多个 process 组成，却只有一个 resource 最多只能被一个 process 占用。由于 process 是分布式的，只能通过各自的 clock 读取时间值，但这些 clock 的时间值不同步，没有办法通过时间上的编排来分别占用 resource。需要靠算法满足以下要求：
 
 1. 对于 resource，一定要先释放，再占用。
-1. 对于 process 先申请，先占用。
-1. 如果 process 一定会释放 resource，那么，所有占用 resource 的申请，一定会被满足。
+1. 对于 process， 先申请，先占用。
+1. 如果 process 占用 resource 的时间有限，那么，所有占用 resource 的申请，都会被满足。
 
 为了简化问题，还存在以下假设：
 
@@ -30,8 +30,8 @@ system 由多个 process 组成，却只有一个 resource 最多只能被一个
 
 "happened before" 表示一个局部排序关系，有两种情况下成立
 
-1. 串行的 Pm 中， Ei 比 Ej 早发生。 Ei "happened before" Ej，所以有 Cm(Ei) `< Cm(Ej)。
-1. 从 Pm 发送到 Pn 中的消息 m，Pm 中 Ei 是发送 m， Pn 中 Ej 是接受 m。Ei "happened before" Ej，所以有 Cm(Ei) `< Cn(Ej)
+1. 串行的 Pm 中， Ei 比 Ej 早发生。 Ei "happened before" Ej，所以有 Cm(Ei) < Cm(Ej)。
+1. 从 Pm 发送到 Pn 中的消息 m，Pm 中 Ei 是发送 m， Pn 中 Ej 是接受 m。Ei "happened before" Ej，所以有 Cm(Ei) < Cn(Ej)
 
 以上两条，在论文中被称为 `Clock Condition`。
 
@@ -40,10 +40,10 @@ system 由多个 process 组成，却只有一个 resource 最多只能被一个
 为了让 system 中的 clocks 满足 `Clock Condition`，论文上的规定了 IR1 和 IR2，并在最后演变成了 [Lamport timestamps](https://en.wikipedia.org/wiki/Lamport_timestamps) 规则：
 
 1. 进程在每做一件事情之前，计数器+1
-1. 当进程发送消息的**前**，需要带上计数器的值
-1. 当进程接收消息的**后**，需要按照消息中的值，更新自己的计数器。更新规则为 max(自身值，消息值)+1
+1. 当进程发送消息的时候，需要带上计数器的值
+1. 当进程接收消息的时候，需要根据消息中的值，更新自己的计数器。更新规则为 max(自身值，消息值)+1
 
-以下是算法的伪代码
+以下是规则的伪代码
 
 ```code
 // 在进程内
