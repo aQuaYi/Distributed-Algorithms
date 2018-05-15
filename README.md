@@ -61,16 +61,16 @@ timestamp = max(timestamp , msgTimestamp) + 1
 
 ### 全局排序
 
-`Ei =>` Ej` 表示，在全局排序中， Ei 排在 Ej 前面。
+`Ei => Ej` 表示，在全局排序中， Ei 排在 Ej 前面。
 
 对于 system 中的任意一个 event，可以使用其所在的 process P 和发生的 timestamp T 进行编号为： ``<T:P>``。
 
-任意两个事件 Ei`<Tm:Pa>` 和 Ej`<Tn:Pb>`， 若要使得 `Ei =>` Ej` 成立，需要以下两个条件之一成立：
+任意两个事件 Ei`<Tm:Pa>` 和 Ej`<Tn:Pb>`， 若要使得 `Ei => Ej` 成立，需要以下两个条件之一成立：
 
-1. Tm `< Tn
-1. Tm == Tn 且 Pa `< Pb
+1. Tm < Tn
+1. Tm == Tn 且 Pa < Pb
 
-其中 Pa `< Pb 的含义是， system 中 process 中也存在一种排序方式。我在代码中选择使用 process 的代号，对其进行排序。
+其中 Pa < Pb 的含义是， system 中 process 中也存在一种排序方式。我在代码中选择使用 process 的代号，对其进行排序。
 
 也由条件 2 可知，分布式系统的全局排序不是唯一的。具体的排序结果还取决于 process 的排序方式。
 
@@ -79,12 +79,12 @@ timestamp = max(timestamp , msgTimestamp) + 1
 mutual exclusion 算法需要每个 process 维护自己的 request queue。 由 5 个规则组成
 
 1. 为了申请 resource，process Pi 需要
-    1. 生成 message `<Tm:Pi>`
+    1. 生成 request `<Tm:Pi>`
     1. 发送 request message `<Tm:Pi>` 到所有其他的 process
     1. 把 `<Tm:Pi>` 放入自己的 request queue
 1. 当 Pj 收到 request message `<Tm:Pi>` 后
     1. 把 `<Tm:Pi>` 放入自己的 request queue
-    1. 发送一条确认信息。如果最近一次给 Pi 发送消息的时间 >` Tm 的话，可以不发。
+    1. 发送一条确认信息。如果最近一次给 Pi 发送消息的时间 > Tm 的话，可以不发。
 1. 为了释放 resource，process Pi 需要
     1. 释放 resource
     1. 把 `<Tm:Pi>` 移出自己的 request queue
@@ -92,8 +92,8 @@ mutual exclusion 算法需要每个 process 维护自己的 request queue。 由
 1. 当 Pj 收到 release message `<Tm:Pi>` 后
     1. 把 `<Tm:Pi>` 移出自己的 request queue
 1. 当以下全部条件满足时，Pi 可以占用 resource：
-    1. 在 Pi 的 request queue 中，`<Tm:Pi>` 与其他 event 都是 `=>`` 关系。
-    1. Pi 收到所有其他 process 消息的最新时间中的最小值 >` Tm
+    1. 在 Pi 的 request queue 中，`<Tm:Pi>` 与其他 event 都是 `=>` 关系。
+    1. Pi 收到所有其他 process 消息的最新时间中的最小值 > Tm
 
 每个 process 只需要独立平等地完整这 5 种 event，就可以避免 process 同时占用 resource 的情况。
 
