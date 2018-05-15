@@ -1,13 +1,13 @@
 # Mutual Exclusion Algorithm Demo
 
-使用 Go 语言实现了 Lamport 在论文 《Time, Clocks and the Ordering of Events in a Distributed System》中提到的 Mutual Exclusion 算法
+使用 Go 语言实现了 Lamport 在论文 [《Time, Clocks and the Ordering of Events in a Distributed System》](time-clocks.pdf)中提到的 Mutual Exclusion 算法
 
 ## 问题
 
-system 由多个 process 组成，却只有一个 resource 可供使用。resource 最多只能被一个 process 占用。由于所有的 process 都是平等的，因此，程序中没有负责调度占用 resource 的功能。需要靠算法满足以下要求：
+system 由多个 process 组成，却只有一个 resource 最多只能被一个 process 占用。由于 process 是分布式的，只能通过各自的 clock 读取时间值，但这些 clock 的时间值不同步，没有办法通过时间上的编排来分别占用 resource。。需要靠算法满足以下要求：
 
-1. 占用 resource 的 process，在别的 process 占用 resource 前，一定要释放资源。
-1. process 占用 resource 的顺序，要和他们申请占用 resource 的顺序必须一致。
+1. 对于 resource，一定要先释放，再占用。
+1. 对于 process 先申请，先占用。
 1. 如果 process 一定会释放 resource，那么，所有占用 resource 的申请，一定会被满足。
 
 为了简化问题，还存在以下假设：
@@ -47,17 +47,16 @@ system 由多个 process 组成，却只有一个 resource 可供使用。resour
 
 ```code
 // 在进程内
-time = time + 1
+timestamp = timestamp + 1
 doOneEvent()
 
 // 进程发现消息时
-time = time + 1
-timeStamp = time
-send(message, timeStamp)
+timestamp = timestamp + 1
+send(message, timestamp)
 
 // 进程接收消息时
-message, timeStamp = receive()
-time = max(time, timeStamp) + 1
+message, msgTimestamp = receive()
+timestamp = max(timestamp , msgTimestamp) + 1
 ```
 
 ### 全局排序
@@ -116,6 +115,6 @@ mutual exclusion 算法需要每个 process 维护自己的 request queue。 由
 ## 思考问题
 
 1. 为什么会出现多种全局排序？请举例说明。
-1. 真实时间上先 request 的 process 会不会后得到 resource？如果会的话，能不能说明全局排序失败了？
+1. 真实时间上先 request 的 process 会不会后得到 resource？如果会的话，能不能说明 mutual exclusion 算法失败了？请说明理由。
 
 [参考答案](qna.md)
