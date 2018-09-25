@@ -4,7 +4,7 @@ import (
 	"fmt"
 )
 
-// requet 是 priorityQueue 中的元素
+// request 是 priorityQueue 中的元素
 type request struct {
 	timestamp int // request 的时间
 	process   int // request 的 process

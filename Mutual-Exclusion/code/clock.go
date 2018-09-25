@@ -16,7 +16,6 @@ type clock struct {
 func newClock() *clock {
 	return &clock{
 		time: 1 + rand.Intn(100),
-		// time: 0,
 	}
 }
 
@@ -29,16 +28,14 @@ func (c *clock) getTime() int {
 
 func (c *clock) update(t int) int {
 	c.rwmu.Lock()
-	c.time = max(c.time, t) + 1
-	time := c.time
-	c.rwmu.Unlock()
-	return time
+	defer c.rwmu.Unlock()
+	c.time = max(c.time, t+1)
+	return c.time
 }
 
 func (c *clock) tick() int {
 	c.rwmu.Lock()
+	defer c.rwmu.Unlock()
 	c.time++
-	ts := c.time
-	c.rwmu.Unlock()
-	return ts
+	return c.time
 }
