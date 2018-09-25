@@ -75,3 +75,7 @@ func (p *process) pop(r *request) {
 
 	debugPrintf("[%d]P%d pop(%s) 后，request queue %v", p.clock.getTime(), p.me, req, p.requestQueue)
 }
+
+func (p *process) request() {
+	p.requestChan <- struct{}{}
+}

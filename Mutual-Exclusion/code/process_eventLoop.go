@@ -44,6 +44,7 @@ func (p *process) handleMsg(msg *message) {
 		p.pop(r)
 	}
 
+	// TODO: 修改成和论文中一样的
 	// NOTICE: 与论文中不同
 	// 我总是发送 acknowledgement 信息
 	if msg.msgType != acknowledgment {
@@ -110,7 +111,7 @@ func (p *process) handleCheckRule5() {
 	debugPrintf("[%d]P%d to check Rule5", p.clock.getTime(), p.me)
 
 	if len(p.requestQueue) > 0 && // p.requestQueue 中还有元素
-		p.requestQueue[0].process == p.me && // 排在首位的 repuest 是 p 自己的
+		p.requestQueue[0].process == p.me && // 排在首位的 request 是 p 自己的
 		p.requestQueue[0].timestamp < p.minReceiveTime && // p 在 request 后，收到过所有其他 p 的回复
 		!p.isOccupying { // 不能是正占用的资源
 

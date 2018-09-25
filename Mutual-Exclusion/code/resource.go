@@ -15,6 +15,7 @@ type resource struct {
 	procOrder []int
 	timeOrder []int
 	occupieds sync.WaitGroup
+	mutex     sync.Mutex
 }
 
 func newResource() *resource {
@@ -44,8 +45,4 @@ func (r *resource) release(req *request) {
 	debugPrintf("~~~ @resource: %s release ~~~ %v", req, r.procOrder[max(0, len(r.procOrder)-6):])
 
 	r.occupieds.Done()
-}
-
-func (p *process) request() {
-	p.requestChan <- struct{}{}
 }
