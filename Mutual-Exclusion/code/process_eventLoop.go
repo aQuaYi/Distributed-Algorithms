@@ -121,6 +121,7 @@ func (p *process) handleCheckRule5() {
 
 	debugPrintf("[%d]P%d 不满足 Rule5 MRT=%d RT%v PQ%v", p.clock.getTime(), p.me, p.minReceiveTime, p.receiveTime, p.requestQueue)
 }
+
 func (p *process) handleOccupy() {
 	req := p.requestQueue[0]
 	debugPrintf("[%d]P%d handleOccupy %s request queue %v", p.clock.getTime(), p.me, req, p.requestQueue)
