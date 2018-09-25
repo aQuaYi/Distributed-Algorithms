@@ -1,18 +1,27 @@
-{
-	"onDidClearBookmarkEmitter": {},
-	"onDidClearAllBookmarksEmitter": {},
-	"onDidAddBookmarkEmitter": {},
-	"onDidRemoveBookmarkEmitter": {},
-	"onDidUpdateBookmarkEmitter": {},
-	"bookmarks": [
-		{
-			"fsPath": "$ROOTPATH$/output.test.txt",
-			"bookmarks": [
-				3088,
-				3154,
-				11967,
-				12053
-			]
-		}
-	]
-}
+[
+	{
+		"path": "$ROOTPATH$/output.test.txt",
+		"bookmarks": [
+			{
+				"line": 3088,
+				"column": 1,
+				"label": ""
+			},
+			{
+				"line": 3154,
+				"column": 1,
+				"label": ""
+			},
+			{
+				"line": 11967,
+				"column": 1,
+				"label": ""
+			},
+			{
+				"line": 12053,
+				"column": 1,
+				"label": ""
+			}
+		]
+	}
+]
