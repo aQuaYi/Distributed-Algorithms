@@ -47,13 +47,6 @@ func (rq *requestQueue) remove(ts timestamp) {
 	delete(rq.requestOf, ts)
 }
 
-// func newRequestQueue() *requestQueue {
-// 	return &requestQueue{
-// 		rpq:,
-// 		rqs:,
-// 	}
-// }
-
 // request 是 priorityQueue 中的元素
 type request struct {
 	// TODO: 更名 timestamp2 到 timestamp
@@ -64,6 +57,7 @@ type request struct {
 	index     int
 }
 
+// TODO: 删除此处内容
 func (r *request) String() string {
 	if r == nil {
 		return "<:>"
