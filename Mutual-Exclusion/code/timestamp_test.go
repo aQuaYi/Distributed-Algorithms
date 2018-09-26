@@ -21,6 +21,7 @@ func Test_timestamp_String(t *testing.T) {
 func Test_less(t *testing.T) {
 	ast := assert.New(t)
 
+	// a < b < c
 	a := timestamp{time: 1, process: 1}
 	b := timestamp{time: 1, process: 2}
 	c := timestamp{time: 2, process: 3}
