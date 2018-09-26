@@ -17,3 +17,19 @@ func Test_timestamp_String(t *testing.T) {
 	ast.Equal(expected, actual)
 
 }
+
+func Test_less(t *testing.T) {
+	ast := assert.New(t)
+
+	a := timestamp{time: 1, process: 1}
+	b := timestamp{time: 1, process: 2}
+	c := timestamp{time: 2, process: 3}
+
+	ast.True(less(a, b))
+	ast.True(less(b, c))
+	ast.True(less(a, c))
+
+	ast.False(less(b, a))
+	ast.False(less(c, a))
+	ast.False(less(c, b))
+}

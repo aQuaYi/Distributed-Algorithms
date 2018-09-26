@@ -6,7 +6,7 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func Test_receivedTime(t *testing.T) {
+func Test_receivedTime_update(t *testing.T) {
 	ast := assert.New(t)
 	all, me := 10, 0
 	rt := newReceivedTime(all, me)

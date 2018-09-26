@@ -6,8 +6,9 @@ import (
 )
 
 type receivedTime struct {
-	trq   *timeRecordQueue
-	trs   []*timeRecord
+	trq *timeRecordQueue
+	trs []*timeRecord
+	// FIXME: 试着删除 mutex 或者删除此条注释
 	mutex sync.Mutex
 }
 
