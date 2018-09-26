@@ -40,3 +40,11 @@ func Test_requestQueue(t *testing.T) {
 		ast.Equal(expected, actual)
 	}
 }
+
+func Test_requestQueue_emptyToFirst(t *testing.T) {
+	ast := assert.New(t)
+	rq := newRequestQueue()
+	expected := others
+	actual := rq.first().process
+	ast.Equal(expected, actual)
+}

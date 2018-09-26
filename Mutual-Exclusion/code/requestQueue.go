@@ -44,6 +44,7 @@ func (rq *requestQueue) remove(ts timestamp) {
 	rq.mutex.Lock()
 	defer rq.mutex.Unlock()
 	rq.rpq.remove(rq.requestOf[ts])
+	delete(rq.requestOf, ts)
 }
 
 // func newRequestQueue() *requestQueue {
