@@ -24,7 +24,7 @@ func Test_requestQueue(t *testing.T) {
 	size := half * 2
 	tss := makeIncreasingTimestamps(half)
 	rq := newRequestQueue()
-
+	//
 	for i := size - 1; i >= 0; i-- {
 		ts := tss[i]
 		rq.push(ts) // 每次放入到都是新的最小值
@@ -32,11 +32,36 @@ func Test_requestQueue(t *testing.T) {
 		actual := rq.first()
 		ast.Equal(expected, actual)
 	}
-
+	//
 	for i := 0; i+1 < size; i++ {
 		rq.remove(tss[i])
 		expected := tss[i+1] // 删除了最小值后，下个就是新的最小值
 		actual := rq.first()
+		ast.Equal(expected, actual)
+	}
+}
+
+func Test_requestQueue_remove(t *testing.T) {
+	ast := assert.New(t)
+	//
+	half := 10
+	size := half * 2
+	tss := makeIncreasingTimestamps(half)
+	rq := newRequestQueue()
+	//
+	for i := 0; i < size; i++ {
+		ts := tss[i]
+		rq.push(ts)
+	}
+	//
+	expected := tss[0]
+	for i, j := 1, size-1; i < j; i, j = i+1, j-1 {
+		rq.remove(tss[i])
+		actual := rq.first()
+		ast.Equal(expected, actual)
+		//
+		rq.remove(tss[j])
+		actual = rq.first()
 		ast.Equal(expected, actual)
 	}
 }
