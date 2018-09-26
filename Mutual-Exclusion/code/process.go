@@ -5,6 +5,8 @@ import (
 	"fmt"
 )
 
+const others = -1
+
 type process struct {
 	me           int
 	clock        *clock

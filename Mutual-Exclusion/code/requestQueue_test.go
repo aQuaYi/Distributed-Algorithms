@@ -20,8 +20,9 @@ func makeIncreasingTimestamps(half int) []timestamp {
 func Test_requestQueue(t *testing.T) {
 	ast := assert.New(t)
 	//
-	size := 10
-	tss := makeIncreasingTimestamps(size / 2)
+	half := 10
+	size := half * 2
+	tss := makeIncreasingTimestamps(half)
 	rq := newRequestQueue()
 
 	for i := size - 1; i >= 0; i-- {

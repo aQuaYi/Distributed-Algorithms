@@ -7,23 +7,43 @@ import (
 )
 
 type requestQueue struct {
-	rpq   *requestPriorityQueue
-	rqs   map[timestamp]*request
+	rpq       *requestPriorityQueue
+	requestOf map[timestamp]*request
+	// FIXME: 试着删除 mutex 或者删除此条注释
 	mutex sync.Mutex
 }
 
 func newRequestQueue() *requestQueue {
-	return &requestQueue{}
+	return &requestQueue{
+		rpq:       new(requestPriorityQueue),
+		requestOf: make(map[timestamp]*request, 1024),
+	}
 }
 
 func (rq *requestQueue) first() timestamp {
-	return timestamp{}
+	rq.mutex.Lock()
+	defer rq.mutex.Unlock()
+	if len(*rq.rpq) == 0 {
+		return timestamp{process: others}
+	}
+	return (*rq.rpq)[0].timestamp2
 }
 
 func (rq *requestQueue) push(ts timestamp) {
+	rq.mutex.Lock()
+	defer rq.mutex.Unlock()
+	r := &request{
+		timestamp2: ts,
+	}
+
+	rq.requestOf[ts] = r
+	heap.Push(rq.rpq, r)
 }
 
 func (rq *requestQueue) remove(ts timestamp) {
+	rq.mutex.Lock()
+	defer rq.mutex.Unlock()
+	rq.rpq.remove(rq.requestOf[ts])
 }
 
 // func newRequestQueue() *requestQueue {
