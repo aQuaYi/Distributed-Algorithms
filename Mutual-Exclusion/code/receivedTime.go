@@ -6,9 +6,9 @@ import (
 )
 
 type receivedTime struct {
-	trq *timeRecordQueue
-	trs []*timeRecord
-	rwm sync.RWMutex
+	trq   *timeRecordQueue
+	trs   []*timeRecord
+	mutex sync.Mutex
 }
 
 func newReceivedTime(all, me int) *receivedTime {
@@ -27,15 +27,11 @@ func newReceivedTime(all, me int) *receivedTime {
 	}
 }
 
-func (rt *receivedTime) update(id, time int) {
-	rt.rwm.Lock()
-	defer rt.rwm.Unlock()
+// update 以后，返回 rt 中的最小值
+func (rt *receivedTime) update(id, time int) int {
+	rt.mutex.Lock()
+	defer rt.mutex.Unlock()
 	rt.trq.update(rt.trs[id], time)
-}
-
-func (rt *receivedTime) min() int {
-	rt.rwm.RLock()
-	defer rt.rwm.RUnlock()
 	return (*rt.trq)[0].time
 }
 

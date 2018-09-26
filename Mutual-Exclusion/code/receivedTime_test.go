@@ -17,8 +17,7 @@ func Test_receivedTime(t *testing.T) {
 	// 依次按照以最小值更新第 i 个时间值
 	for i := all - 1; i > me; i-- {
 		expected := i
-		rt.update(i, i)
-		actual := rt.min()
+		actual := rt.update(i, i)
 		ast.Equal(expected, actual)
 	}
 }
