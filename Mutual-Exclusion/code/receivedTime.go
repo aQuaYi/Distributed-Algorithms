@@ -70,7 +70,7 @@ func (trq *timeRecordQueue) Pop() interface{} {
 	return temp
 }
 
-func (trq *timeRecordQueue) update(entry *timeRecord, priority int) {
-	entry.time = priority
-	heap.Fix(trq, entry.index)
+func (trq *timeRecordQueue) update(tr *timeRecord, time int) {
+	tr.time = time
+	heap.Fix(trq, tr.index)
 }
