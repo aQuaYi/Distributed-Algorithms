@@ -28,18 +28,18 @@ func newResource() *resource {
 	}
 }
 
-func (r *resource) occupy2(ts timestamp) {
+func (r *resource) occupy2(ts timestamp) { // TODO: 修改方法名称
 	if r.occupiedBy != NOBODY {
 		msg := fmt.Sprintf("资源正在被 P%d 占据，P%d 却想获取资源。", r.occupiedBy, ts.process)
 		panic(msg)
 	}
-
+	r.occupiedBy = ts.process
 	r.timestamps = append(r.timestamps, ts)
 	r.times = append(r.times, time.Now())
 	debugPrintf("~~~ @resource: %s occupied ~~~ ", ts)
 }
 
-func (r *resource) release2(ts timestamp) {
+func (r *resource) release2(ts timestamp) { // TODO: 修改方法名称
 	if r.occupiedBy != ts.process {
 		msg := fmt.Sprintf("P%d 想要释放正在被 P%d 占据的资源。", ts.process, r.occupiedBy)
 		panic(msg)
@@ -57,7 +57,7 @@ func (r *resource) report() string {
 	}
 	totalTime := r.times[size-1].Sub(r.times[0])
 	rate := occupiedTime.Nanoseconds() * 10000 / totalTime.Nanoseconds()
-	format := "resource 的占用比率为 %d.%d%"
+	format := "resource 的占用比率为 %02d.%02d%%"
 	return fmt.Sprintf(format, rate/100, rate%100)
 }
 
