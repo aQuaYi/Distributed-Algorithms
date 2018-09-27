@@ -1,4 +1,4 @@
 package mutual
 
 // needDebug for Debugging
-const needDebug = true
+var needDebug = true

@@ -6,17 +6,19 @@ import (
 	"time"
 )
 
-const (
+var (
 	// NOBODY 表示没有赋予任何人
-	NOBODY = -1
+	NOBODY = -1 // TODO: 删除此处内容
+	// NOBODY2 表示没有赋予任何人
+	NOBODY2 = timestamp{time: -1, process: others}
 )
 
 type resource struct {
-	occupiedBy int
-	procOrder  []int          // TODO: 删除此处内容
-	timeOrder  []int          // TODO: 删除此处内容
-	occupieds  sync.WaitGroup // TODO: 删除此处内容
-	mutex      sync.Mutex
+	occupiedBy2 timestamp      // TODO: 重命名此处属性
+	occupiedBy  int            // TODO: 删除此处内容
+	procOrder   []int          // TODO: 删除此处内容
+	timeOrder   []int          // TODO: 删除此处内容
+	occupieds   sync.WaitGroup // TODO: 删除此处内容
 
 	timestamps []timestamp
 	times      []time.Time
@@ -24,27 +26,28 @@ type resource struct {
 
 func newResource() *resource {
 	return &resource{
-		occupiedBy: NOBODY,
+		occupiedBy2: NOBODY2,
+		occupiedBy:  NOBODY,
 	}
 }
 
 func (r *resource) occupy2(ts timestamp) { // TODO: 修改方法名称
-	if r.occupiedBy != NOBODY {
-		msg := fmt.Sprintf("资源正在被 P%d 占据，P%d 却想获取资源。", r.occupiedBy, ts.process)
+	if r.occupiedBy2 != NOBODY2 {
+		msg := fmt.Sprintf("资源正在被 %s 占据，%s 却想获取资源。", r.occupiedBy2, ts)
 		panic(msg)
 	}
-	r.occupiedBy = ts.process
+	r.occupiedBy2 = ts
 	r.timestamps = append(r.timestamps, ts)
 	r.times = append(r.times, time.Now())
 	debugPrintf("~~~ @resource: %s occupied ~~~ ", ts)
 }
 
 func (r *resource) release2(ts timestamp) { // TODO: 修改方法名称
-	if r.occupiedBy != ts.process {
-		msg := fmt.Sprintf("P%d 想要释放正在被 P%d 占据的资源。", ts.process, r.occupiedBy)
+	if r.occupiedBy2 != ts {
+		msg := fmt.Sprintf("%s 想要释放正在被 P%s 占据的资源。", ts, r.occupiedBy2)
 		panic(msg)
 	}
-	r.occupiedBy = NOBODY
+	r.occupiedBy2 = NOBODY2
 	r.times = append(r.times, time.Now())
 	debugPrintf("~~~ @resource: %s released ~~~ ", ts)
 }
