@@ -33,7 +33,7 @@ func requestLoop(ps []*process, occupieds int) {
 		// 等待一段时间，再进行下一个 request
 		randSleep()
 
-		sleep1SecondPer100Occupyieds(count)
+		sleep1SecondPer100Occupieds(count)
 
 	}
 

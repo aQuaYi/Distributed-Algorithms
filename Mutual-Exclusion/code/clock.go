@@ -7,8 +7,7 @@ import (
 
 type clock struct {
 	time int
-	// clock 使用单独的锁
-	// 避免与 process 的锁冲突
+	// TODO: 删除此处内容
 	rwmu sync.RWMutex
 }
 

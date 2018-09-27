@@ -37,7 +37,7 @@ func randSleep() {
 	time.Sleep(timeout)
 }
 
-func sleep1SecondPer100Occupyieds(count int) {
+func sleep1SecondPer100Occupieds(count int) {
 	if count%100 == 0 {
 		time.Sleep(time.Second)
 	}
