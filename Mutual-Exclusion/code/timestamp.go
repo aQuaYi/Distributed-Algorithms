@@ -6,8 +6,8 @@ type timestamp struct {
 	time, process int
 }
 
-func newTimestamp(time, process int) *timestamp {
-	return &timestamp{
+func newTimestamp(time, process int) timestamp {
+	return timestamp{
 		time:    time,
 		process: process,
 	}

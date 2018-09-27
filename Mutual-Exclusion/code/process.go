@@ -29,7 +29,7 @@ type process struct {
 	isOccupying bool
 
 	// 新的属性
-	requestTimestamp *timestamp
+	requestTimestamp timestamp
 	prop             observer.Property
 	stream           observer.Stream
 	receivedTime     *receivedTime
@@ -57,11 +57,12 @@ func newProcess(me int, r *resource, chans []chan *message) *process {
 
 func newProcess2(all, me int, r *resource, prop observer.Property) *process {
 	p := &process{
-		me:            me,
-		resource:      r,
-		clock:         newClock(),
-		requestQueue2: newRequestQueue(),
-		receivedTime:  newReceivedTime(all, me),
+		me:               me,
+		resource:         r,
+		clock:            newClock(),
+		requestQueue2:    newRequestQueue(),
+		receivedTime:     newReceivedTime(all, me),
+		requestTimestamp: NOBODY2,
 	}
 	eventLoop(p)
 	debugPrintf("[%d]P%d 完成创建工作", p.clock.getTime(), p.me)
@@ -98,17 +99,28 @@ func (p *process) pop(r *request) {
 }
 
 func (p *process) request() {
-
-	p.requestChan <- struct{}{}
+	ts := newTimestamp(p.clock.tick(), p.me)
+	msg := newMessage2(requestResource, p.clock.tick(), p.me, others, ts)
+	// Rule 1: 发送申请信息给其他的 process
+	p.prop.Update(msg)
+	p.requestQueue2.push(ts)
 }
 
 func (p *process) occupy() {
 	p.isOccupying = true
-	p.resource.occupy2(*p.requestTimestamp)
+	p.resource.occupy2(p.requestTimestamp)
 }
 
 func (p *process) release() {
-	p.resource.release2(*p.requestTimestamp)
-	p.requestTimestamp = nil
+	ts := p.requestTimestamp
+	// rule 3: 先释放资源
+	p.resource.release2(ts)
+	// rule 3: 在 requestQueue 中删除 ts
+	p.requestQueue2.remove(ts)
+	// rule 3: 把释放的消息发送给其他 process
+	msg := newMessage2(releaseResource, p.clock.tick(), p.me, others, ts)
+	p.prop.Update(msg)
+
+	p.requestTimestamp = NOBODY2
 	p.isOccupying = false
 }

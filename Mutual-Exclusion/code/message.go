@@ -10,6 +10,7 @@ type message struct {
 	to         int // message 接收方的 ID， 当值为 others 的时候，表示接收方为除 from 外的所有
 	request    *request
 	timestamp2 timestamp
+	msgTime    int
 }
 
 // TODO: 删除此处内容
@@ -22,9 +23,10 @@ func newMessage(mt msgType, timestamp int, from int, request *request) *message 
 	}
 }
 
-func newMessage2(mt msgType, from, to int, ts timestamp) *message {
+func newMessage2(mt msgType, msgTime, from, to int, ts timestamp) *message {
 	return &message{
 		msgType:    mt,
+		msgTime:    msgTime,
 		from:       from,
 		to:         to,
 		timestamp2: ts,
@@ -32,7 +34,7 @@ func newMessage2(mt msgType, from, to int, ts timestamp) *message {
 }
 
 func (m *message) String() string {
-	return fmt.Sprintf("{%s,%s,From:%d,To:%d}", m.msgType, m.timestamp2, m.from, m.to)
+	return fmt.Sprintf("{%s, Time:%d, From:%d, To:%d, %s}", m.msgType, m.msgTime, m.from, m.to, m.timestamp2)
 }
 
 type msgType int
