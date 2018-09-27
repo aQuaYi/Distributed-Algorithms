@@ -3,12 +3,16 @@ package mutual
 import "fmt"
 
 type message struct {
-	msgType   msgType
-	timestamp int // 发送 message 时， process.clock 的时间
-	from      int // message 发送方的 ID
-	request   *request
+	msgType msgType
+	// TODO: 删除此处内容
+	timestamp  int // 发送 message 时， process.clock 的时间
+	from       int // message 发送方的 ID
+	to         int // message 接收方的 ID， 当值为 others 的时候，表示接收方为除 from 外的所有
+	request    *request
+	timestamp2 timestamp
 }
 
+// TODO: 删除此处内容
 func newMessage(mt msgType, timestamp int, from int, request *request) *message {
 	return &message{
 		msgType:   mt,
@@ -18,8 +22,17 @@ func newMessage(mt msgType, timestamp int, from int, request *request) *message 
 	}
 }
 
+func newMessage2(mt msgType, from, to int, ts timestamp) *message {
+	return &message{
+		msgType:    mt,
+		from:       from,
+		to:         to,
+		timestamp2: ts,
+	}
+}
+
 func (m *message) String() string {
-	return fmt.Sprintf("msg{%s,T%d,P%d,%s}", m.msgType, m.timestamp, m.from, m.request)
+	return fmt.Sprintf("{%s,%s,From:%d,To:%d}", m.msgType, m.timestamp2, m.from, m.to)
 }
 
 type msgType int
@@ -35,12 +48,10 @@ const (
 func (mt msgType) String() string {
 	switch mt {
 	case requestResource:
-		return "申请"
+		return "申请资源"
 	case releaseResource:
-		return "释放"
-	case acknowledgment:
-		return "确认"
+		return "释放资源"
 	default:
-		panic("出现了多余的 msgType")
+		return "确认收到"
 	}
 }
