@@ -3,6 +3,8 @@ package mutual
 import (
 	"container/heap"
 	"fmt"
+
+	"github.com/aQuaYi/observer"
 )
 
 const others = -1
@@ -25,27 +27,44 @@ type process struct {
 	occupyChan  chan struct{}
 
 	isOccupying bool
+
+	// 新的属性
+	requestTimestamp *timestamp
+	prop             observer.Property
+	stream           observer.Stream
+	receivedTime     *receivedTime
+	requestQueue2    *requestQueue
+	occupyTimes      int // process 可以占用资源的次数
 }
 
 func newProcess(me int, r *resource, chans []chan *message) *process {
 	p := &process{
-		me:             me,
-		resource:       r,
-		clock:          newClock(),
-		chans:          chans,
-		requestQueue:   make(requestPriorityQueue, 0, 1024),
-		receiveTime:    make([]int, len(chans)),
-		minReceiveTime: 0,
-
+		me:               me,
+		resource:         r,
+		clock:            newClock(),
+		chans:            chans,
+		requestQueue:     make(requestPriorityQueue, 0, 1024),
+		receiveTime:      make([]int, len(chans)),
+		minReceiveTime:   0,
 		toCheckRule5Chan: make(chan struct{}),
 		requestChan:      make(chan struct{}),
 		occupyChan:       make(chan struct{}),
 	}
-
 	eventLoop(p)
-
 	debugPrintf("[%d]P%d 完成创建工作", p.clock.getTime(), p.me)
+	return p
+}
 
+func newProcess2(all, me int, r *resource, prop observer.Property) *process {
+	p := &process{
+		me:            me,
+		resource:      r,
+		clock:         newClock(),
+		requestQueue2: newRequestQueue(),
+		receivedTime:  newReceivedTime(all, me),
+	}
+	eventLoop(p)
+	debugPrintf("[%d]P%d 完成创建工作", p.clock.getTime(), p.me)
 	return p
 }
 
@@ -79,5 +98,17 @@ func (p *process) pop(r *request) {
 }
 
 func (p *process) request() {
+
 	p.requestChan <- struct{}{}
+}
+
+func (p *process) occupy() {
+	p.isOccupying = true
+	p.resource.occupy2(*p.requestTimestamp)
+}
+
+func (p *process) release() {
+	p.resource.release2(*p.requestTimestamp)
+	p.requestTimestamp = nil
+	p.isOccupying = false
 }
