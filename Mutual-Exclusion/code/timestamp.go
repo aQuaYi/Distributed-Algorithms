@@ -11,7 +11,7 @@ type timestamp struct {
 	time, process int
 }
 
-// TODO: 把返回值改成指针
+// TODO: 把返回值改成 接口
 func newTimestamp(time, process int) timestamp {
 	return timestamp{
 		time:    time,

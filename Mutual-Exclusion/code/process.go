@@ -19,7 +19,6 @@ type process struct {
 	occupyTimes      int // process 可以占用资源的次数
 }
 
-// TODO: 重命名这个方法
 func newProcess(all, me int, r *resource, prop observer.Property) *process {
 	p := &process{
 		me:               me,
@@ -28,7 +27,7 @@ func newProcess(all, me int, r *resource, prop observer.Property) *process {
 		clock:            newClock(),
 		requestQueue:     newRequestQueue(),
 		receivedTime:     newReceivedTime(all, me),
-		requestTimestamp: NOBODY2,
+		requestTimestamp: NOBODY,
 	}
 
 	go p.Listening()
@@ -40,7 +39,7 @@ func newProcess(all, me int, r *resource, prop observer.Property) *process {
 
 func (p *process) request() {
 	ts := newTimestamp(p.clock.tick(), p.me)
-	msg := newMessage2(requestResource, p.clock.tick(), p.me, others, ts)
+	msg := newMessage(requestResource, p.clock.tick(), p.me, others, ts)
 	// Rule 1: 发送申请信息给其他的 process
 	p.prop.Update(msg)
 	p.requestQueue.push(ts)
@@ -48,20 +47,20 @@ func (p *process) request() {
 
 func (p *process) occupyResource() {
 	p.isOccupying = true
-	p.resource.occupy2(p.requestTimestamp)
+	p.resource.occupy(p.requestTimestamp)
 }
 
 func (p *process) releaseResource() {
 	ts := p.requestTimestamp
 	// rule 3: 先释放资源
-	p.resource.release2(ts)
+	p.resource.release(ts)
 	// rule 3: 在 requestQueue 中删除 ts
 	p.requestQueue.remove(ts)
 	// rule 3: 把释放的消息发送给其他 process
-	msg := newMessage2(releaseResource, p.clock.tick(), p.me, others, ts)
+	msg := newMessage(releaseResource, p.clock.tick(), p.me, others, ts)
 	p.prop.Update(msg)
 
-	p.requestTimestamp = NOBODY2
+	p.requestTimestamp = NOBODY
 	p.isOccupying = false
 }
 
@@ -74,7 +73,7 @@ func (p *process) addOccupyTimes(n int) {
 
 func (p *process) needResource() bool {
 	if p.occupyTimes <= 0 ||
-		p.requestTimestamp != NOBODY2 {
+		p.requestTimestamp != NOBODY {
 		return false
 	}
 	return true
@@ -87,9 +86,9 @@ func (p *process) handleRequestMessage(msg *message) {
 	// 收到消息，总是先更新自己的时间
 	p.updateClock(msg.from, msg.msgTime)
 	// rule 2: 把 msg.timestamp 放入自己的 requestQueue 当中
-	p.requestQueue.push(msg.timestamp2)
+	p.requestQueue.push(msg.timestamp)
 	// rule 2: 给对方发送一条 acknowledge 消息
-	p.prop.Update(newMessage2(
+	p.prop.Update(newMessage(
 		acknowledgment,
 		p.clock.tick(),
 		p.me,
@@ -106,7 +105,7 @@ func (p *process) handleReleaseMessage(msg *message) {
 	// 收到消息，总是先更新自己的时间
 	p.updateClock(msg.from, msg.msgTime)
 	// rule 4: 收到就从 request queue 中删除相应的申请
-	p.requestQueue.remove(msg.timestamp2)
+	p.requestQueue.remove(msg.timestamp)
 	p.checkRule5()
 }
 

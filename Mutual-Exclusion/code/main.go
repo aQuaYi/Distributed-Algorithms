@@ -11,15 +11,6 @@ func init() {
 
 func start(processes, occupieds int) *resource {
 	resource := newResource()
-
-	sys := newSystem(processes, resource)
-
-	resource.occupieds.Add(occupieds)
-
-	requestLoop(sys.processes, occupieds)
-
-	resource.occupieds.Wait()
-
 	return resource
 }
 

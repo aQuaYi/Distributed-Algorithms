@@ -2,7 +2,6 @@ package mutual
 
 import (
 	"container/heap"
-	"fmt"
 	"sync"
 )
 
@@ -26,14 +25,14 @@ func (rq *requestQueue) first() timestamp {
 	if len(*rq.rpq) == 0 {
 		return timestamp{process: others}
 	}
-	return (*rq.rpq)[0].timestamp2
+	return (*rq.rpq)[0].timestamp
 }
 
 func (rq *requestQueue) push(ts timestamp) {
 	rq.mutex.Lock()
 	defer rq.mutex.Unlock()
 	r := &request{
-		timestamp2: ts,
+		timestamp: ts,
 	}
 
 	rq.requestOf[ts] = r
@@ -49,20 +48,8 @@ func (rq *requestQueue) remove(ts timestamp) {
 
 // request 是 priorityQueue 中的元素
 type request struct {
-	// TODO: 更名 timestamp2 到 timestamp
-	timestamp2 timestamp
-	// TODO: 删除 timestamp 和 process
-	timestamp int
-	process   int
+	timestamp timestamp
 	index     int
-}
-
-// TODO: 删除此处内容
-func (r *request) String() string {
-	if r == nil {
-		return "<:>"
-	}
-	return fmt.Sprintf("<%d:%d>", r.timestamp, r.process)
 }
 
 // rpq implements heap.Interface and holds entries.
@@ -72,7 +59,7 @@ func (q requestPriorityQueue) Len() int { return len(q) }
 
 // NOTICE: 这就是将局部顺序推广到全局顺序的关键
 func (q requestPriorityQueue) Less(i, j int) bool {
-	return less(q[i].timestamp2, q[j].timestamp2)
+	return less(q[i].timestamp, q[j].timestamp)
 }
 
 func (q requestPriorityQueue) Swap(i, j int) {

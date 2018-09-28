@@ -7,7 +7,6 @@ import (
 
 type clock struct {
 	time int
-	// TODO: 删除此处内容
 	rwmu sync.RWMutex
 }
 
