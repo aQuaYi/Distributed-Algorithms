@@ -11,12 +11,12 @@ func Test_clock_update(t *testing.T) {
 	//
 	c := newClock()
 	newTime := 1000
-	ast.True(newTime+1 >= c.time)
+	ast.True(newTime+1 >= c.Now())
 	//
-	c.update(newTime)
+	c.Update(newTime)
 	//
 	expected := newTime + 1
-	actual := c.getTime()
+	actual := c.Now()
 	ast.Equal(expected, actual)
 }
 
@@ -24,7 +24,7 @@ func Test_clock_tick(t *testing.T) {
 	ast := assert.New(t)
 	//
 	c := newClock()
-	expected := c.getTime() + 1
-	actual := c.tick()
+	expected := c.Now() + 1
+	actual := c.Tick()
 	ast.Equal(expected, actual)
 }

@@ -8,7 +8,7 @@ const others = -1
 
 type process struct {
 	me               int
-	clock            *clock
+	clock            Clock
 	resource         *resource
 	isOccupying      bool
 	requestTimestamp Timestamp
@@ -32,14 +32,14 @@ func newProcess(all, me int, r *resource, prop observer.Property) *process {
 
 	go p.Listening()
 
-	debugPrintf("[%d]P%d 完成创建工作", p.clock.getTime(), p.me)
+	debugPrintf("[%d]P%d 完成创建工作", p.clock.Now(), p.me)
 
 	return p
 }
 
 func (p *process) request() {
-	ts := newTimestamp(p.clock.tick(), p.me)
-	msg := newMessage(requestResource, p.clock.tick(), p.me, others, ts)
+	ts := newTimestamp(p.clock.Tick(), p.me)
+	msg := newMessage(requestResource, p.clock.Tick(), p.me, others, ts)
 	// Rule 1: 发送申请信息给其他的 process
 	p.prop.Update(msg)
 	p.requestQueue.Push(ts)
@@ -57,7 +57,7 @@ func (p *process) releaseResource() {
 	// rule 3: 在 requestQueue 中删除 ts
 	p.requestQueue.Remove(ts)
 	// rule 3: 把释放的消息发送给其他 process
-	msg := newMessage(releaseResource, p.clock.tick(), p.me, others, ts)
+	msg := newMessage(releaseResource, p.clock.Tick(), p.me, others, ts)
 	p.prop.Update(msg)
 
 	p.requestTimestamp = nil
@@ -90,7 +90,7 @@ func (p *process) handleRequestMessage(msg *message) {
 	// rule 2: 给对方发送一条 acknowledge 消息
 	p.prop.Update(newMessage(
 		acknowledgment,
-		p.clock.tick(),
+		p.clock.Tick(),
 		p.me,
 		msg.from,
 		nil,
@@ -119,7 +119,7 @@ func (p *process) handleAcknowledgeMessage(msg *message) {
 }
 
 func (p *process) updateClock(id, time int) {
-	p.clock.update(time)
+	p.clock.Update(time)
 	p.receivedTime.update(id, time)
 }
 
