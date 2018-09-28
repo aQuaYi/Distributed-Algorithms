@@ -64,8 +64,11 @@ func newProcess2(all, me int, r *resource, prop observer.Property) *process {
 		receivedTime:     newReceivedTime(all, me),
 		requestTimestamp: NOBODY2,
 	}
-	// eventLoop(p)
+
+	go p.Listening()
+
 	debugPrintf("[%d]P%d 完成创建工作", p.clock.getTime(), p.me)
+
 	return p
 }
 
