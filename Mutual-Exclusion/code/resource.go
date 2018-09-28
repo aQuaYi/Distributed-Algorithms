@@ -5,25 +5,20 @@ import (
 	"time"
 )
 
-var (
-	// NOBODY 表示没有赋予任何人
-	NOBODY = timestamp{time: -1, process: others}
-)
-
 type resource struct {
-	occupiedBy timestamp
-	timestamps []timestamp
+	occupiedBy Timestamp
+	timestamps []Timestamp
 	times      []time.Time
 }
 
 func newResource() *resource {
 	return &resource{
-		occupiedBy: NOBODY,
+		occupiedBy: nil,
 	}
 }
 
-func (r *resource) occupy(ts timestamp) {
-	if r.occupiedBy != NOBODY {
+func (r *resource) occupy(ts Timestamp) {
+	if r.occupiedBy != nil {
 		msg := fmt.Sprintf("资源正在被 %s 占据，%s 却想获取资源。", r.occupiedBy, ts)
 		panic(msg)
 	}
@@ -33,12 +28,12 @@ func (r *resource) occupy(ts timestamp) {
 	debugPrintf("~~~ @resource: %s occupied ~~~ ", ts)
 }
 
-func (r *resource) release(ts timestamp) {
-	if r.occupiedBy != ts {
+func (r *resource) release(ts Timestamp) {
+	if !r.occupiedBy.isEqual(ts) {
 		msg := fmt.Sprintf("%s 想要释放正在被 P%s 占据的资源。", ts, r.occupiedBy)
 		panic(msg)
 	}
-	r.occupiedBy = NOBODY
+	r.occupiedBy = nil
 	r.times = append(r.times, time.Now())
 	debugPrintf("~~~ @resource: %s released ~~~ ", ts)
 }
@@ -58,7 +53,7 @@ func (r *resource) report() string {
 func (r *resource) isSortedOccupied() bool {
 	size := len(r.timestamps)
 	for i := 1; i < size; i++ {
-		if !less(r.timestamps[i-1], r.timestamps[i]) {
+		if !r.timestamps[i-1].Less(r.timestamps[i]) {
 			return false
 		}
 	}

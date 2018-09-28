@@ -11,7 +11,7 @@ type process struct {
 	clock            *clock
 	resource         *resource
 	isOccupying      bool
-	requestTimestamp timestamp
+	requestTimestamp Timestamp
 	prop             observer.Property
 	stream           observer.Stream
 	receivedTime     *receivedTime
@@ -27,7 +27,7 @@ func newProcess(all, me int, r *resource, prop observer.Property) *process {
 		clock:            newClock(),
 		requestQueue:     newRequestQueue(),
 		receivedTime:     newReceivedTime(all, me),
-		requestTimestamp: NOBODY,
+		requestTimestamp: nil,
 	}
 
 	go p.Listening()
@@ -60,7 +60,7 @@ func (p *process) releaseResource() {
 	msg := newMessage(releaseResource, p.clock.tick(), p.me, others, ts)
 	p.prop.Update(msg)
 
-	p.requestTimestamp = NOBODY
+	p.requestTimestamp = nil
 	p.isOccupying = false
 }
 
@@ -73,7 +73,7 @@ func (p *process) addOccupyTimes(n int) {
 
 func (p *process) needResource() bool {
 	if p.occupyTimes <= 0 ||
-		p.requestTimestamp != NOBODY {
+		p.requestTimestamp != nil {
 		return false
 	}
 	return true
@@ -93,7 +93,7 @@ func (p *process) handleRequestMessage(msg *message) {
 		p.clock.tick(),
 		p.me,
 		msg.from,
-		nullTimestamp,
+		nil,
 	))
 	p.checkRule5()
 }
@@ -124,8 +124,8 @@ func (p *process) updateClock(id, time int) {
 }
 
 func (p *process) checkRule5() {
-	if p.requestQueue.first() != p.requestTimestamp ||
-		p.requestTimestamp.time >= p.receivedTime.min() {
+	if !p.requestTimestamp.isEqual(p.requestQueue.Min()) ||
+		p.requestTimestamp.Time() >= p.receivedTime.min() {
 		return
 	}
 

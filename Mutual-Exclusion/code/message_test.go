@@ -9,7 +9,7 @@ import (
 func Test_Message(t *testing.T) {
 	ast := assert.New(t)
 	//
-	ts := timestamp{time: 0, process: 0}
+	ts := newTimestamp(0, 0)
 	m := newMessage(requestResource, 0, 0, others, ts)
 	//
 	expected := "{申请资源, Time:0, From:0, To:-1, <T0:P0>}"

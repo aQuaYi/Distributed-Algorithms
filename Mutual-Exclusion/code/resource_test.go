@@ -18,7 +18,7 @@ func Test_resource_occupyAndRelease(t *testing.T) {
 	ast := assert.New(t)
 	//
 	p := 0
-	ts := timestamp{time: 0, process: p}
+	ts := newTimestamp(0, p)
 	r := newResource()
 	r.occupy(ts)
 	//
@@ -37,8 +37,8 @@ func Test_resource_occupy_occupyInvalidResource(t *testing.T) {
 	//
 	p0 := 0
 	p1 := 1
-	ts0 := timestamp{time: 0, process: p0}
-	ts1 := timestamp{time: 1, process: p1}
+	ts0 := newTimestamp(0, p0)
+	ts1 := newTimestamp(1, p1)
 	r := newResource()
 	r.occupy(ts0)
 	//
@@ -55,7 +55,7 @@ func Test_resource_report(t *testing.T) {
 	ast := assert.New(t)
 	//
 	p := 0
-	ts := timestamp{time: 0, process: p}
+	ts := newTimestamp(0, p)
 	r := newResource()
 	r.occupy(ts)
 	r.release(ts)
@@ -81,17 +81,18 @@ func Test_resource_timestamps(t *testing.T) {
 	//
 	ast := assert.New(t)
 	//
+	time := 0
 	p := 0
-	ts := timestamp{time: 0, process: p}
 	r := newResource()
 	times := 100
 	//
 	for i := 0; i < times; i++ {
 		if i%2 == 0 {
-			ts.time++
+			time++
 		} else {
-			ts.process++
+			p++
 		}
+		ts := newTimestamp(time, p)
 		r.occupy(ts)
 		r.release(ts)
 	}
