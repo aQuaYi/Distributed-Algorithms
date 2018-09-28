@@ -20,7 +20,6 @@ type timestamp struct {
 	time, process int
 }
 
-// TODO: 把返回值改成 接口
 func newTimestamp(time, process int) Timestamp {
 	return &timestamp{
 		time:    time,
@@ -58,12 +57,4 @@ func (ts *timestamp) Time() int {
 
 func (ts *timestamp) Process() int {
 	return ts.process
-}
-
-// TODO: 删除此处内容
-func less(ts, b timestamp) bool {
-	if ts.time == b.time {
-		return ts.process < b.process
-	}
-	return ts.time < b.time
 }

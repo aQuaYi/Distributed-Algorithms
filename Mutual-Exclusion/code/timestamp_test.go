@@ -15,19 +15,19 @@ func Test_timestamp_String(t *testing.T) {
 
 }
 
-func Test_less(t *testing.T) {
+func Test_Timestamp_Less(t *testing.T) {
 	ast := assert.New(t)
 
 	// a < b < c
-	a := timestamp{time: 1, process: 1}
-	b := timestamp{time: 1, process: 2}
-	c := timestamp{time: 2, process: 3}
+	a := newTimestamp(1, 1)
+	b := newTimestamp(1, 2)
+	c := newTimestamp(2, 3)
 
-	ast.True(less(a, b))
-	ast.True(less(b, c))
-	ast.True(less(a, c))
+	ast.True(a.Less(b))
+	ast.True(a.Less(c))
+	ast.True(b.Less(c))
 
-	ast.False(less(b, a))
-	ast.False(less(c, a))
-	ast.False(less(c, b))
+	ast.False(b.Less(a))
+	ast.False(c.Less(a))
+	ast.False(c.Less(b))
 }
