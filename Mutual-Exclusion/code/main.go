@@ -31,11 +31,17 @@ func main() {
 	for i := range ps {
 		go func(i int) {
 			p := ps[i]
+
+			debugPrintf("%s 准备开始随机申请资源", p)
+
 			for {
+				i++
 				if p.NeedResource() {
 					p.Request()
 				}
 				randSleep()
+
+				debugPrintf("%s 的第 %d 次检查", p, i)
 			}
 		}(i)
 	}

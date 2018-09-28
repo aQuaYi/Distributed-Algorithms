@@ -1,6 +1,9 @@
 package main
 
 import (
+	"fmt"
+	"time"
+
 	"github.com/aQuaYi/observer"
 )
 
@@ -15,6 +18,8 @@ type Process interface {
 	NeedResource() bool
 	// 申请资源
 	Request()
+	// 输出信息
+	String() string
 }
 
 type process struct {
@@ -51,8 +56,15 @@ func newProcess(all, me int, r Resource, prop observer.Property) Process {
 	return p
 }
 
+func (p *process) String() string {
+	return fmt.Sprintf("[%d]P%d", p.clock.Now(), p.me)
+}
+
 func (p *process) Listening() {
 	stream := p.prop.Observe()
+
+	debugPrintf("[%d]P%d 已经获取了 stream 准备开始监听", p.clock.Now(), p.me)
+
 	for {
 		msg := stream.Next().(*message)
 		switch msg.msgType {
@@ -107,6 +119,8 @@ func (p *process) handleAcknowledgeMessage(msg *message) {
 
 func (p *process) Request() {
 	ts := newTimestamp(p.clock.Tick(), p.me)
+	p.requestTimestamp = ts
+
 	msg := newMessage(requestResource, p.clock.Tick(), p.me, OTHERS, ts)
 	// Rule 1: 发送申请信息给其他的 process
 	p.prop.Update(msg)
@@ -129,6 +143,7 @@ func (p *process) releaseResource() {
 	p.prop.Update(msg)
 
 	p.requestTimestamp = nil
+	p.occupyTimes--
 	p.isOccupying = false
 }
 
@@ -140,6 +155,10 @@ func (p *process) AddOccupyTimes(n int) {
 }
 
 func (p *process) NeedResource() bool {
+
+	debugPrintf("%d, %s", p.occupyTimes, p.requestTimestamp)
+	time.Sleep(time.Second * 1)
+
 	if p.occupyTimes > 0 &&
 		p.requestTimestamp == nil {
 		return true
