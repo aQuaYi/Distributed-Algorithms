@@ -28,3 +28,8 @@ func requestLoop(ps []*process, occupieds int) {
 
 	debugPrintf("完成全部 request 工作")
 }
+
+func main() {
+
+	return
+}
