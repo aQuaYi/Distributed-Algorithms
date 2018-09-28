@@ -12,7 +12,6 @@ func Test_timestamp_String(t *testing.T) {
 	actual := ts.String()
 	expected := "<T0:P1>"
 	ast.Equal(expected, actual)
-
 }
 
 func Test_Timestamp_Less(t *testing.T) {
