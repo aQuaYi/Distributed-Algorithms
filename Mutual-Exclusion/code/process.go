@@ -4,7 +4,8 @@ import (
 	"github.com/aQuaYi/observer"
 )
 
-const others = -1
+// OTHERS 表示信息接收方为其他所有 process
+const OTHERS = -1
 
 type process struct {
 	me          int
@@ -41,7 +42,7 @@ func newProcess(all, me int, r Resource, prop observer.Property) *process {
 
 func (p *process) request() {
 	ts := newTimestamp(p.clock.Tick(), p.me)
-	msg := newMessage(requestResource, p.clock.Tick(), p.me, others, ts)
+	msg := newMessage(requestResource, p.clock.Tick(), p.me, OTHERS, ts)
 	// Rule 1: 发送申请信息给其他的 process
 	p.prop.Update(msg)
 	p.requestQueue.Push(ts)
@@ -59,7 +60,7 @@ func (p *process) releaseResource() {
 	// rule 3: 在 requestQueue 中删除 ts
 	p.requestQueue.Remove(ts)
 	// rule 3: 把释放的消息发送给其他 process
-	msg := newMessage(releaseResource, p.clock.Tick(), p.me, others, ts)
+	msg := newMessage(releaseResource, p.clock.Tick(), p.me, OTHERS, ts)
 	p.prop.Update(msg)
 
 	p.requestTimestamp = nil
