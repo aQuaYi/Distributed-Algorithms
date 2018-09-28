@@ -28,11 +28,16 @@ func newReceivedTime(all, me int) *receivedTime {
 	}
 }
 
-// update 以后，返回 rt 中的最小值
-func (rt *receivedTime) update(id, time int) int {
+func (rt *receivedTime) update(id, time int) {
 	rt.mutex.Lock()
 	defer rt.mutex.Unlock()
 	rt.trq.update(rt.trs[id], time)
+}
+
+// 返回 rt 中的最小值
+func (rt *receivedTime) min() int {
+	rt.mutex.Lock()
+	defer rt.mutex.Unlock()
 	return (*rt.trq)[0].time
 }
 

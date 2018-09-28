@@ -64,7 +64,7 @@ func newProcess2(all, me int, r *resource, prop observer.Property) *process {
 		receivedTime:     newReceivedTime(all, me),
 		requestTimestamp: NOBODY2,
 	}
-	eventLoop(p)
+	// eventLoop(p)
 	debugPrintf("[%d]P%d 完成创建工作", p.clock.getTime(), p.me)
 	return p
 }
@@ -106,12 +106,12 @@ func (p *process) request() {
 	p.requestQueue2.push(ts)
 }
 
-func (p *process) occupy() {
+func (p *process) occupyResource() {
 	p.isOccupying = true
 	p.resource.occupy2(p.requestTimestamp)
 }
 
-func (p *process) release() {
+func (p *process) releaseResource() {
 	ts := p.requestTimestamp
 	// rule 3: 先释放资源
 	p.resource.release2(ts)
@@ -123,4 +123,93 @@ func (p *process) release() {
 
 	p.requestTimestamp = NOBODY2
 	p.isOccupying = false
+}
+
+func (p *process) addOccupyTimes(n int) {
+	if n < 0 {
+		panic("addOccupyTimes n should be >= 0")
+	}
+	p.occupyTimes += n
+}
+
+func (p *process) needResource() bool {
+	if p.occupyTimes <= 0 ||
+		p.requestTimestamp != NOBODY2 {
+		return false
+	}
+	return true
+}
+
+func (p *process) handleRequestMessage(msg *message) {
+	if msg.from == p.me {
+		return
+	}
+	// 收到消息，总是先更新自己的时间
+	p.updateClock(msg.from, msg.msgTime)
+	// rule 2: 把 msg.timestamp 放入自己的 requestQueue 当中
+	p.requestQueue2.push(msg.timestamp2)
+	// rule 2: 给对方发送一条 acknowledge 消息
+	p.prop.Update(newMessage2(
+		acknowledgment,
+		p.clock.tick(),
+		p.me,
+		msg.from,
+		nullTimestamp,
+	))
+	p.checkRule5()
+}
+
+func (p *process) handleReleaseMessage(msg *message) {
+	if msg.from == p.me {
+		return
+	}
+	// 收到消息，总是先更新自己的时间
+	p.updateClock(msg.from, msg.msgTime)
+	// rule 4: 收到就从 request queue 中删除相应的申请
+	p.requestQueue2.remove(msg.timestamp2)
+	p.checkRule5()
+}
+
+func (p *process) handleAcknowledgeMessage(msg *message) {
+	if msg.to != p.me {
+		return
+	}
+	// 收到消息，总是先更新自己的时间
+	p.updateClock(msg.from, msg.msgTime)
+	p.checkRule5()
+}
+
+func (p *process) updateClock(id, time int) {
+	p.clock.update(time)
+	p.receivedTime.update(id, time)
+}
+
+func (p *process) checkRule5() {
+	if p.requestQueue2.first() != p.requestTimestamp ||
+		p.requestTimestamp.time >= p.receivedTime.min() {
+		return
+	}
+
+	// 此时，满足了 rule 5
+	go func() {
+		p.occupyResource()
+		randSleep()
+		p.releaseResource()
+	}()
+}
+
+func (p *process) Listening() {
+	stream := p.prop.Observe()
+	for {
+		msg := stream.Value().(*message)
+		switch msg.msgType {
+		case requestResource:
+			p.handleRequestMessage(msg)
+		case releaseResource:
+			p.handleReleaseMessage(msg)
+		case acknowledgment:
+			p.handleAcknowledgeMessage(msg)
+		}
+		stream.Wait()
+	}
 }

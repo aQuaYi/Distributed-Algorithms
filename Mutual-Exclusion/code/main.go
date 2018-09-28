@@ -39,3 +39,5 @@ func requestLoop(ps []*process, occupieds int) {
 
 	debugPrintf("完成全部 request 工作")
 }
+
+// TODO: 把所有子模块都改成接口

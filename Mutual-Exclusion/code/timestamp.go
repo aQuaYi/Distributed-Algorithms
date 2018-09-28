@@ -2,10 +2,16 @@ package mutual
 
 import "fmt"
 
+var nullTimestamp = timestamp{
+	time:    -2,
+	process: -2,
+}
+
 type timestamp struct {
 	time, process int
 }
 
+// TODO: 把返回值改成指针
 func newTimestamp(time, process int) timestamp {
 	return timestamp{
 		time:    time,
