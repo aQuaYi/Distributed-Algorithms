@@ -1,5 +1,9 @@
 package mutual
 
+import (
+	"github.com/aQuaYi/observer"
+)
+
 type system struct {
 	processes []*process
 }
@@ -9,10 +13,10 @@ func newSystem(size int, r *resource) *system {
 	for i := range chans {
 		chans[i] = make(chan *message, 100)
 	}
-
+	prop := observer.NewProperty(nil)
 	ps := make([]*process, size)
 	for i := range ps {
-		ps[i] = newProcess(i, r, chans)
+		ps[i] = newProcess(size, i, r, prop)
 	}
 
 	return &system{
