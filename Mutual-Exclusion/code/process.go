@@ -15,7 +15,7 @@ type process struct {
 	prop             observer.Property
 	stream           observer.Stream
 	receivedTime     *receivedTime
-	requestQueue     *requestQueue
+	requestQueue     RequestQueue
 	occupyTimes      int // process 可以占用资源的次数
 }
 
@@ -42,7 +42,7 @@ func (p *process) request() {
 	msg := newMessage(requestResource, p.clock.tick(), p.me, others, ts)
 	// Rule 1: 发送申请信息给其他的 process
 	p.prop.Update(msg)
-	p.requestQueue.push(ts)
+	p.requestQueue.Push(ts)
 }
 
 func (p *process) occupyResource() {
@@ -55,7 +55,7 @@ func (p *process) releaseResource() {
 	// rule 3: 先释放资源
 	p.resource.release(ts)
 	// rule 3: 在 requestQueue 中删除 ts
-	p.requestQueue.remove(ts)
+	p.requestQueue.Remove(ts)
 	// rule 3: 把释放的消息发送给其他 process
 	msg := newMessage(releaseResource, p.clock.tick(), p.me, others, ts)
 	p.prop.Update(msg)
@@ -86,7 +86,7 @@ func (p *process) handleRequestMessage(msg *message) {
 	// 收到消息，总是先更新自己的时间
 	p.updateClock(msg.from, msg.msgTime)
 	// rule 2: 把 msg.timestamp 放入自己的 requestQueue 当中
-	p.requestQueue.push(msg.timestamp)
+	p.requestQueue.Push(msg.timestamp)
 	// rule 2: 给对方发送一条 acknowledge 消息
 	p.prop.Update(newMessage(
 		acknowledgment,
@@ -105,7 +105,7 @@ func (p *process) handleReleaseMessage(msg *message) {
 	// 收到消息，总是先更新自己的时间
 	p.updateClock(msg.from, msg.msgTime)
 	// rule 4: 收到就从 request queue 中删除相应的申请
-	p.requestQueue.remove(msg.timestamp)
+	p.requestQueue.Remove(msg.timestamp)
 	p.checkRule5()
 }
 

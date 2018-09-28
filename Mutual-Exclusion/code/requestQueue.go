@@ -8,54 +8,63 @@ import (
 // RequestQueue 提供了操作 request queue 的接口
 type RequestQueue interface {
 	// Min 返回最小的 Timestamp 值
-	Min() // TODO: 继续写
+	Min() Less
+	// Push 把元素加入 RequestQueue 中
+	Push(Less)
+	// Remove 在 RequestQueue 中删除 Less
+	Remove(Less)
 }
 
 type requestQueue struct {
 	rpq       *requestPriorityQueue
-	requestOf map[Timestamp]*request
+	requestOf map[Less]*request
 	mutex     sync.Mutex
 }
 
-// TODO: 修改返回值为 RequestQueue 接口
-func newRequestQueue() *requestQueue {
+func newRequestQueue() RequestQueue {
 	return &requestQueue{
 		rpq:       new(requestPriorityQueue),
-		requestOf: make(map[Timestamp]*request, 1024),
+		requestOf: make(map[Less]*request, 1024),
 	}
 }
 
-func (rq *requestQueue) Min() Timestamp {
+func (rq *requestQueue) Min() Less {
 	rq.mutex.Lock()
 	defer rq.mutex.Unlock()
 	if len(*rq.rpq) == 0 {
 		return nil
 	}
-	return (*rq.rpq)[0].timestamp
+	return (*rq.rpq)[0].ls
 }
 
-func (rq *requestQueue) push(ts Timestamp) {
+func (rq *requestQueue) Push(ls Less) {
 	rq.mutex.Lock()
 	defer rq.mutex.Unlock()
 	r := &request{
-		timestamp: ts,
+		ls: ls,
 	}
 
-	rq.requestOf[ts] = r
+	rq.requestOf[ls] = r
 	heap.Push(rq.rpq, r)
 }
 
-func (rq *requestQueue) remove(ts Timestamp) {
+func (rq *requestQueue) Remove(ls Less) {
 	rq.mutex.Lock()
 	defer rq.mutex.Unlock()
-	rq.rpq.remove(rq.requestOf[ts])
-	delete(rq.requestOf, ts)
+	rq.rpq.remove(rq.requestOf[ls])
+	delete(rq.requestOf, ls)
+}
+
+// Less 是 rpq 元素中的主要成分
+type Less interface {
+	// Less 比较两个接口的值
+	Less(interface{}) bool
 }
 
 // request 是 priorityQueue 中的元素
 type request struct {
-	timestamp Timestamp
-	index     int
+	ls    Less
+	index int
 }
 
 // rpq implements heap.Interface and holds entries.
@@ -63,9 +72,8 @@ type requestPriorityQueue []*request
 
 func (q requestPriorityQueue) Len() int { return len(q) }
 
-// NOTICE: 这就是将局部顺序推广到全局顺序的关键
 func (q requestPriorityQueue) Less(i, j int) bool {
-	return q[i].timestamp.Less(q[j].timestamp)
+	return q[i].ls.Less(q[j].ls)
 }
 
 func (q requestPriorityQueue) Swap(i, j int) {
