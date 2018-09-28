@@ -1,4 +1,4 @@
-package mutual
+package main
 
 import (
 	"container/heap"

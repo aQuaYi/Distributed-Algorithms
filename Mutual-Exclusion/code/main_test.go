@@ -1,4 +1,4 @@
-package mutual
+package main
 
 // func Test_start(t *testing.T) {
 // 	type args struct {

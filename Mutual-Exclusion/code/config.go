@@ -1,4 +1,4 @@
-package mutual
+package main
 
 // needDebug for Debugging
 var needDebug = true
