@@ -153,7 +153,8 @@ func (p *process) updateClock(id, time int) {
 }
 
 func (p *process) checkRule5() {
-	if !p.requestTimestamp.isEqual(p.requestQueue.Min()) ||
+	if p.requestTimestamp == nil ||
+		!p.requestTimestamp.isEqual(p.requestQueue.Min()) ||
 		p.requestTimestamp.Time() >= p.receivedTime.Min() {
 		return
 	}

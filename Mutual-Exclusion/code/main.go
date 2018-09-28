@@ -1,6 +1,7 @@
 package main
 
 import (
+	"log"
 	"math/rand"
 	"time"
 
@@ -14,12 +15,32 @@ func init() {
 func main() {
 	all := 10
 	occupyTimes := 10
-	rsc := newResource(all * occupyTimes)
-	ps := make([]Process, all)
+
+	rsc := new(resource)
+	rsc.wg.Add(all * occupyTimes)
+
 	prop := observer.NewProperty(nil)
+
+	ps := make([]Process, all)
 	for i := range ps {
 		p := newProcess(all, i, rsc, prop)
 		p.AddOccupyTimes(occupyTimes)
 		ps[i] = p
 	}
+
+	for i := range ps {
+		go func(i int) {
+			p := ps[i]
+			for {
+				if p.NeedResource() {
+					p.Request()
+				}
+				randSleep()
+			}
+		}(i)
+	}
+
+	rsc.Wait()
+
+	log.Println(rsc.report())
 }
