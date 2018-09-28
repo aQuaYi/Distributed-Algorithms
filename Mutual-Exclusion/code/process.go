@@ -7,6 +7,16 @@ import (
 // OTHERS 表示信息接收方为其他所有 process
 const OTHERS = -1
 
+// Process 是进程的接口
+type Process interface {
+	// 给进程添加占用资源的次数，次数必须 >=0
+	AddOccupyTimes(int)
+	// 检查 process 是否需要申请资源
+	NeedResource() bool
+	// 申请资源
+	Request()
+}
+
 type process struct {
 	me int
 
@@ -23,7 +33,7 @@ type process struct {
 	stream observer.Stream
 }
 
-func newProcess(all, me int, r Resource, prop observer.Property) *process {
+func newProcess(all, me int, r Resource, prop observer.Property) Process {
 	p := &process{
 		me:               me,
 		resource:         r,
@@ -95,7 +105,7 @@ func (p *process) handleAcknowledgeMessage(msg *message) {
 	p.checkRule5()
 }
 
-func (p *process) request() {
+func (p *process) Request() {
 	ts := newTimestamp(p.clock.Tick(), p.me)
 	msg := newMessage(requestResource, p.clock.Tick(), p.me, OTHERS, ts)
 	// Rule 1: 发送申请信息给其他的 process
@@ -122,19 +132,19 @@ func (p *process) releaseResource() {
 	p.isOccupying = false
 }
 
-func (p *process) addOccupyTimes(n int) {
+func (p *process) AddOccupyTimes(n int) {
 	if n < 0 {
 		panic("addOccupyTimes n should be >= 0")
 	}
 	p.occupyTimes += n
 }
 
-func (p *process) needResource() bool {
-	if p.occupyTimes <= 0 ||
-		p.requestTimestamp != nil {
-		return false
+func (p *process) NeedResource() bool {
+	if p.occupyTimes > 0 &&
+		p.requestTimestamp == nil {
+		return true
 	}
-	return true
+	return false
 }
 
 func (p *process) updateClock(id, time int) {

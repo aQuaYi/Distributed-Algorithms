@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"sync"
 	"time"
 )
 
@@ -11,17 +12,24 @@ type Resource interface {
 	Occupy(Timestamp)
 	// Release 表示释放资源
 	Release(Timestamp)
+	// Wait 等待资源被完全部的次数
+	Wait()
 }
 type resource struct {
 	occupiedBy Timestamp
 	timestamps []Timestamp
 	times      []time.Time
+	wg         sync.WaitGroup
 }
 
-func newResource() *resource {
-	return &resource{
-		occupiedBy: nil,
-	}
+func newResource(times int) Resource {
+	r := &resource{}
+	r.wg.Add(times)
+	return r
+}
+
+func (r *resource) Wait() {
+	r.wg.Wait()
 }
 
 func (r *resource) Occupy(ts Timestamp) {
@@ -42,6 +50,7 @@ func (r *resource) Release(ts Timestamp) {
 	}
 	r.occupiedBy = nil
 	r.times = append(r.times, time.Now())
+	r.wg.Done()
 	debugPrintf("~~~ @resource: %s released ~~~ ", ts)
 }
 
