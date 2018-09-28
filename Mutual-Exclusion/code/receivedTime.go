@@ -5,14 +5,22 @@ import (
 	"sync"
 )
 
+// ReceivedTime 是最新接受时间的操作接口
+// 因为 Rule5(ii) 需要用到最小的接受时间
+type ReceivedTime interface {
+	// Update 更新从 process 接收到的最新时间
+	Update(process, time int)
+	// Min 返回最早接收到消息的时间
+	Min() int
+}
+
 type receivedTime struct {
-	trq *timeRecordQueue
-	trs []*timeRecord
-	// FIXME: 试着删除 mutex 或者删除此条注释
+	trq   *timeRecordQueue
+	trs   []*timeRecord
 	mutex sync.Mutex
 }
 
-func newReceivedTime(all, me int) *receivedTime {
+func newReceivedTime(all, me int) ReceivedTime {
 	trq := new(timeRecordQueue)
 	trs := make([]*timeRecord, all)
 	for i := range trs {
@@ -28,14 +36,14 @@ func newReceivedTime(all, me int) *receivedTime {
 	}
 }
 
-func (rt *receivedTime) update(id, time int) {
+func (rt *receivedTime) Update(id, time int) {
 	rt.mutex.Lock()
 	defer rt.mutex.Unlock()
 	rt.trq.update(rt.trs[id], time)
 }
 
 // 返回 rt 中的最小值
-func (rt *receivedTime) min() int {
+func (rt *receivedTime) Min() int {
 	rt.mutex.Lock()
 	defer rt.mutex.Unlock()
 	return (*rt.trq)[0].time

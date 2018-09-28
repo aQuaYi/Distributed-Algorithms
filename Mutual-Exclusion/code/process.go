@@ -7,19 +7,21 @@ import (
 const others = -1
 
 type process struct {
-	me               int
+	me          int
+	isOccupying bool
+	occupyTimes int // process 可以占用资源的次数
+
 	clock            Clock
-	resource         *resource
-	isOccupying      bool
+	resource         Resource
 	requestTimestamp Timestamp
-	prop             observer.Property
-	stream           observer.Stream
-	receivedTime     *receivedTime
+	receivedTime     ReceivedTime
 	requestQueue     RequestQueue
-	occupyTimes      int // process 可以占用资源的次数
+
+	prop   observer.Property
+	stream observer.Stream
 }
 
-func newProcess(all, me int, r *resource, prop observer.Property) *process {
+func newProcess(all, me int, r Resource, prop observer.Property) *process {
 	p := &process{
 		me:               me,
 		resource:         r,
@@ -47,13 +49,13 @@ func (p *process) request() {
 
 func (p *process) occupyResource() {
 	p.isOccupying = true
-	p.resource.occupy(p.requestTimestamp)
+	p.resource.Occupy(p.requestTimestamp)
 }
 
 func (p *process) releaseResource() {
 	ts := p.requestTimestamp
 	// rule 3: 先释放资源
-	p.resource.release(ts)
+	p.resource.Release(ts)
 	// rule 3: 在 requestQueue 中删除 ts
 	p.requestQueue.Remove(ts)
 	// rule 3: 把释放的消息发送给其他 process
@@ -120,12 +122,12 @@ func (p *process) handleAcknowledgeMessage(msg *message) {
 
 func (p *process) updateClock(id, time int) {
 	p.clock.Update(time)
-	p.receivedTime.update(id, time)
+	p.receivedTime.Update(id, time)
 }
 
 func (p *process) checkRule5() {
 	if !p.requestTimestamp.isEqual(p.requestQueue.Min()) ||
-		p.requestTimestamp.Time() >= p.receivedTime.min() {
+		p.requestTimestamp.Time() >= p.receivedTime.Min() {
 		return
 	}
 

@@ -8,7 +8,7 @@ type system struct {
 	processes []*process
 }
 
-func newSystem(size int, r *resource) *system {
+func newSystem(size int, r Resource) *system {
 	chans := make([]chan *message, size)
 	for i := range chans {
 		chans[i] = make(chan *message, 100)

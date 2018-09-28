@@ -20,7 +20,7 @@ func Test_resource_occupyAndRelease(t *testing.T) {
 	p := 0
 	ts := newTimestamp(0, p)
 	r := newResource()
-	r.occupy(ts)
+	r.Occupy(ts)
 	//
 	ast.Equal(ts, r.occupiedBy)
 	ast.Equal(ts, r.timestamps[0])
@@ -40,10 +40,10 @@ func Test_resource_occupy_occupyInvalidResource(t *testing.T) {
 	ts0 := newTimestamp(0, p0)
 	ts1 := newTimestamp(1, p1)
 	r := newResource()
-	r.occupy(ts0)
+	r.Occupy(ts0)
 	//
 	expected := fmt.Sprintf("资源正在被 %s 占据，%s 却想获取资源。", ts0, ts1)
-	ast.PanicsWithValue(expected, func() { r.occupy(ts1) })
+	ast.PanicsWithValue(expected, func() { r.Occupy(ts1) })
 }
 
 func Test_resource_report(t *testing.T) {
@@ -57,10 +57,10 @@ func Test_resource_report(t *testing.T) {
 	p := 0
 	ts := newTimestamp(0, p)
 	r := newResource()
-	r.occupy(ts)
-	r.release(ts)
-	r.occupy(ts)
-	r.release(ts)
+	r.Occupy(ts)
+	r.Release(ts)
+	r.Occupy(ts)
+	r.Release(ts)
 	now := time.Now()
 	r.times[0] = now
 	r.times[1] = now.Add(100 * time.Second)
@@ -93,8 +93,8 @@ func Test_resource_timestamps(t *testing.T) {
 			p++
 		}
 		ts := newTimestamp(time, p)
-		r.occupy(ts)
-		r.release(ts)
+		r.Occupy(ts)
+		r.Release(ts)
 	}
 	//
 	expected := times * 2

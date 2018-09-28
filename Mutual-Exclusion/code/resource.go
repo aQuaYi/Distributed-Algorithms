@@ -5,6 +5,13 @@ import (
 	"time"
 )
 
+// Resource 是 Process 占用资源的接口
+type Resource interface {
+	// Occupy 表示占用资源
+	Occupy(Timestamp)
+	// Release 表示释放资源
+	Release(Timestamp)
+}
 type resource struct {
 	occupiedBy Timestamp
 	timestamps []Timestamp
@@ -17,7 +24,7 @@ func newResource() *resource {
 	}
 }
 
-func (r *resource) occupy(ts Timestamp) {
+func (r *resource) Occupy(ts Timestamp) {
 	if r.occupiedBy != nil {
 		msg := fmt.Sprintf("资源正在被 %s 占据，%s 却想获取资源。", r.occupiedBy, ts)
 		panic(msg)
@@ -28,7 +35,7 @@ func (r *resource) occupy(ts Timestamp) {
 	debugPrintf("~~~ @resource: %s occupied ~~~ ", ts)
 }
 
-func (r *resource) release(ts Timestamp) {
+func (r *resource) Release(ts Timestamp) {
 	if !r.occupiedBy.isEqual(ts) {
 		msg := fmt.Sprintf("%s 想要释放正在被 P%s 占据的资源。", ts, r.occupiedBy)
 		panic(msg)
