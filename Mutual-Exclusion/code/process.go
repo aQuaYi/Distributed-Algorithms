@@ -26,6 +26,7 @@ type process struct {
 	me int
 
 	isOccupying bool
+	// TODO: 删除此处内容
 	occupyTimes int // process 可以占用资源的次数
 
 	requestTimestamp Timestamp
