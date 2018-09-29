@@ -47,7 +47,7 @@ func newProcess(all, me int, r Resource, prop observer.Property) Process {
 		receivedTime: newReceivedTime(all, me),
 	}
 
-	go p.Listening()
+	p.Listening()
 
 	debugPrintf("[%d]P%d 完成创建工作", p.clock.Now(), p.me)
 
@@ -61,19 +61,22 @@ func (p *process) String() string {
 func (p *process) Listening() {
 	stream := p.prop.Observe()
 
+	go func() {
+		for {
+			msg := stream.Next().(*message)
+			switch msg.msgType {
+			case requestResource:
+				p.handleRequestMessage(msg)
+			case releaseResource:
+				p.handleReleaseMessage(msg)
+			case acknowledgment:
+				p.handleAcknowledgeMessage(msg)
+			}
+		}
+	}()
+
 	debugPrintf("[%d]P%d 已经获取了 stream 准备开始监听", p.clock.Now(), p.me)
 
-	for {
-		msg := stream.Next().(*message)
-		switch msg.msgType {
-		case requestResource:
-			p.handleRequestMessage(msg)
-		case releaseResource:
-			p.handleReleaseMessage(msg)
-		case acknowledgment:
-			p.handleAcknowledgeMessage(msg)
-		}
-	}
 }
 
 func (p *process) handleRequestMessage(msg *message) {
