@@ -13,19 +13,22 @@ func init() {
 }
 
 func main() {
-	for all := 2; all <= 100; all++ {
-		for times := 10; times <= 10000; times *= 2 {
+	count := 0
+	for all := 2; all <= 128; all *= 2 {
+		for times := 160; times <= 10240; times *= 2 {
 			if all*times > 20480 {
 				continue
 			}
 			fmt.Printf("~~~ %d Process，每个占用资源 %d 次 ~~~\n", all, times)
-			oneRound(all, times)
+			newRound(all, times)
+			count++
 		}
 	}
-	return
+
+	fmt.Printf("一共测试了 %d 轮，全部通过", count)
 }
 
-func oneRound(all, occupyTimesPerProcess int) {
+func newRound(all, occupyTimesPerProcess int) {
 	rsc := new(resource)
 	rsc.wg.Add(all * occupyTimesPerProcess)
 

@@ -181,8 +181,8 @@ func (p *process) checkRule5() {
 		p.requestTimestamp != nil &&
 		p.requestTimestamp.IsEqual(p.requestQueue.Min()) &&
 		p.requestTimestamp.Time() < p.receivedTime.Min() {
+		p.occupyResource()
 		go func() {
-			p.occupyResource()
 			randSleep()
 			p.releaseResource()
 		}()
@@ -190,13 +190,10 @@ func (p *process) checkRule5() {
 }
 
 func (p *process) occupyResource() {
-	p.mutex.Lock()
-
+	// 利用 checkRule5 的锁进行锁定
 	debugPrintf("%s 准备占用资源 %s", p, p.requestQueue)
 	p.isOccupying = true
 	p.resource.Occupy(p.requestTimestamp)
-
-	p.mutex.Unlock()
 }
 
 func (p *process) releaseResource() {
