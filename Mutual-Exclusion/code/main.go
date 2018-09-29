@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"log"
 	"math/rand"
 	"time"
 
@@ -19,7 +20,9 @@ func main() {
 			if all*times > 20480 {
 				continue
 			}
-			fmt.Printf("~~~ %d Process，每个占用资源 %d 次 ~~~\n", all, times)
+			msg := fmt.Sprintf("~~~ %d Process，每个占用资源 %d 次 ~~~\n", all, times)
+			fmt.Println(msg)
+			log.Println(msg)
 			newRound(all, times)
 			count++
 		}
