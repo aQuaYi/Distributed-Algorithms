@@ -14,7 +14,7 @@ func init() {
 
 func main() {
 	count := 0
-	amount := 2048
+	amount := 8192
 	for all := 2; all <= 128; all *= 2 {
 		times := amount / all
 		fmt.Printf("~~~ %d Process，每个占用资源 %d 次 ~~~\n", all, times)
