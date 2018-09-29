@@ -3,6 +3,9 @@
 使用 Go 语言实现了 Lamport 在论文 [《Time, Clocks and the Ordering of Events in a Distributed System》](time-clocks.pdf)中提到的 Mutual Exclusion 算法。
 
 ```shell
+$ git checkout 00c787
+$ go build -o me.exe
+$ ./me.exe
 ...
 14:25:49.227003  ## {确认收到, Time:3449, From:1, To:0, <T3446:P0>}
 14:25:49.227015  ## {申请资源, Time:3445, From:1, To:-1, <T3444:P1>}
