@@ -12,8 +12,6 @@ const OTHERS = -1
 
 // Process 是进程的接口
 type Process interface {
-	// 给进程添加占用资源的次数，次数必须 >=0
-	AddOccupyTimes(int)
 	// 检查 process 是否需要申请资源
 	CanRequest() bool
 	// 申请资源
@@ -36,6 +34,7 @@ type process struct {
 	rwm sync.RWMutex
 	// 访问修改以下属性时，需要加锁
 	requestTimestamp Timestamp
+	isOccupying      bool
 }
 
 func newProcess(all, me int, r Resource, prop observer.Property) Process {
@@ -118,7 +117,6 @@ func (p *process) handleAcknowledgeMessage(msg *message) {
 
 func (p *process) Request() {
 	ts := newTimestamp(p.clock.Tick(), p.me)
-
 	p.rwm.Lock()
 	p.requestTimestamp = ts
 	p.rwm.Unlock()
@@ -127,34 +125,6 @@ func (p *process) Request() {
 	// Rule 1: 发送申请信息给其他的 process
 	p.prop.Update(msg)
 	p.requestQueue.Push(ts)
-}
-
-func (p *process) occupyResource() {
-	p.resource.Occupy(p.requestTimestamp)
-}
-
-func (p *process) releaseResource() {
-	p.rwm.Lock()
-	ts := p.requestTimestamp
-	// rule 3: 先释放资源
-	p.resource.Release(ts)
-	// rule 3: 在 requestQueue 中删除 ts
-	p.requestQueue.Remove(ts) // FIXME: 到底是先释放好，还是先删除好呢
-	p.requestTimestamp = nil
-	p.rwm.Unlock()
-
-	// rule 3: 把释放的消息发送给其他 process
-	msg := newMessage(releaseResource, p.clock.Tick(), p.me, OTHERS, ts)
-	p.prop.Update(msg)
-
-}
-
-// TODO: 删除此处内容
-func (p *process) AddOccupyTimes(n int) {
-	if n < 0 {
-		panic("addOccupyTimes n should be >= 0")
-	}
-	// p.occupyTimes += n
 }
 
 func (p *process) CanRequest() bool {
@@ -169,19 +139,43 @@ func (p *process) updateTime(id, time int) {
 }
 
 func (p *process) checkRule5() {
-	p.rwm.RLock()
-	defer p.rwm.RUnlock()
-
-	if p.requestTimestamp == nil ||
-		!p.requestTimestamp.IsEqual(p.requestQueue.Min()) ||
-		p.requestTimestamp.Time() >= p.receivedTime.Min() {
-		return
-	}
-
-	// 此时，满足了 rule 5
-	go func() {
+	p.rwm.Lock()
+	defer p.rwm.Unlock()
+	if !p.isOccupying &&
+		p.requestTimestamp != nil &&
+		p.requestTimestamp.IsEqual(p.requestQueue.Min()) &&
+		p.requestTimestamp.Time() < p.receivedTime.Min() {
 		p.occupyResource()
-		randSleep()
-		p.releaseResource()
-	}()
+		go func() {
+			randSleep()
+			p.releaseResource()
+		}()
+	}
+}
+
+func (p *process) occupyResource() {
+	debugPrintf("%s 准备占用资源 %s", p, p.requestQueue)
+	p.isOccupying = true
+	p.resource.Occupy(p.requestTimestamp)
+}
+
+func (p *process) releaseResource() {
+	p.rwm.RLock()
+	ts := p.requestTimestamp
+	p.rwm.RUnlock()
+
+	// rule 3: 先释放资源
+	p.resource.Release(ts)
+	// rule 3: 在 requestQueue 中删除 ts
+	p.requestQueue.Remove(ts) // FIXME: 到底是先释放好，还是先删除好呢
+
+	p.rwm.Lock()
+	p.isOccupying = false
+	p.requestTimestamp = nil
+	p.rwm.Unlock()
+
+	// rule 3: 把释放的消息发送给其他 process
+	msg := newMessage(releaseResource, p.clock.Tick(), p.me, OTHERS, ts)
+	p.prop.Update(msg)
+
 }

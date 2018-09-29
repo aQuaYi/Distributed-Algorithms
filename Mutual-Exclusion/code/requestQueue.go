@@ -2,6 +2,7 @@ package main
 
 import (
 	"container/heap"
+	"strings"
 	"sync"
 )
 
@@ -13,6 +14,8 @@ type RequestQueue interface {
 	Push(Less)
 	// Remove 在 RequestQueue 中删除 Less
 	Remove(Less)
+	// String 输出 RequestQueue 的细节
+	String() string
 }
 
 type requestQueue struct {
@@ -55,10 +58,16 @@ func (rq *requestQueue) Remove(ls Less) {
 	delete(rq.requestOf, ls)
 }
 
+func (rq *requestQueue) String() string {
+	return rq.rpq.String()
+}
+
 // Less 是 rpq 元素中的主要成分
 type Less interface {
 	// Less 比较两个接口的值
 	Less(interface{}) bool
+	// String() 输出内容
+	String() string
 }
 
 // request 是 priorityQueue 中的元素
@@ -69,6 +78,16 @@ type request struct {
 
 // rpq implements heap.Interface and holds entries.
 type requestPriorityQueue []*request
+
+func (q *requestPriorityQueue) String() string {
+	var b strings.Builder
+	b.WriteString("{request queue:")
+	for i := range *q {
+		b.WriteString((*q)[i].ls.String())
+	}
+	b.WriteString("}")
+	return b.String()
+}
 
 func (q requestPriorityQueue) Len() int { return len(q) }
 
