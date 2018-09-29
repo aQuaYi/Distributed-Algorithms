@@ -3,7 +3,7 @@
 使用 Go 语言实现了 Lamport 在论文 [《Time, Clocks and the Ordering of Events in a Distributed System》](time-clocks.pdf)中提到的 Mutual Exclusion 算法。
 
 ```shell
-$ git checkout 00c787
+$ git checkout 00c7877
 $ go build -o me.exe
 $ ./me.exe
 ...
@@ -133,5 +133,3 @@ mutual exclusion 算法需要每个 process 维护自己的 request queue。 由
 1. 真实时间上先 request 的 process 会不会后得到 resource？如果会的话，能不能说明 mutual exclusion 算法失败了？请说明理由。
 
 [参考答案](qna.md)
-
-
