@@ -2,7 +2,7 @@ package main
 
 import (
 	"fmt"
-	"time"
+	"sync"
 
 	"github.com/aQuaYi/observer"
 )
@@ -15,7 +15,7 @@ type Process interface {
 	// 给进程添加占用资源的次数，次数必须 >=0
 	AddOccupyTimes(int)
 	// 检查 process 是否需要申请资源
-	NeedResource() bool
+	CanRequest() bool
 	// 申请资源
 	Request()
 	// 输出信息
@@ -25,29 +25,27 @@ type Process interface {
 type process struct {
 	me int
 
-	isOccupying bool
-	// TODO: 删除此处内容
-	occupyTimes int // process 可以占用资源的次数
-
-	requestTimestamp Timestamp
-	resource         Resource
-	clock            Clock
-	receivedTime     ReceivedTime
-	requestQueue     RequestQueue
+	resource     Resource
+	clock        Clock
+	receivedTime ReceivedTime
+	requestQueue RequestQueue
 
 	prop   observer.Property
 	stream observer.Stream
+
+	rwm sync.RWMutex
+	// 访问修改以下属性时，需要加锁
+	requestTimestamp Timestamp
 }
 
 func newProcess(all, me int, r Resource, prop observer.Property) Process {
 	p := &process{
-		me:               me,
-		resource:         r,
-		prop:             prop,
-		clock:            newClock(),
-		requestQueue:     newRequestQueue(),
-		receivedTime:     newReceivedTime(all, me),
-		requestTimestamp: nil,
+		me:           me,
+		resource:     r,
+		prop:         prop,
+		clock:        newClock(),
+		requestQueue: newRequestQueue(),
+		receivedTime: newReceivedTime(all, me),
 	}
 
 	go p.Listening()
@@ -84,7 +82,7 @@ func (p *process) handleRequestMessage(msg *message) {
 		return
 	}
 	// 收到消息，总是先更新自己的时间
-	p.updateClock(msg.from, msg.msgTime)
+	p.updateTime(msg.from, msg.msgTime)
 	// rule 2: 把 msg.timestamp 放入自己的 requestQueue 当中
 	p.requestQueue.Push(msg.timestamp)
 	// rule 2: 给对方发送一条 acknowledge 消息
@@ -103,7 +101,7 @@ func (p *process) handleReleaseMessage(msg *message) {
 		return
 	}
 	// 收到消息，总是先更新自己的时间
-	p.updateClock(msg.from, msg.msgTime)
+	p.updateTime(msg.from, msg.msgTime)
 	// rule 4: 收到就从 request queue 中删除相应的申请
 	p.requestQueue.Remove(msg.timestamp)
 	p.checkRule5()
@@ -114,13 +112,16 @@ func (p *process) handleAcknowledgeMessage(msg *message) {
 		return
 	}
 	// 收到消息，总是先更新自己的时间
-	p.updateClock(msg.from, msg.msgTime)
+	p.updateTime(msg.from, msg.msgTime)
 	p.checkRule5()
 }
 
 func (p *process) Request() {
 	ts := newTimestamp(p.clock.Tick(), p.me)
+
+	p.rwm.Lock()
 	p.requestTimestamp = ts
+	p.rwm.Unlock()
 
 	msg := newMessage(requestResource, p.clock.Tick(), p.me, OTHERS, ts)
 	// Rule 1: 发送申请信息给其他的 process
@@ -129,52 +130,50 @@ func (p *process) Request() {
 }
 
 func (p *process) occupyResource() {
-	p.isOccupying = true
 	p.resource.Occupy(p.requestTimestamp)
 }
 
 func (p *process) releaseResource() {
+	p.rwm.Lock()
 	ts := p.requestTimestamp
 	// rule 3: 先释放资源
 	p.resource.Release(ts)
 	// rule 3: 在 requestQueue 中删除 ts
-	p.requestQueue.Remove(ts)
+	p.requestQueue.Remove(ts) // FIXME: 到底是先释放好，还是先删除好呢
+	p.requestTimestamp = nil
+	p.rwm.Unlock()
+
 	// rule 3: 把释放的消息发送给其他 process
 	msg := newMessage(releaseResource, p.clock.Tick(), p.me, OTHERS, ts)
 	p.prop.Update(msg)
 
-	p.requestTimestamp = nil
-	p.occupyTimes--
-	p.isOccupying = false
 }
 
+// TODO: 删除此处内容
 func (p *process) AddOccupyTimes(n int) {
 	if n < 0 {
 		panic("addOccupyTimes n should be >= 0")
 	}
-	p.occupyTimes += n
+	// p.occupyTimes += n
 }
 
-func (p *process) NeedResource() bool {
-
-	debugPrintf("%d, %s", p.occupyTimes, p.requestTimestamp)
-	time.Sleep(time.Second * 1)
-
-	if p.occupyTimes > 0 &&
-		p.requestTimestamp == nil {
-		return true
-	}
-	return false
+func (p *process) CanRequest() bool {
+	p.rwm.RLock()
+	defer p.rwm.RUnlock()
+	return p.requestTimestamp == nil
 }
 
-func (p *process) updateClock(id, time int) {
+func (p *process) updateTime(id, time int) {
 	p.clock.Update(time)
 	p.receivedTime.Update(id, time)
 }
 
 func (p *process) checkRule5() {
+	p.rwm.RLock()
+	defer p.rwm.RUnlock()
+
 	if p.requestTimestamp == nil ||
-		!p.requestTimestamp.isEqual(p.requestQueue.Min()) ||
+		!p.requestTimestamp.IsEqual(p.requestQueue.Min()) ||
 		p.requestTimestamp.Time() >= p.receivedTime.Min() {
 		return
 	}

@@ -36,7 +36,7 @@ func main() {
 
 			for {
 				i++
-				if p.NeedResource() {
+				if p.CanRequest() {
 					p.Request()
 				}
 				randSleep()

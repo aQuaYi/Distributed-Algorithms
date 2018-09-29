@@ -44,7 +44,7 @@ func (r *resource) Occupy(ts Timestamp) {
 }
 
 func (r *resource) Release(ts Timestamp) {
-	if !r.occupiedBy.isEqual(ts) {
+	if !r.occupiedBy.IsEqual(ts) {
 		msg := fmt.Sprintf("%s 想要释放正在被 P%s 占据的资源。", ts, r.occupiedBy)
 		panic(msg)
 	}
