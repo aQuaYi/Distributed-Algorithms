@@ -15,6 +15,9 @@ func init() {
 func main() {
 	for all := 2; all <= 100; all++ {
 		for times := 10; times <= 10000; times *= 2 {
+			if all*times > 20480 {
+				continue
+			}
 			fmt.Printf("~~~ %d Process，每个占用资源 %d 次 ~~~\n", all, times)
 			oneRound(all, times)
 		}
@@ -44,9 +47,8 @@ func oneRound(all, occupyTimesPerProcess int) {
 				if p.CanRequest() {
 					p.Request()
 					i++
-					debugPrintf("%s 第 %d 次申请资源", p, i)
+					// debugPrintf("%s 第 %d 次申请资源", p, i)
 				}
-				randSleep()
 			}
 		}(p, occupyTimesPerProcess)
 	}

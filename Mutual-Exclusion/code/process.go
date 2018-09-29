@@ -133,7 +133,7 @@ func (p *process) Request() {
 	// Rule 1: 发送申请信息给其他的 process
 	p.prop.Update(msg)
 
-	// debugPrintf("%s 发布了 %s", p, ts)
+	debugPrintf("  ## Publish %s ##", ts)
 
 	p.requestQueue.Push(ts)
 }
