@@ -61,6 +61,8 @@ func (p *process) String() string {
 func (p *process) Listening() {
 	stream := p.prop.Observe()
 
+	debugPrintf("[%d]P%d 获取了 stream 开始监听", p.clock.Now(), p.me)
+
 	go func() {
 		for {
 			msg := stream.Next().(*message)
@@ -74,9 +76,6 @@ func (p *process) Listening() {
 			}
 		}
 	}()
-
-	debugPrintf("[%d]P%d 已经获取了 stream 准备开始监听", p.clock.Now(), p.me)
-
 }
 
 func (p *process) handleRequestMessage(msg *message) {

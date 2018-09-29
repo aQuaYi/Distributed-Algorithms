@@ -1,7 +1,7 @@
 package main
 
 import (
-	"log"
+	"fmt"
 	"math/rand"
 	"time"
 
@@ -12,13 +12,17 @@ func init() {
 	rand.Seed(time.Now().UnixNano())
 }
 
-// TODO: 解决启动后，立刻死锁的问题
-// TODO: 解决 request queue 会删除不存在的元素的问题
-
 func main() {
-	all := 10
-	occupyTimesPerProcess := 10
+	for all := 2; all <= 100; all++ {
+		for times := 10; times <= 10000; times *= 2 {
+			fmt.Printf("~~~ %d Process，每个占用资源 %d 次 ~~~\n", all, times)
+			oneRound(all, times)
+		}
+	}
+	return
+}
 
+func oneRound(all, occupyTimesPerProcess int) {
 	rsc := new(resource)
 	rsc.wg.Add(all * occupyTimesPerProcess)
 
@@ -35,7 +39,7 @@ func main() {
 	for _, p := range ps {
 		go func(p Process, times int) {
 			i := 0
-			debugPrintf("%s 准备开始随机申请资源", p)
+			debugPrintf("%s 开始随机申请资源", p)
 			for i < times {
 				if p.CanRequest() {
 					p.Request()
@@ -49,5 +53,5 @@ func main() {
 
 	rsc.wg.Wait()
 
-	log.Println(rsc.report())
+	fmt.Println(rsc.report())
 }

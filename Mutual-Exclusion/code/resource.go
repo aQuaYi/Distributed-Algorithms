@@ -54,6 +54,9 @@ func (r *resource) Release(ts Timestamp) {
 }
 
 func (r *resource) report() string {
+	if !r.isSortedOccupied() {
+		panic("resource 不是按照顺序被占用的")
+	}
 	var b strings.Builder
 	// 计算占用率
 	occupiedTime := time.Duration(0)
@@ -66,10 +69,10 @@ func (r *resource) report() string {
 	}
 	totalTime := r.times[size-1].Sub(r.times[0])
 	rate := occupiedTime.Nanoseconds() * 10000 / totalTime.Nanoseconds()
-	format := "resource 被占用了 %dus，占用比率为 %02d.%02d%%。"
-	fmt.Fprintf(&b, format, totalTime.Nanoseconds()/1000, rate/100, rate%100)
+	format := "resource 按照顺序被占用了 %s，占用比率为 %02d.%02d%%。\n"
+	fmt.Fprintf(&b, format, totalTime, rate/100, rate%100)
 	// 计算资源占用时间的均值和方差
-	format = "资源占用 %d 次，最短 %.2fus， 最长 %.2fus， 均值 %.2fus， 方差 %.2f。"
+	format = "资源占用 %8d 次，最短 %8.2fus， 最长 %8.2fus， 均值 %8.2fus， 方差 %8.2f。\n"
 	minBusy, _ := stats.Min(busys)
 	maxBusy, _ := stats.Max(busys)
 	meanBusy, _ := stats.Mean(busys)
@@ -82,7 +85,7 @@ func (r *resource) report() string {
 			float64(r.times[i+1].Sub(r.times[i]).Nanoseconds()),
 		)
 	}
-	format = "资源空闲 %d 次，最短 %.2fus， 最长 %.2fus， 均值 %.2fus， 方差 %.2f。"
+	format = "资源空闲 %8d 次，最短 %8.2fus， 最长 %8.2fus， 均值 %8.2fus， 方差 %8.2f。\n"
 	minIdle, _ := stats.Min(idles)
 	maxIdle, _ := stats.Max(idles)
 	meanIdle, _ := stats.Mean(idles)

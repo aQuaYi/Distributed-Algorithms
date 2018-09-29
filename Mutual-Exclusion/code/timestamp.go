@@ -47,6 +47,9 @@ func (ts *timestamp) Less(tsi interface{}) bool {
 }
 
 func (ts *timestamp) IsEqual(tsi interface{}) bool {
+	if tsi == nil {
+		return false
+	}
 	ts2, ok := tsi.(*timestamp)
 	if !ok {
 		panic("ts.Less：无法转换 tsi 到 *timestamp 类型")
