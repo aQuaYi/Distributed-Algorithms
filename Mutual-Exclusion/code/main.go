@@ -39,6 +39,14 @@ func oneRound(all, occupyTimesPerProcess int) {
 
 	debugPrintf("~~~ 已经成功创建了 %d 个 Process ~~~", all)
 
+	stream := prop.Observe()
+	go func() {
+		for {
+			msg := stream.Next().(*message)
+			debugPrintf(" ## %s", msg)
+		}
+	}()
+
 	for _, p := range ps {
 		go func(p Process, times int) {
 			i := 0

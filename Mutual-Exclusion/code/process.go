@@ -95,7 +95,7 @@ func (p *process) handleRequestMessage(msg *message) {
 		p.clock.Tick(),
 		p.me,
 		msg.from,
-		nil,
+		msg.timestamp,
 	))
 	p.checkRule5()
 }
@@ -132,8 +132,6 @@ func (p *process) Request() {
 	msg := newMessage(requestResource, p.clock.Tick(), p.me, OTHERS, ts)
 	// Rule 1: 发送申请信息给其他的 process
 	p.prop.Update(msg)
-
-	debugPrintf("  ## Publish %s ##", ts)
 
 	p.requestQueue.Push(ts)
 }
