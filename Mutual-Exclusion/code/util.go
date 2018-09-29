@@ -6,11 +6,6 @@ import (
 	"time"
 )
 
-func init() {
-	log.SetFlags(log.LstdFlags | log.Lmicroseconds)
-	debugPrintf("程序开始运行")
-}
-
 // debugPrintf 根据设置打印输出
 func debugPrintf(format string, a ...interface{}) {
 	if needDebug {
@@ -32,6 +27,7 @@ func min(a, b int) int {
 	return b
 }
 
+// NOTICE: 为了保证测试结果的可比性，请勿修改此函数
 func randSleep() {
 	timeout := time.Duration(2+rand.Intn(2)) * time.Millisecond
 	time.Sleep(timeout)

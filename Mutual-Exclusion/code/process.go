@@ -36,6 +36,8 @@ type process struct {
 	isOccupying      bool
 }
 
+// TODO: 资源占用的上限和均值，和 randSleep 的范围相差较大，我感觉还是锁太多了的原因，希望可以改进
+
 func newProcess(all, me int, r Resource, prop observer.Property) Process {
 	p := &process{
 		me:           me,

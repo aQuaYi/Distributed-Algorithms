@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"log"
 	"math/rand"
 	"time"
 
@@ -9,12 +10,14 @@ import (
 )
 
 func init() {
+	log.SetFlags(log.LstdFlags | log.Lmicroseconds)
+	debugPrintf("程序开始运行")
 	rand.Seed(time.Now().UnixNano())
 }
 
 func main() {
 	count := 0
-	amount := 8192
+	amount := 8192 // NOTICE: 为了保证测试结果的可比性，请勿修改此数值
 	for all := 2; all <= 128; all *= 2 {
 		times := amount / all
 		fmt.Printf("~~~ %d Process，每个占用资源 %d 次 ~~~\n", all, times)
