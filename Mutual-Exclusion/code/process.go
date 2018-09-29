@@ -86,6 +86,9 @@ func (p *process) handleRequestMessage(msg *message) {
 	p.updateTime(msg.from, msg.msgTime)
 	// rule 2: 把 msg.timestamp 放入自己的 requestQueue 当中
 	p.requestQueue.Push(msg.timestamp)
+
+	debugPrintf("%s 添加了 %s 后的 request queue 是 %s", p, msg.timestamp, p.requestQueue)
+
 	// rule 2: 给对方发送一条 acknowledge 消息
 	p.prop.Update(newMessage(
 		acknowledgment,
@@ -105,6 +108,9 @@ func (p *process) handleReleaseMessage(msg *message) {
 	p.updateTime(msg.from, msg.msgTime)
 	// rule 4: 收到就从 request queue 中删除相应的申请
 	p.requestQueue.Remove(msg.timestamp)
+
+	debugPrintf("%s 删除了 %s 后的 request queue 是 %s", p, msg.timestamp, p.requestQueue)
+
 	p.checkRule5()
 }
 
@@ -126,6 +132,9 @@ func (p *process) Request() {
 	msg := newMessage(requestResource, p.clock.Tick(), p.me, OTHERS, ts)
 	// Rule 1: 发送申请信息给其他的 process
 	p.prop.Update(msg)
+
+	debugPrintf("%s 发布了 %s", p, ts)
+
 	p.requestQueue.Push(ts)
 }
 
