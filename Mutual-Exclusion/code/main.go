@@ -14,18 +14,15 @@ func init() {
 
 func main() {
 	count := 0
+	amount := 256
 	for all := 2; all <= 128; all *= 2 {
-		for times := 160; times <= 10240; times *= 2 {
-			if all*times > 20480 {
-				continue
-			}
-			fmt.Printf("~~~ %d Process，每个占用资源 %d 次 ~~~\n", all, times)
-			newRound(all, times)
-			count++
-		}
+		times := amount / all
+		fmt.Printf("~~~ %d Process，每个占用资源 %d 次 ~~~\n", all, times)
+		newRound(all, times)
+		count++
 	}
 
-	fmt.Printf("一共测试了 %d 轮，全部通过", count)
+	fmt.Printf("一共测试了 %d 轮，全部通过\n", count)
 }
 
 func newRound(all, occupyTimesPerProcess int) {
@@ -58,8 +55,8 @@ func newRound(all, occupyTimesPerProcess int) {
 				if p.CanRequest() {
 					p.Request()
 					i++
-					// debugPrintf("%s 第 %d 次申请资源", p, i)
 				}
+				time.Sleep(time.Millisecond)
 			}
 		}(p, occupyTimesPerProcess)
 	}
