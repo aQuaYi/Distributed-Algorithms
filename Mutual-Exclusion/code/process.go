@@ -21,18 +21,17 @@ type Process interface {
 }
 
 type process struct {
-	me int
+	me    int
+	mutex sync.Mutex
 
-	resource     Resource
-	clock        Clock
-	receivedTime ReceivedTime
-	requestQueue RequestQueue
-
-	prop   observer.Property
-	stream observer.Stream
-
-	rwm sync.RWMutex
+	// 为了保证 Process 内部的事件顺序
 	// 访问修改以下属性时，需要加锁
+	resource         Resource
+	clock            Clock
+	receivedTime     ReceivedTime
+	requestQueue     RequestQueue
+	prop             observer.Property
+	stream           observer.Stream
 	requestTimestamp Timestamp
 	isOccupying      bool
 }
@@ -49,19 +48,24 @@ func newProcess(all, me int, r Resource, prop observer.Property) Process {
 
 	p.Listening()
 
-	debugPrintf("[%d]P%d 完成创建工作", p.clock.Now(), p.me)
+	debugPrintf("%s 完成创建工作", p)
 
 	return p
 }
 
 func (p *process) String() string {
+	// 这个方法会在别的加锁方法内部出现
+	// 为了避免死锁，此方法不加锁
 	return fmt.Sprintf("[%d]P%d", p.clock.Now(), p.me)
 }
 
 func (p *process) Listening() {
+	p.mutex.Lock()
+	defer p.mutex.Unlock()
+
 	stream := p.prop.Observe()
 
-	debugPrintf("[%d]P%d 获取了 stream 开始监听", p.clock.Now(), p.me)
+	debugPrintf("%s 获取了 stream 开始监听", p)
 
 	go func() {
 		for {
@@ -82,6 +86,9 @@ func (p *process) handleRequestMessage(msg *message) {
 	if msg.from == p.me {
 		return
 	}
+
+	p.mutex.Lock()
+
 	// 收到消息，总是先更新自己的时间
 	p.updateTime(msg.from, msg.msgTime)
 	// rule 2: 把 msg.timestamp 放入自己的 requestQueue 当中
@@ -97,6 +104,10 @@ func (p *process) handleRequestMessage(msg *message) {
 		msg.from,
 		msg.timestamp,
 	))
+
+	p.mutex.Unlock()
+
+	// checkRule5 有自己的锁
 	p.checkRule5()
 }
 
@@ -104,6 +115,9 @@ func (p *process) handleReleaseMessage(msg *message) {
 	if msg.from == p.me {
 		return
 	}
+
+	p.mutex.Lock()
+
 	// 收到消息，总是先更新自己的时间
 	p.updateTime(msg.from, msg.msgTime)
 	// rule 4: 收到就从 request queue 中删除相应的申请
@@ -111,6 +125,9 @@ func (p *process) handleReleaseMessage(msg *message) {
 
 	debugPrintf("%s 删除了 %s 后的 request queue 是 %s", p, msg.timestamp, p.requestQueue)
 
+	p.mutex.Unlock()
+
+	// checkRule5 有自己的锁
 	p.checkRule5()
 }
 
@@ -118,44 +135,54 @@ func (p *process) handleAcknowledgeMessage(msg *message) {
 	if msg.to != p.me {
 		return
 	}
+
+	p.mutex.Lock()
+
 	// 收到消息，总是先更新自己的时间
 	p.updateTime(msg.from, msg.msgTime)
+
+	p.mutex.Unlock()
+
+	// checkRule5 有自己的锁
 	p.checkRule5()
 }
 
 func (p *process) Request() {
+	p.mutex.Lock()
+
 	ts := newTimestamp(p.clock.Tick(), p.me)
-	p.rwm.Lock()
 	p.requestTimestamp = ts
-	p.rwm.Unlock()
 
 	msg := newMessage(requestResource, p.clock.Tick(), p.me, OTHERS, ts)
 	// Rule 1: 发送申请信息给其他的 process
 	p.prop.Update(msg)
 
 	p.requestQueue.Push(ts)
+
+	p.mutex.Unlock()
 }
 
 func (p *process) CanRequest() bool {
-	p.rwm.RLock()
-	defer p.rwm.RUnlock()
+	p.mutex.Lock()
+	defer p.mutex.Unlock()
 	return p.requestTimestamp == nil
 }
 
 func (p *process) updateTime(id, time int) {
+	// 被带锁的方法引用，所以，不再加锁
 	p.clock.Update(time)
 	p.receivedTime.Update(id, time)
 }
 
 func (p *process) checkRule5() {
-	p.rwm.Lock()
-	defer p.rwm.Unlock()
+	p.mutex.Lock()
+	defer p.mutex.Unlock()
 	if !p.isOccupying &&
 		p.requestTimestamp != nil &&
 		p.requestTimestamp.IsEqual(p.requestQueue.Min()) &&
 		p.requestTimestamp.Time() < p.receivedTime.Min() {
-		p.occupyResource()
 		go func() {
+			p.occupyResource()
 			randSleep()
 			p.releaseResource()
 		}()
@@ -163,28 +190,28 @@ func (p *process) checkRule5() {
 }
 
 func (p *process) occupyResource() {
+	p.mutex.Lock()
+
 	debugPrintf("%s 准备占用资源 %s", p, p.requestQueue)
 	p.isOccupying = true
 	p.resource.Occupy(p.requestTimestamp)
+
+	p.mutex.Unlock()
 }
 
 func (p *process) releaseResource() {
-	p.rwm.RLock()
-	ts := p.requestTimestamp
-	p.rwm.RUnlock()
+	p.mutex.Lock()
 
+	ts := p.requestTimestamp
 	// rule 3: 先释放资源
 	p.resource.Release(ts)
 	// rule 3: 在 requestQueue 中删除 ts
-	p.requestQueue.Remove(ts) // FIXME: 到底是先释放好，还是先删除好呢
-
-	p.rwm.Lock()
+	p.requestQueue.Remove(ts) // FIXME: 到底是先释放好，还是先删除好呢?
 	p.isOccupying = false
 	p.requestTimestamp = nil
-	p.rwm.Unlock()
-
 	// rule 3: 把释放的消息发送给其他 process
 	msg := newMessage(releaseResource, p.clock.Tick(), p.me, OTHERS, ts)
 	p.prop.Update(msg)
 
+	p.mutex.Unlock()
 }
