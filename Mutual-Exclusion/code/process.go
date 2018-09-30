@@ -51,15 +51,12 @@ func newProcess(all, me int, r Resource, prop observer.Property) Process {
 }
 
 func (p *process) String() string {
-	// 这个方法会在别的加锁方法内部出现
-	// 为了避免死锁，此方法不加锁
 	return fmt.Sprintf("[%d]P%d", p.clock.Now(), p.me)
 }
 
 func (p *process) Listening() {
-	p.mutex.Lock()
-	defer p.mutex.Unlock()
-
+	// 删除了这个地方的锁
+	// stream 的观察起点位置，由上层调用 newProcess 的方式决定
 	stream := p.prop.Observe()
 
 	debugPrintf("%s 获取了 stream 开始监听", p)
@@ -91,14 +88,15 @@ func (p *process) Listening() {
 }
 
 func (p *process) handleRequestMessage(msg *message) {
-	p.mutex.Lock()
 
-	// rule 2: 把 msg.timestamp 放入自己的 requestQueue 当中
+	// rule 2.1: 把 msg.timestamp 放入自己的 requestQueue 当中
 	p.requestQueue.Push(msg.timestamp)
 
 	debugPrintf("%s 添加了 %s 后的 request queue 是 %s", p, msg.timestamp, p.requestQueue)
 
-	// rule 2: 给对方发送一条 acknowledge 消息
+	p.mutex.Lock()
+
+	// rule 2.2: 给对方发送一条 acknowledge 消息
 	p.prop.Update(newMessage(
 		acknowledgment,
 		p.clock.Tick(),

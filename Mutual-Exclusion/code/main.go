@@ -36,11 +36,11 @@ func newRound(all, occupyTimesPerProcess int) {
 	prop := observer.NewProperty(nil)
 
 	ps := make([]Process, all)
+	// 需要一口气同时生成，保证所有的 stream 都能从同样的位置开始观察
 	for i := range ps {
 		p := newProcess(all, i, rsc, prop)
 		ps[i] = p
 	}
-
 	debugPrintf("~~~ 已经成功创建了 %d 个 Process ~~~", all)
 
 	stream := prop.Observe()
