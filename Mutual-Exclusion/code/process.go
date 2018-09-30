@@ -67,20 +67,23 @@ func (p *process) Listening() {
 	go func() {
 		for {
 			msg := stream.Next().(*message)
-			if msg.from == p.me {
-				// 忽略自己发出的消息
+			if msg.from == p.me ||
+				(msg.msgType == acknowledgment && msg.to != p.me) {
+				// 忽略所有不该看见的消息
 				continue
 			}
+
+			// 收到消息的第一件，更新自己的 clock
+			p.clock.Update(msg.msgTime)
+			// 然后为了 Rule5(ii) 记录收到消息的时间
+			p.receivedTime.Update(msg.from, p.clock.Now())
+
 			switch msg.msgType {
+			// acknowledgment: 收到此类消息只用更新时钟，前面已经做了
 			case requestResource:
 				p.handleRequestMessage(msg)
 			case releaseResource:
 				p.handleReleaseMessage(msg)
-			case acknowledgment:
-				if msg.to != p.me {
-					continue
-				}
-				p.handleAcknowledgeMessage(msg)
 			}
 			p.checkRule5()
 		}
@@ -90,8 +93,6 @@ func (p *process) Listening() {
 func (p *process) handleRequestMessage(msg *message) {
 	p.mutex.Lock()
 
-	// 收到消息，总是先更新自己的时间
-	p.updateTime(msg.from, msg.msgTime)
 	// rule 2: 把 msg.timestamp 放入自己的 requestQueue 当中
 	p.requestQueue.Push(msg.timestamp)
 
@@ -112,8 +113,6 @@ func (p *process) handleRequestMessage(msg *message) {
 func (p *process) handleReleaseMessage(msg *message) {
 	p.mutex.Lock()
 
-	// 收到消息，总是先更新自己的时间
-	p.updateTime(msg.from, msg.msgTime)
 	// rule 4: 收到就从 request queue 中删除相应的申请
 	p.requestQueue.Remove(msg.timestamp)
 
@@ -121,20 +120,6 @@ func (p *process) handleReleaseMessage(msg *message) {
 
 	p.mutex.Unlock()
 
-	// checkRule5 有自己的锁
-	p.checkRule5()
-}
-
-func (p *process) handleAcknowledgeMessage(msg *message) {
-	p.mutex.Lock()
-
-	// 收到消息，总是先更新自己的时间
-	p.updateTime(msg.from, msg.msgTime)
-
-	p.mutex.Unlock()
-
-	// checkRule5 有自己的锁
-	p.checkRule5()
 }
 
 func (p *process) WaitRequest() {
@@ -153,12 +138,6 @@ func (p *process) WaitRequest() {
 	p.requestQueue.Push(ts)
 
 	p.mutex.Unlock()
-}
-
-func (p *process) updateTime(id, time int) {
-	// 被带锁的方法引用，所以，不再加锁
-	p.clock.Update(time)
-	p.receivedTime.Update(id, p.clock.Now())
 }
 
 func (p *process) checkRule5() {

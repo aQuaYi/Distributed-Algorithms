@@ -13,6 +13,9 @@ type Clock interface {
 	Tick() int
 	// Now 返回当前的时间值
 	Now() int
+	// LockAndTick 上锁，然后 Clock 的时间 +1
+	// LockAntTick()
+	// LockAndUpdate
 }
 
 type clock struct {
