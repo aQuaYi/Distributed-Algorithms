@@ -21,8 +21,6 @@ type process struct {
 	mutex sync.Mutex
 	wg    sync.WaitGroup
 
-	// 为了保证 Process 内部的事件顺序
-	// 访问修改以下属性时，需要加锁
 	resource         Resource
 	clock            Clock
 	receivedTime     ReceivedTime

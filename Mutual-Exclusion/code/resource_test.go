@@ -55,13 +55,14 @@ func Test_resource_report(t *testing.T) {
 	ast := assert.New(t)
 	//
 	p := 0
-	ts := newTimestamp(0, p)
+	ts0 := newTimestamp(0, p)
+	ts1 := newTimestamp(1, p)
 	r := new(resource)
 	r.wg.Add(2)
-	r.Occupy(ts)
-	r.Release(ts)
-	r.Occupy(ts)
-	r.Release(ts)
+	r.Occupy(ts0)
+	r.Release(ts0)
+	r.Occupy(ts1)
+	r.Release(ts1)
 	now := time.Now()
 	r.times[0] = now
 	r.times[1] = now.Add(100 * time.Second)
