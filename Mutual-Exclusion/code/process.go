@@ -185,7 +185,6 @@ func (p *process) checkRule5() {
 		p.requestTimestamp.Time() < p.receivedTime.Min() {
 		p.occupyResource()
 		go func() {
-			randSleep()
 			p.releaseResource()
 		}()
 	}
