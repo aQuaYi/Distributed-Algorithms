@@ -18,11 +18,14 @@ type Process interface {
 	Request()
 	// 输出信息
 	String() string
+	// WaitRequest 等待上一次资源占用完毕，然后立马申请资源
+	WaitRequest()
 }
 
 type process struct {
 	me    int
 	mutex sync.Mutex
+	wg    sync.WaitGroup
 
 	// 为了保证 Process 内部的事件顺序
 	// 访问修改以下属性时，需要加锁
@@ -149,6 +152,25 @@ func (p *process) handleAcknowledgeMessage(msg *message) {
 	p.checkRule5()
 }
 
+func (p *process) WaitRequest() {
+	p.wg.Wait()
+	p.wg.Add(1)
+
+	p.mutex.Lock()
+
+	ts := newTimestamp(p.clock.Tick(), p.me)
+	p.requestTimestamp = ts
+
+	msg := newMessage(requestResource, p.clock.Tick(), p.me, OTHERS, ts)
+	// Rule 1: 发送申请信息给其他的 process
+	p.prop.Update(msg)
+
+	p.requestQueue.Push(ts)
+
+	p.mutex.Unlock()
+}
+
+// TODO: 删除此处内容
 func (p *process) Request() {
 	p.mutex.Lock()
 
@@ -212,4 +234,6 @@ func (p *process) releaseResource() {
 	p.prop.Update(msg)
 
 	p.mutex.Unlock()
+
+	p.wg.Done()
 }

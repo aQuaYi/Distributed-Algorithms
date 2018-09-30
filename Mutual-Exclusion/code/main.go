@@ -17,8 +17,7 @@ func init() {
 
 func main() {
 	count := 0
-	// amount := 8192 // NOTICE: 为了保证测试结果的可比性，请勿修改此数值
-	amount := 1024
+	amount := 8192 // NOTICE: 为了保证测试结果的可比性，请勿修改此数值
 	for all := 2; all <= 128; all *= 2 {
 		times := amount / all
 		fmt.Printf("~~~ %d Process，每个占用资源 %d 次 ~~~\n", all, times)
@@ -56,11 +55,8 @@ func newRound(all, occupyTimesPerProcess int) {
 			i := 0
 			debugPrintf("%s 开始随机申请资源", p)
 			for i < times {
-				if p.CanRequest() {
-					p.Request()
-					i++
-				}
-				time.Sleep(time.Millisecond)
+				p.WaitRequest()
+				i++
 			}
 		}(p, occupyTimesPerProcess)
 	}
