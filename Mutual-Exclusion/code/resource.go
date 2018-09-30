@@ -99,6 +99,7 @@ func (r *resource) isSortedOccupied() bool {
 	size := len(r.timestamps)
 	for i := 1; i < size; i++ {
 		if !r.timestamps[i-1].Less(r.timestamps[i]) {
+			debugPrintf("%s 排在了 %s 前面", r.timestamps[i-1], r.timestamps[i])
 			return false
 		}
 	}
