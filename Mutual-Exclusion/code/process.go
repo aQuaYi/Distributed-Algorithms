@@ -12,12 +12,6 @@ const OTHERS = -1
 
 // Process 是进程的接口
 type Process interface {
-	// 检查 process 是否需要申请资源
-	CanRequest() bool
-	// 申请资源
-	Request()
-	// 输出信息
-	String() string
 	// WaitRequest 等待上一次资源占用完毕，然后立马申请资源
 	WaitRequest()
 }
@@ -75,23 +69,27 @@ func (p *process) Listening() {
 	go func() {
 		for {
 			msg := stream.Next().(*message)
+			if msg.from == p.me {
+				// 忽略自己发出的消息
+				continue
+			}
 			switch msg.msgType {
 			case requestResource:
 				p.handleRequestMessage(msg)
 			case releaseResource:
 				p.handleReleaseMessage(msg)
 			case acknowledgment:
+				if msg.to != p.me {
+					continue
+				}
 				p.handleAcknowledgeMessage(msg)
 			}
+			p.checkRule5()
 		}
 	}()
 }
 
 func (p *process) handleRequestMessage(msg *message) {
-	if msg.from == p.me {
-		return
-	}
-
 	p.mutex.Lock()
 
 	// 收到消息，总是先更新自己的时间
@@ -111,16 +109,9 @@ func (p *process) handleRequestMessage(msg *message) {
 	))
 
 	p.mutex.Unlock()
-
-	// checkRule5 有自己的锁
-	p.checkRule5()
 }
 
 func (p *process) handleReleaseMessage(msg *message) {
-	if msg.from == p.me {
-		return
-	}
-
 	p.mutex.Lock()
 
 	// 收到消息，总是先更新自己的时间
@@ -137,10 +128,6 @@ func (p *process) handleReleaseMessage(msg *message) {
 }
 
 func (p *process) handleAcknowledgeMessage(msg *message) {
-	if msg.to != p.me {
-		return
-	}
-
 	p.mutex.Lock()
 
 	// 收到消息，总是先更新自己的时间
@@ -170,32 +157,10 @@ func (p *process) WaitRequest() {
 	p.mutex.Unlock()
 }
 
-// TODO: 删除此处内容
-func (p *process) Request() {
-	p.mutex.Lock()
-
-	ts := newTimestamp(p.clock.Tick(), p.me)
-	p.requestTimestamp = ts
-
-	msg := newMessage(requestResource, p.clock.Tick(), p.me, OTHERS, ts)
-	// Rule 1: 发送申请信息给其他的 process
-	p.prop.Update(msg)
-
-	p.requestQueue.Push(ts)
-
-	p.mutex.Unlock()
-}
-
-func (p *process) CanRequest() bool {
-	p.mutex.Lock()
-	defer p.mutex.Unlock()
-	return p.requestTimestamp == nil
-}
-
 func (p *process) updateTime(id, time int) {
 	// 被带锁的方法引用，所以，不再加锁
 	p.clock.Update(time)
-	p.receivedTime.Update(id, time)
+	p.receivedTime.Update(id, p.clock.Now())
 }
 
 func (p *process) checkRule5() {
