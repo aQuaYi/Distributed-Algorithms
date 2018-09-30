@@ -17,18 +17,20 @@ type Process interface {
 }
 
 type process struct {
-	me    int
-	mutex sync.Mutex
-	wg    sync.WaitGroup
+	me int
+	wg sync.WaitGroup
 
-	resource         Resource
 	clock            Clock
+	resource         Resource
 	receivedTime     ReceivedTime
 	requestQueue     RequestQueue
-	prop             observer.Property
 	stream           observer.Stream
-	requestTimestamp Timestamp
 	isOccupying      bool
+	requestTimestamp Timestamp
+
+	mutex sync.Mutex
+	// 操作以下属性，需要加锁
+	prop observer.Property
 }
 
 func newProcess(all, me int, r Resource, prop observer.Property) Process {
@@ -67,7 +69,7 @@ func (p *process) Listening() {
 			msg := stream.Next().(*message)
 			if msg.from == p.me ||
 				(msg.msgType == acknowledgment && msg.to != p.me) {
-				// 忽略所有不该看见的消息
+				// 忽略不该看见的消息
 				continue
 			}
 
