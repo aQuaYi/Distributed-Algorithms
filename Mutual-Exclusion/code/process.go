@@ -20,17 +20,19 @@ type process struct {
 	me int
 	wg sync.WaitGroup
 
-	clock            Clock
-	resource         Resource
-	receivedTime     ReceivedTime
-	requestQueue     RequestQueue
-	stream           observer.Stream
-	isOccupying      bool
-	requestTimestamp Timestamp
+	clock        Clock
+	resource     Resource
+	receivedTime ReceivedTime
+	requestQueue RequestQueue
+	stream       observer.Stream
 
 	mutex sync.Mutex
-	// 操作以下属性，需要加锁
+	// 为了保证发送消息的原子性，从生成 timestamp 开始
+	// 到 prop.update 完成，的这个过程需要上锁
 	prop observer.Property
+	// 操作以下属性，需要加锁
+	isOccupying      bool
+	requestTimestamp Timestamp
 }
 
 func newProcess(all, me int, r Resource, prop observer.Property) Process {
@@ -143,11 +145,11 @@ func (p *process) releaseResource() {
 	p.resource.Release(ts)
 	// rule 3: 在 requestQueue 中删除 ts
 	p.requestQueue.Remove(ts) // FIXME: 到底是先释放好，还是先删除好呢?
-	p.isOccupying = false
-	p.requestTimestamp = nil
 	// rule 3: 把释放的消息发送给其他 process
 	msg := newMessage(releaseResource, p.clock.Tick(), p.me, OTHERS, ts)
 	p.prop.Update(msg)
+	p.isOccupying = false
+	p.requestTimestamp = nil
 
 	p.mutex.Unlock()
 
@@ -161,13 +163,13 @@ func (p *process) WaitRequest() {
 	p.mutex.Lock()
 
 	ts := newTimestamp(p.clock.Tick(), p.me)
-	p.requestTimestamp = ts
-
 	msg := newMessage(requestResource, p.clock.Tick(), p.me, OTHERS, ts)
-	// Rule 1: 发送申请信息给其他的 process
+	// Rule 1.1: 发送申请信息给其他的 process
 	p.prop.Update(msg)
-
+	// Rule 1.2: 把申请消息放入自己的 request queue
 	p.requestQueue.Push(ts)
+	// 修改辅助属性，便于后续检查
+	p.requestTimestamp = ts
 
 	p.mutex.Unlock()
 }

@@ -54,7 +54,7 @@ func newRound(all, occupyTimesPerProcess int) {
 	for _, p := range ps {
 		go func(p Process, times int) {
 			i := 0
-			debugPrintf("%s 开始随机申请资源", p)
+			debugPrintf("%s 开始申请资源", p)
 			for i < times {
 				p.WaitRequest()
 				i++
