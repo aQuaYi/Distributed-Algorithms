@@ -125,6 +125,7 @@ func (p *process) checkRule5() {
 		p.requestTimestamp.Time() < p.receivedTime.Min() {
 		p.occupyResource()
 		go func() {
+			// TODO: 把 releaseResource 从 go func 中拿出来
 			p.releaseResource()
 		}()
 	}
