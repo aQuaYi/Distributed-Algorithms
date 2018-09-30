@@ -109,33 +109,9 @@ func (p *process) handleRequestMessage(msg *message) {
 }
 
 func (p *process) handleReleaseMessage(msg *message) {
-	p.mutex.Lock()
-
-	// rule 4: 收到就从 request queue 中删除相应的申请
+	// rule 4: 从 request queue 中删除相应的申请
 	p.requestQueue.Remove(msg.timestamp)
-
 	debugPrintf("%s 删除了 %s 后的 request queue 是 %s", p, msg.timestamp, p.requestQueue)
-
-	p.mutex.Unlock()
-
-}
-
-func (p *process) WaitRequest() {
-	p.wg.Wait()
-	p.wg.Add(1)
-
-	p.mutex.Lock()
-
-	ts := newTimestamp(p.clock.Tick(), p.me)
-	p.requestTimestamp = ts
-
-	msg := newMessage(requestResource, p.clock.Tick(), p.me, OTHERS, ts)
-	// Rule 1: 发送申请信息给其他的 process
-	p.prop.Update(msg)
-
-	p.requestQueue.Push(ts)
-
-	p.mutex.Unlock()
 }
 
 func (p *process) checkRule5() {
@@ -176,4 +152,22 @@ func (p *process) releaseResource() {
 	p.mutex.Unlock()
 
 	p.wg.Done()
+}
+
+func (p *process) WaitRequest() {
+	p.wg.Wait()
+	p.wg.Add(1)
+
+	p.mutex.Lock()
+
+	ts := newTimestamp(p.clock.Tick(), p.me)
+	p.requestTimestamp = ts
+
+	msg := newMessage(requestResource, p.clock.Tick(), p.me, OTHERS, ts)
+	// Rule 1: 发送申请信息给其他的 process
+	p.prop.Update(msg)
+
+	p.requestQueue.Push(ts)
+
+	p.mutex.Unlock()
 }
