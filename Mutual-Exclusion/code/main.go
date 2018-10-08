@@ -63,7 +63,7 @@ func newRound(all, occupyTimesPerProcess int) {
 		}(p, occupyTimesPerProcess)
 	}
 
-	rsc.Wait()
+	rsc.wait()
 
-	fmt.Println(rsc.Report())
+	fmt.Println(rsc.report())
 }

@@ -15,46 +15,43 @@ type Resource interface {
 	Occupy(Timestamp)
 	// Release 表示释放资源
 	Release(Timestamp)
-	// Wait 等待所有色占用次数用完
-	Wait()
-	// Report 报告资源占用情况
-	Report() string
 }
 
 type resource struct {
+	lastOccupiedBy Timestamp      // 记录上次占用资源的 timestamp
 	occupiedBy     Timestamp      // 记录当前占用资源的 timestamp, nil 表示资源未被占用
-	LastOccupiedBy Timestamp      // 记录上次占用资源的 timestamp
 	timestamps     []Timestamp    // 按顺序保存占用资源的 timestamp
 	times          []time.Time    // 记录每次占用资源的起止时间，用于分析算法的效率
 	wg             sync.WaitGroup // 完成全部占用计划前，阻塞主 goroutine
 }
 
-func newResource(times int) Resource {
+func newResource(times int) *resource {
 	r := &resource{
-		LastOccupiedBy: newTimestamp(-1, -1),
+		lastOccupiedBy: newTimestamp(-1, -1),
 	}
 	r.wg.Add(times)
 	return r
 }
 
-func (r *resource) Wait() {
+func (r *resource) wait() {
 	r.wg.Wait()
 }
 
 func (r *resource) Occupy(ts Timestamp) {
+	r.times = append(r.times, time.Now())
+
 	if r.occupiedBy != nil {
 		msg := fmt.Sprintf("资源正在被 %s 占据，%s 却想获取资源。", r.occupiedBy, ts)
 		panic(msg)
 	}
 
-	if !r.LastOccupiedBy.Less(ts) {
-		msg := fmt.Sprintf("资源上次被 %s 占据，这次 %s 却想获取资源。", r.LastOccupiedBy, ts)
+	if !r.lastOccupiedBy.Less(ts) {
+		msg := fmt.Sprintf("资源上次被 %s 占据，这次 %s 却想获取资源。", r.lastOccupiedBy, ts)
 		panic(msg)
 	}
 
 	r.occupiedBy = ts
 	r.timestamps = append(r.timestamps, ts)
-	r.times = append(r.times, time.Now())
 	debugPrintf("~~~ @resource: %s occupied ~~~ ", ts)
 }
 
@@ -63,24 +60,16 @@ func (r *resource) Release(ts Timestamp) {
 		msg := fmt.Sprintf("%s 想要释放正在被 P%s 占据的资源。", ts, r.occupiedBy)
 		panic(msg)
 	}
-	r.LastOccupiedBy, r.occupiedBy = ts, nil
-	r.times = append(r.times, time.Now())
+
+	r.lastOccupiedBy, r.occupiedBy = ts, nil
 	r.wg.Done() // 完成一次占用
+
+	r.times = append(r.times, time.Now())
+
 	debugPrintf("~~~ @resource: %s released ~~~ ", ts)
 }
 
-// func (r *resource) isSortedOccupied() bool {
-// 	size := len(r.timestamps)
-// 	for i := 1; i < size; i++ {
-// 		if !r.timestamps[i-1].Less(r.timestamps[i]) {
-// 			debugPrintf("%s 排在了 %s 前面", r.timestamps[i-1], r.timestamps[i])
-// 			return false
-// 		}
-// 	}
-// 	return true
-// }
-
-func (r *resource) Report() string {
+func (r *resource) report() string {
 	var b strings.Builder
 
 	// 统计资源被占用的时间

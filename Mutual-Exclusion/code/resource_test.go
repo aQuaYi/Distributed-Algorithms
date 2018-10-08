@@ -69,7 +69,7 @@ func Test_resource_report(t *testing.T) {
 	r.times[2] = now.Add(200 * time.Second)
 	r.times[3] = now.Add(400 * time.Second)
 	//
-	report := r.Report()
+	report := r.report()
 	ast.True(strings.Contains(report, "75.00%"), report)
 	//
 	ast.Equal(4, len(r.times), "资源被占用了 2 次，但是 r.times 的长度不等于 4")
