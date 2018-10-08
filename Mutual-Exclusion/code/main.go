@@ -9,7 +9,6 @@ import (
 	"github.com/aQuaYi/observer"
 )
 
-// needDebug for Debugging
 var needDebug = false
 
 func init() {
@@ -59,7 +58,7 @@ func newRound(all, occupyTimesPerProcess int) {
 			i := 0
 			debugPrintf("%s 开始申请资源", p)
 			for i < times {
-				p.WaitRequest()
+				p.Request()
 				i++
 			}
 		}(p, occupyTimesPerProcess)

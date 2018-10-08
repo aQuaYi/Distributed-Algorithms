@@ -12,8 +12,10 @@ const OTHERS = -1
 
 // Process 是进程的接口
 type Process interface {
-	// WaitRequest 等待上一次资源占用完毕，然后立马申请资源
-	WaitRequest()
+	// Request 会申请占用资源
+	// 如果上次 Request 后，还没有占用并释放资源，会发生阻塞
+	// 非线程安全
+	Request()
 }
 
 type process struct {
@@ -157,7 +159,7 @@ func (p *process) releaseResource() {
 	p.wg.Done()
 }
 
-func (p *process) WaitRequest() {
+func (p *process) Request() {
 	p.wg.Wait()
 	p.wg.Add(1)
 
