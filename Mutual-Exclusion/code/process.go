@@ -26,7 +26,6 @@ type process struct {
 	resource     Resource
 	receivedTime ReceivedTime
 	requestQueue RequestQueue
-	stream       observer.Stream
 
 	mutex sync.Mutex
 	// 为了保证发送消息的原子性，从生成 timestamp 开始
