@@ -9,6 +9,9 @@ import (
 	"github.com/aQuaYi/observer"
 )
 
+// needDebug for Debugging
+var needDebug = false
+
 func init() {
 	log.SetFlags(log.LstdFlags | log.Lmicroseconds)
 	debugPrintf("程序开始运行")
