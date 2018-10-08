@@ -32,10 +32,7 @@ func (ts *timestamp) String() string {
 }
 
 func (ts *timestamp) Less(tsi interface{}) bool {
-	ts2, ok := tsi.(*timestamp)
-	if !ok {
-		panic("ts.Less：无法转换 tsi 到 *timestamp 类型")
-	}
+	ts2 := tsi.(*timestamp)
 	// 这就是将局部顺序推广到全局顺序的关键
 	if ts.time == ts2.time {
 		return ts.process < ts2.process
@@ -47,10 +44,7 @@ func (ts *timestamp) IsEqual(tsi interface{}) bool {
 	if tsi == nil {
 		return false
 	}
-	ts2, ok := tsi.(*timestamp)
-	if !ok {
-		panic("ts.Less：无法转换 tsi 到 *timestamp 类型")
-	}
+	ts2 := tsi.(*timestamp)
 	return ts.time == ts2.time && ts.process == ts2.process
 }
 

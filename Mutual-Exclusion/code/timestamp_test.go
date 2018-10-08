@@ -14,7 +14,7 @@ func Test_timestamp_String(t *testing.T) {
 	ast.Equal(expected, actual)
 }
 
-func Test_Timestamp_Less(t *testing.T) {
+func Test_timestamp_Less(t *testing.T) {
 	ast := assert.New(t)
 
 	// a < b < c
@@ -29,4 +29,36 @@ func Test_Timestamp_Less(t *testing.T) {
 	ast.False(b.Less(a))
 	ast.False(c.Less(a))
 	ast.False(c.Less(b))
+}
+
+func Test_timestamp_IsEqual_nil_false(t *testing.T) {
+	ast := assert.New(t)
+	ts := newTimestamp(0, 0)
+	ast.False(ts.IsEqual(nil))
+}
+
+func Test_timestamp_IsEqual_same_true(t *testing.T) {
+	ast := assert.New(t)
+	time, process := 0, 0
+	ts := newTimestamp(time, process)
+	tsi := newTimestamp(time, process)
+	ast.True(ts.IsEqual(tsi))
+}
+
+func Test_timestamp_Time(t *testing.T) {
+	ast := assert.New(t)
+	time, process := 0, 0
+	ts := newTimestamp(time, process)
+	expected := time
+	actual := ts.Time()
+	ast.Equal(expected, actual)
+}
+
+func Test_timestamp_Process(t *testing.T) {
+	ast := assert.New(t)
+	time, process := 0, 0
+	ts := newTimestamp(time, process)
+	expected := process
+	actual := ts.Process()
+	ast.Equal(expected, actual)
 }
