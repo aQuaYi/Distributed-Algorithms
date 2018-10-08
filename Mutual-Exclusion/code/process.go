@@ -122,10 +122,7 @@ func (p *process) handleReleaseMessage(msg *message) {
 
 func (p *process) checkRule5() {
 	p.mutex.Lock()
-	if !p.isOccupying &&
-		p.requestTimestamp != nil &&
-		p.requestTimestamp.IsEqual(p.requestQueue.Min()) &&
-		p.requestTimestamp.Time() < p.receivedTime.Min() {
+	if p.isSatisfiedRule5() {
 		p.occupyResource()
 		go func() {
 			// TODO: 把 releaseResource 从 go func 中拿出来
@@ -133,6 +130,14 @@ func (p *process) checkRule5() {
 		}()
 	}
 	p.mutex.Unlock()
+}
+
+func (p *process) isSatisfiedRule5() bool {
+	// 利用 checkRule5 的锁进行锁定
+	return !p.isOccupying && // 还没有占领资源
+		p.requestTimestamp != nil && // 已经申请资源
+		p.requestTimestamp.IsEqual(p.requestQueue.Min()) && // Rule5.1 申请排在第一位
+		p.requestTimestamp.Time() < p.receivedTime.Min() // Rule5.2: 申请后，收到全部回复
 }
 
 func (p *process) occupyResource() {
@@ -149,7 +154,7 @@ func (p *process) releaseResource() {
 	// rule 3: 先释放资源
 	p.resource.Release(ts)
 	// rule 3: 在 requestQueue 中删除 ts
-	p.requestQueue.Remove(ts) // FIXME: 到底是先释放好，还是先删除好呢?
+	p.requestQueue.Remove(ts)
 	// rule 3: 把释放的消息发送给其他 process
 	msg := newMessage(releaseResource, p.clock.Tick(), p.me, OTHERS, ts)
 	p.prop.Update(msg)
