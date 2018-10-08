@@ -38,8 +38,8 @@ func newReceivedTime(all, me int) ReceivedTime {
 
 func (rt *receivedTime) Update(id, time int) {
 	rt.mutex.Lock()
-	defer rt.mutex.Unlock()
 	rt.trq.update(rt.trs[id], time)
+	rt.mutex.Unlock()
 }
 
 // 返回 rt 中的最小值

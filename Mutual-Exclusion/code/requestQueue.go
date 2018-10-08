@@ -42,20 +42,20 @@ func (rq *requestQueue) Min() Less {
 
 func (rq *requestQueue) Push(ls Less) {
 	rq.mutex.Lock()
-	defer rq.mutex.Unlock()
 	r := &request{
 		ls: ls,
 	}
 
 	rq.requestOf[ls] = r
 	heap.Push(rq.rpq, r)
+	rq.mutex.Unlock()
 }
 
 func (rq *requestQueue) Remove(ls Less) {
 	rq.mutex.Lock()
-	defer rq.mutex.Unlock()
 	rq.rpq.remove(rq.requestOf[ls])
 	delete(rq.requestOf, ls)
+	rq.mutex.Unlock()
 }
 
 func (rq *requestQueue) String() string {

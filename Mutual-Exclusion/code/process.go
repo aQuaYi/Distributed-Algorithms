@@ -28,8 +28,8 @@ type process struct {
 	requestQueue RequestQueue
 
 	mutex sync.Mutex
-	// 为了保证发送消息的原子性，从生成 timestamp 开始
-	// 到 prop.update 完成，的这个过程需要上锁
+	// 为了保证发送消息的原子性，
+	// 从生成 timestamp 开始到 prop.update 完成，这个过程需要上锁
 	prop observer.Property
 	// 操作以下属性，需要加锁
 	isOccupying      bool
@@ -58,8 +58,9 @@ func (p *process) String() string {
 }
 
 func (p *process) Listening() {
-	// 删除了这个地方的锁
 	// stream 的观察起点位置，由上层调用 newProcess 的方式决定
+	// 在生成完所有的 process 后，再更新 prop，
+	// 才能保证所有的 process 都能收到全部消息
 	stream := p.prop.Observe()
 
 	debugPrintf("%s 获取了 stream 开始监听", p)
@@ -73,13 +74,15 @@ func (p *process) Listening() {
 				continue
 			}
 
+			// TODO: 这里需要加锁吗？
+
 			// 收到消息的第一件，更新自己的 clock
 			p.clock.Update(msg.msgTime)
 			// 然后为了 Rule5(ii) 记录收到消息的时间
 			p.receivedTime.Update(msg.from, p.clock.Now())
 
 			switch msg.msgType {
-			// acknowledgment: 收到此类消息只用更新时钟，前面已经做了
+			// case acknowledgment: 收到此类消息只用更新时钟，前面已经做了
 			case requestResource:
 				p.handleRequestMessage(msg)
 			case releaseResource:
@@ -119,7 +122,6 @@ func (p *process) handleReleaseMessage(msg *message) {
 
 func (p *process) checkRule5() {
 	p.mutex.Lock()
-	defer p.mutex.Unlock()
 	if !p.isOccupying &&
 		p.requestTimestamp != nil &&
 		p.requestTimestamp.IsEqual(p.requestQueue.Min()) &&
@@ -130,6 +132,7 @@ func (p *process) checkRule5() {
 			p.releaseResource()
 		}()
 	}
+	p.mutex.Unlock()
 }
 
 func (p *process) occupyResource() {
@@ -163,9 +166,10 @@ func (p *process) Request() {
 	p.wg.Add(1)
 
 	p.mutex.Lock()
+	p.clock.Tick()
 
-	ts := newTimestamp(p.clock.Tick(), p.me)
-	msg := newMessage(requestResource, p.clock.Tick(), p.me, OTHERS, ts)
+	ts := newTimestamp(p.clock.Now(), p.me)
+	msg := newMessage(requestResource, p.clock.Now(), p.me, OTHERS, ts)
 	// Rule 1.1: 发送申请信息给其他的 process
 	p.prop.Update(msg)
 	// Rule 1.2: 把申请消息放入自己的 request queue
