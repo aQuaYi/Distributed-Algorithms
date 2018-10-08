@@ -23,7 +23,7 @@ func main() {
 	amount := 131072 // NOTICE: 为了保证测试结果的可比性，请勿修改此数值
 	for all := 2; all <= 128; all *= 2 {
 		times := amount / all
-		fmt.Printf("~~~ %d Process，每个占用资源 %d 次 ~~~\n", all, times)
+		fmt.Printf("~~~ %d Process，每个占用资源 %d 次，共计 %d 次 ~~~\n", all, times, amount)
 		newRound(all, times)
 		count++
 	}
@@ -32,8 +32,7 @@ func main() {
 }
 
 func newRound(all, occupyTimesPerProcess int) {
-	rsc := new(resource)
-	rsc.wg.Add(all * occupyTimesPerProcess)
+	rsc := newResource(all * occupyTimesPerProcess)
 
 	prop := observer.NewProperty(nil)
 
@@ -64,7 +63,7 @@ func newRound(all, occupyTimesPerProcess int) {
 		}(p, occupyTimesPerProcess)
 	}
 
-	rsc.wg.Wait()
+	rsc.Wait()
 
-	fmt.Println(rsc.report())
+	fmt.Println(rsc.Report())
 }

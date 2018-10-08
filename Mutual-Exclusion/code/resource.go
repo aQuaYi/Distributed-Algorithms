@@ -15,20 +15,30 @@ type Resource interface {
 	Occupy(Timestamp)
 	// Release 表示释放资源
 	Release(Timestamp)
+	// Wait 等待所有色占用次数用完
+	Wait()
+	// Report 报告资源占用情况
+	Report() string
 }
 
 type resource struct {
-	occupiedBy Timestamp
-	timestamps []Timestamp
-	times      []time.Time
-	wg         sync.WaitGroup
-	// NOTICE: 为了验证 mutual exclusion 算法，resource 不能加锁
+	occupiedBy     Timestamp      // 记录当前占用资源的 timestamp, nil 表示资源未被占用
+	LastOccupiedBy Timestamp      // 记录上次占用资源的 timestamp
+	timestamps     []Timestamp    // 按顺序保存占用资源的 timestamp
+	times          []time.Time    // 记录每次占用资源的起止时间，用于分析算法的效率
+	wg             sync.WaitGroup // 完成全部占用计划前，阻塞主 goroutine
 }
 
 func newResource(times int) Resource {
-	r := &resource{}
+	r := &resource{
+		LastOccupiedBy: newTimestamp(-1, -1),
+	}
 	r.wg.Add(times)
 	return r
+}
+
+func (r *resource) Wait() {
+	r.wg.Wait()
 }
 
 func (r *resource) Occupy(ts Timestamp) {
@@ -36,6 +46,12 @@ func (r *resource) Occupy(ts Timestamp) {
 		msg := fmt.Sprintf("资源正在被 %s 占据，%s 却想获取资源。", r.occupiedBy, ts)
 		panic(msg)
 	}
+
+	if !r.LastOccupiedBy.Less(ts) {
+		msg := fmt.Sprintf("资源上次被 %s 占据，这次 %s 却想获取资源。", r.LastOccupiedBy, ts)
+		panic(msg)
+	}
+
 	r.occupiedBy = ts
 	r.timestamps = append(r.timestamps, ts)
 	r.times = append(r.times, time.Now())
@@ -47,61 +63,67 @@ func (r *resource) Release(ts Timestamp) {
 		msg := fmt.Sprintf("%s 想要释放正在被 P%s 占据的资源。", ts, r.occupiedBy)
 		panic(msg)
 	}
-	r.occupiedBy = nil
+	r.LastOccupiedBy, r.occupiedBy = ts, nil
 	r.times = append(r.times, time.Now())
-	r.wg.Done()
+	r.wg.Done() // 完成一次占用
 	debugPrintf("~~~ @resource: %s released ~~~ ", ts)
 }
 
-func (r *resource) report() string {
-	if !r.isSortedOccupied() {
-		panic("resource 不是按照顺序被占用的")
-	}
+// func (r *resource) isSortedOccupied() bool {
+// 	size := len(r.timestamps)
+// 	for i := 1; i < size; i++ {
+// 		if !r.timestamps[i-1].Less(r.timestamps[i]) {
+// 			debugPrintf("%s 排在了 %s 前面", r.timestamps[i-1], r.timestamps[i])
+// 			return false
+// 		}
+// 	}
+// 	return true
+// }
+
+func (r *resource) Report() string {
 	var b strings.Builder
-	// 计算占用率
-	occupiedTime := time.Duration(0)
+
+	// 统计资源被占用的时间
 	size := len(r.times)
-	busys := make([]float64, 0, size/2)
-	for i := 0; i+1 < size; i += 2 {
-		dif := r.times[i+1].Sub(r.times[i])
-		occupiedTime += dif
-		busys = append(busys, float64(dif.Nanoseconds()))
-	}
 	totalTime := r.times[size-1].Sub(r.times[0])
-	rate := occupiedTime.Nanoseconds() * 10000 / totalTime.Nanoseconds()
-	format := "resource 按照顺序被占用了 %s，占用比率为 %02d.%02d%%。\n"
-	fmt.Fprintf(&b, format, totalTime, rate/100, rate%100)
-	// 计算资源占用时间的均值和方差
-	format = "资源占用 %8d 次，最短 %8.2fus， 最长 %8.2fus， 均值 %8.2fus， 方差 %8.2f。\n"
-	minBusy, _ := stats.Min(busys)
-	maxBusy, _ := stats.Max(busys)
-	meanBusy, _ := stats.Mean(busys)
-	sdBusy, _ := stats.StandardDeviation(busys)
-	fmt.Fprintf(&b, format, len(busys), minBusy/1000, maxBusy/1000, meanBusy/1000, sdBusy/1000)
-	// 计算资源空闲间隙的均值和方差
-	idles := make([]float64, 0, size/2-1)
-	for i := 1; i+1 < size; i += 2 {
-		idles = append(idles,
-			float64(r.times[i+1].Sub(r.times[i]).Nanoseconds()),
-		)
+	format := "resource 被占用了 %s， "
+	fmt.Fprintf(&b, format, totalTime)
+
+	// 计算占用率
+	busys := make([]float64, 0, size/2)
+	idles := make([]float64, 0, size/2)
+
+	var i int
+	for i = 0; i+2 < size; i += 2 {
+		busys = append(busys, float64(r.times[i+1].Sub(r.times[i]).Nanoseconds()))
+		idles = append(idles, float64(r.times[i+2].Sub(r.times[i+1]).Nanoseconds()))
 	}
-	format = "资源空闲 %8d 次，最短 %8.2fus， 最长 %8.2fus， 均值 %8.2fus， 方差 %8.2f。\n"
-	minIdle, _ := stats.Min(idles)
-	maxIdle, _ := stats.Max(idles)
-	meanIdle, _ := stats.Mean(idles)
-	sdIdle, _ := stats.StandardDeviation(idles)
-	fmt.Fprintf(&b, format, len(idles), minIdle/1000, maxIdle/1000, meanIdle/1000, sdIdle/1000)
-	//
+	busys = append(busys, float64(r.times[i+1].Sub(r.times[i]).Nanoseconds()))
+
+	busy, _ := stats.Sum(busys)
+	idle, _ := stats.Sum(idles)
+	total := busy + idle
+	rate := busy * 100 / total
+
+	format = "占用比率为 %4.2f%%。\n"
+	fmt.Fprintf(&b, format, rate)
+
+	// 计算资源占用时间的均值和方差
+	format = "资源占用: %s\n"
+	fmt.Fprintf(&b, format, statisticAnalyze(busys))
+
+	// 计算资源空闲间隙的均值和方差
+	format = "资源空闲: %s\n"
+	fmt.Fprintf(&b, format, statisticAnalyze(idles))
+
 	return b.String()
 }
 
-func (r *resource) isSortedOccupied() bool {
-	size := len(r.timestamps)
-	for i := 1; i < size; i++ {
-		if !r.timestamps[i-1].Less(r.timestamps[i]) {
-			debugPrintf("%s 排在了 %s 前面", r.timestamps[i-1], r.timestamps[i])
-			return false
-		}
-	}
-	return true
+func statisticAnalyze(floats []float64) string {
+	format := "min %8.2fus, max %8.2fus, mean %8.2fus, sd %8.2f"
+	min, _ := stats.Min(floats)
+	max, _ := stats.Max(floats)
+	mean, _ := stats.Mean(floats)
+	sd, _ := stats.StandardDeviation(floats)
+	return fmt.Sprintf(format, min/1000, max/1000, mean/1000, sd/1000)
 }
