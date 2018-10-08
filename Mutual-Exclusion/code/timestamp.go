@@ -28,9 +28,6 @@ func newTimestamp(time, process int) Timestamp {
 }
 
 func (ts *timestamp) String() string {
-	if ts == nil {
-		return "<nil timestamp>"
-	}
 	return fmt.Sprintf("<T%d:P%d>", ts.time, ts.process)
 }
 
