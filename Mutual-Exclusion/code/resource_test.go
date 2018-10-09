@@ -45,7 +45,7 @@ func Test_resource_occupy_occupyInvalidResource(t *testing.T) {
 	r := newResource(1)
 	r.Occupy(ts0)
 	//
-	expected := fmt.Sprintf("资源正在被 %s 占据，%s 却想占据资源。", ts0, ts1)
+	expected := fmt.Sprintf("资源正在被 %s 占据，%s 却想获取资源。", ts0, ts1)
 	ast.PanicsWithValue(expected, func() { r.Occupy(ts1) })
 }
 
