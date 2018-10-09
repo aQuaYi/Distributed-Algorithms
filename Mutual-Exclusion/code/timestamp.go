@@ -8,10 +8,8 @@ type Timestamp interface {
 	Less(interface{}) bool
 	// Equal 判断两个 Timestamp 是否相等
 	IsEqual(interface{}) bool
-	// Time 输出的是 time 属性的值
-	Time() int
-	// Process 输出 process 属性的值
-	Process() int
+	// IsBefore 在比较同一个 clock 的时间，所以，不需要 process
+	IsBefore(int) bool
 	// String 输出 Timestamp 的内容
 	String() string
 }
@@ -48,10 +46,6 @@ func (ts *timestamp) IsEqual(tsi interface{}) bool {
 	return ts.time == ts2.time && ts.process == ts2.process
 }
 
-func (ts *timestamp) Time() int {
-	return ts.time
-}
-
-func (ts *timestamp) Process() int {
-	return ts.process
+func (ts *timestamp) IsBefore(t int) bool {
+	return ts.time < t
 }

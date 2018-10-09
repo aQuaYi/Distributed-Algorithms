@@ -137,7 +137,7 @@ func (p *process) isSatisfiedRule5() bool {
 	return !p.isOccupying && // 还没有占领资源
 		p.requestTimestamp != nil && // 已经申请资源
 		p.requestTimestamp.IsEqual(p.requestQueue.Min()) && // Rule5.1 申请排在第一位
-		p.requestTimestamp.Time() < p.receivedTime.Min() // Rule5.2: 申请后，收到全部回复
+		p.requestTimestamp.IsBefore(p.receivedTime.Min()) // Rule5.2: 申请后，收到全部回复
 }
 
 func (p *process) occupyResource() {

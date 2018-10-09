@@ -45,20 +45,10 @@ func Test_timestamp_IsEqual_same_true(t *testing.T) {
 	ast.True(ts.IsEqual(tsi))
 }
 
-func Test_timestamp_Time(t *testing.T) {
+func Test_timestamp_IsBefore(t *testing.T) {
 	ast := assert.New(t)
-	time, process := 0, 0
+	time, process := 1, 0
 	ts := newTimestamp(time, process)
-	expected := time
-	actual := ts.Time()
-	ast.Equal(expected, actual)
-}
-
-func Test_timestamp_Process(t *testing.T) {
-	ast := assert.New(t)
-	time, process := 0, 0
-	ts := newTimestamp(time, process)
-	expected := process
-	actual := ts.Process()
-	ast.Equal(expected, actual)
+	ast.False(ts.IsBefore(0))
+	ast.True(ts.IsBefore(1))
 }
