@@ -62,20 +62,17 @@ func (r *resource) Release(ts Timestamp) {
 	}
 
 	r.lastOccupiedBy, r.occupiedBy = ts, nil
-
 	r.times = append(r.times, time.Now())
-
 	debugPrintf("~~~ @resource: %s released ~~~ ", ts)
 
 	r.wg.Done() // 完成一次占用
-
 }
 
 func (r *resource) report() string {
 	var b strings.Builder
+	size := len(r.times)
 
 	// 统计资源被占用的时间
-	size := len(r.times)
 	totalTime := r.times[size-1].Sub(r.times[0])
 	format := "resource 被占用了 %s， "
 	fmt.Fprintf(&b, format, totalTime)

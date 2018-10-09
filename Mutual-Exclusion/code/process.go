@@ -19,8 +19,8 @@ type Process interface {
 }
 
 type process struct {
-	me int
-	wg sync.WaitGroup
+	me int            // process 的 ID
+	wg sync.WaitGroup // 阻塞 Request() 用
 
 	clock        Clock
 	resource     Resource
@@ -34,6 +34,10 @@ type process struct {
 	// 操作以下属性，需要加锁
 	isOccupying      bool
 	requestTimestamp Timestamp
+}
+
+func (p *process) String() string {
+	return fmt.Sprintf("[%d]P%d", p.clock.Now(), p.me)
 }
 
 func newProcess(all, me int, r Resource, prop observer.Property) Process {
@@ -51,10 +55,6 @@ func newProcess(all, me int, r Resource, prop observer.Property) Process {
 	debugPrintf("%s 完成创建工作", p)
 
 	return p
-}
-
-func (p *process) String() string {
-	return fmt.Sprintf("[%d]P%d", p.clock.Now(), p.me)
 }
 
 func (p *process) Listening() {
@@ -132,7 +132,7 @@ func (p *process) checkRule5() {
 	if p.isSatisfiedRule5() {
 		p.occupyResource()
 		go func() {
-			// TODO: 把 releaseResource 从 go func 中拿出来
+			// process 释放资源的时机交给 goroutine 调度
 			p.releaseResource()
 		}()
 	}
@@ -178,8 +178,8 @@ func (p *process) Request() {
 	p.wg.Add(1)
 
 	p.mutex.Lock()
-	p.clock.Tick()
 
+	p.clock.Tick() // 做事之前，先更新 clock
 	ts := newTimestamp(p.clock.Now(), p.me)
 	msg := newMessage(requestResource, p.clock.Now(), p.me, OTHERS, ts)
 	// Rule 1.1: 发送申请信息给其他的 process

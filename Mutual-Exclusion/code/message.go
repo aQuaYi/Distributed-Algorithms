@@ -5,7 +5,7 @@ import "fmt"
 type message struct {
 	msgType   msgType
 	from      int // message 发送方的 ID
-	to        int // message 接收方的 ID， 当值为 others 的时候，表示接收方为除 from 外的所有
+	to        int // message 接收方的 ID， 当值为 OTHERS 的时候，表示接收方为除 from 外的所有
 	timestamp Timestamp
 	msgTime   int
 }
