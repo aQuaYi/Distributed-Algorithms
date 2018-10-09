@@ -1,6 +1,7 @@
 package main
 
 import (
+	"container/heap"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -28,4 +29,15 @@ func Test_receivedTime_updateItselfWillPanic(t *testing.T) {
 	all, me := 10, 0
 	rt := newReceivedTime(all, me)
 	ast.Panics(func() { rt.Update(me, 1) })
+}
+
+func Test_timeRecordQueue_Pop(t *testing.T) {
+	ast := assert.New(t)
+	trq := new(timeRecordQueue)
+	expected := &timeRecord{
+		time: 1,
+	}
+	heap.Push(trq, expected)
+	actual := heap.Pop(trq).(*timeRecord)
+	ast.Equal(expected.time, actual.time)
 }

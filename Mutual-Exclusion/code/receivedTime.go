@@ -10,7 +10,7 @@ import (
 type ReceivedTime interface {
 	// Update 更新从 process 接收到的最新时间
 	Update(process, time int)
-	// Min 返回最早接收到消息的时间
+	// Min 返回从各个 process 接收时间的最小值
 	Min() int
 }
 

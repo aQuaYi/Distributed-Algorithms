@@ -1,6 +1,7 @@
 package main
 
 import (
+	"strings"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -70,4 +71,26 @@ func Test_requestQueue_MinOfEmpty(t *testing.T) {
 	ast := assert.New(t)
 	rq := newRequestQueue()
 	ast.Nil(rq.Min())
+}
+
+func Test_requestQueue_String(t *testing.T) {
+	ast := assert.New(t)
+	size := 100
+	// 创建 timestamps
+	timestamps := make([]Timestamp, 0, size)
+	for i := 1; i < size; i++ {
+		timestamps = append(timestamps, newTimestamp(i, i))
+	}
+	// 创建 requestQueue，并添加 timestamp
+	rq := newRequestQueue()
+	for i := range timestamps {
+		rq.Push(timestamps[i])
+	}
+	// 获取 rq 的字符输出
+	rqs := rq.String()
+	// 验证 rqs 中的内容
+	for i := range timestamps {
+		tss := timestamps[i].String()
+		ast.True(strings.Contains(rqs, tss))
+	}
 }
