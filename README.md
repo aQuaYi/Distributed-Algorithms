@@ -1,6 +1,7 @@
 # 分布式系统原型
 
 [![Build Status](https://www.travis-ci.org/aQuaYi/Distributed-Algorithms.svg?branch=master)](https://www.travis-ci.org/aQuaYi/Distributed-Algorithms)
+[![codecov](https://codecov.io/gh/aQuaYi/Distributed-Algorithms/branch/master/graph/badge.svg)](https://codecov.io/gh/aQuaYi/Distributed-Algorithms)
 
 ## Mutual Exclusion
 
