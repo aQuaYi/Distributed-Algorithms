@@ -19,7 +19,7 @@ panic: 资源正在被 <T3446:P0> 占据，<T3444:P1> 却想获取资源。
 
 ## 问题
 
-system 由多个 process 组成，却只有一个 resource 最多只能被一个 process 占用。由于 process 是分布式的，只能通过各自的 clock 读取时间值，但这些 clock 的时间值不同步，没有办法通过时间上的编排来分别占用 resource。需要靠算法满足以下要求：
+多个 process 组成分享同一个 resource，但 resource 最多只能被一个 process 占用。由于 process 是分布式的，只能通过各自的 clock 读取时间值，这些 clock 的时间值不一定同步，没有办法通过时间上的编排来分别占用 resource。需要靠算法满足以下要求：
 
 1. 对于 resource，一定要先释放，再占用。
 1. 对于 process， 先申请，先占用。
@@ -35,7 +35,7 @@ system 由多个 process 组成，却只有一个 resource 最多只能被一个
 
 在展开之前，先强调几个定义：
 
-1. system 由多个 process 组成，第 i 个 process 标记为 Pi
+1. 多个 process 中第 i 个 process 标记为 Pi
 1. process 由一系列 event 组成，第 j 个 event 标记为 Ej
 1. 每个 process 都有一个 clock 用于标记 event 发生的时间。第 i 个 process 发生第 j 个 event 的时间，标记为 Ci(Ej)
 1. 每个 process 都是 **串行** 的
@@ -46,7 +46,7 @@ system 由多个 process 组成，却只有一个 resource 最多只能被一个
 "happened before" 表示一个局部排序关系，有两种情况下成立
 
 1. 串行的 Pm 中， Ei 比 Ej 早发生。 Ei "happened before" Ej，所以有 Cm(Ei) < Cm(Ej)。
-1. 从 Pm 发送到 Pn 中的消息 m，Pm 中 Ei 是发送 m， Pn 中 Ej 是接受 m。Ei "happened before" Ej，所以有 Cm(Ei) < Cn(Ej)
+1. 从 Pm 发送到 Pn 中的消息 message，Pm 中 Ei 是发送 message， Pn 中 Ej 是接受 message。Ei "happened before" Ej，所以有 Cm(Ei) < Cn(Ej)
 
 以上两条，在论文中被称为 `Clock Condition`。
 
@@ -62,23 +62,26 @@ system 由多个 process 组成，却只有一个 resource 最多只能被一个
 
 ```code
 // 在进程内
-timestamp = timestamp + 1
+time_stamp = time_stamp + 1
 doOneEvent()
 
 // 进程发现消息时
-timestamp = timestamp + 1
-send(message, timestamp)
+time = time + 1
+time_stamp = time
+send(message, time_stamp)
 
 // 进程接收消息时
-message, msgTimestamp = receive()
-timestamp = max(timestamp , msgTimestamp) + 1
+(message, time_stamp) = receive()
+time = max(time_stamp, time) + 1
 ```
+
+> 基维百科上的说法和论文的说法，略有不同。我的代码以论文为准。
 
 ### 全局排序
 
 `Ei => Ej` 表示，在全局排序中， Ei 排在 Ej 前面。
 
-对于 system 中的任意一个 event，可以使用其所在的 process P 和发生的 timestamp T 进行编号为： ``<T:P>``。
+对于 system 中的任意一个 event，可以使用其所在的 process P 和发生的 timestamp T 进行编号为： `<T:P>`。
 
 任意两个事件 Ei`<Tm:Pa>` 和 Ej`<Tn:Pb>`， 若要使得 `Ei => Ej` 成立，需要以下两个条件之一成立：
 
@@ -86,8 +89,6 @@ timestamp = max(timestamp , msgTimestamp) + 1
 1. Tm == Tn 且 Pa < Pb
 
 其中 Pa < Pb 的含义是， system 中 process 中也存在一种排序方式。我在代码中选择使用 process 的代号，对其进行排序。
-
-也由条件 2 可知，分布式系统的全局排序不是唯一的。具体的排序结果还取决于 process 的排序方式。
 
 ## mutual exclusion 算法
 
@@ -99,7 +100,7 @@ mutual exclusion 算法需要每个 process 维护自己的 request queue。 由
     1. 把 `<Tm:Pi>` 放入自己的 request queue
 1. 当 Pj 收到 request message `<Tm:Pi>` 后
     1. 把 `<Tm:Pi>` 放入自己的 request queue
-    1. 发送一条确认信息。如果最近一次给 Pi 发送消息的时间 > Tm 的话，可以不发。
+    1. 回复 Pi 一条 acknowledge message，确认收到。
 1. 为了释放 resource，process Pi 需要
     1. 释放 resource
     1. 把 `<Tm:Pi>` 移出自己的 request queue
@@ -110,7 +111,7 @@ mutual exclusion 算法需要每个 process 维护自己的 request queue。 由
     1. 在 Pi 的 request queue 中，`<Tm:Pi>` 与其他 event 都是 `=>` 关系。
     1. Pi 收到所有其他 process 消息的最新时间中的最小值 > Tm
 
-每个 process 只需要独立平等地完整这 5 种 event，就可以避免 process 同时占用 resource 的情况。
+每个 process 只需要独立平等地处理这 5 种 event，就可以避免 process 同时占用 resource 的情况。
 
 以上 5 个规则，是从 process 之间交互的角度来规定的。如果把 request `<Tm:Pi>` 的整个生命周期放在 Pi 的时间轴上。如下图所示
 
