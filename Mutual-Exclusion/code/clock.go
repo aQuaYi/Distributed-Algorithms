@@ -1,4 +1,4 @@
-package mutualExclusion
+package mutualexclusion
 
 import (
 	"math/rand"
