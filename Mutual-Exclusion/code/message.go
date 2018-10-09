@@ -21,7 +21,7 @@ func newMessage(mt msgType, msgTime, from, to int, ts Timestamp) *message {
 }
 
 func (m *message) String() string {
-	return fmt.Sprintf("{%s, Time:%d, From:%d, To:%d, %s}", m.msgType, m.msgTime, m.from, m.to, m.timestamp)
+	return fmt.Sprintf("{%s, Time:%d, From:%d, To:%2d, %s}", m.msgType, m.msgTime, m.from, m.to, m.timestamp)
 }
 
 type msgType int
@@ -37,10 +37,10 @@ const (
 func (mt msgType) String() string {
 	switch mt {
 	case requestResource:
-		return "申请资源"
+		return "申请"
 	case releaseResource:
-		return "释放资源"
+		return "释放"
 	default:
-		return "确认收到"
+		return "确认"
 	}
 }

@@ -74,12 +74,7 @@ func (p *process) Listening() {
 				continue
 			}
 
-			// TODO: 这里需要加锁吗？
-
-			// 收到消息的第一件，更新自己的 clock
-			p.clock.Update(msg.msgTime)
-			// 然后为了 Rule5(ii) 记录收到消息的时间
-			p.receivedTime.Update(msg.from, p.clock.Now())
+			p.updateTime(msg.from, msg.msgTime)
 
 			switch msg.msgType {
 			// case acknowledgment: 收到此类消息只用更新时钟，前面已经做了
@@ -91,6 +86,18 @@ func (p *process) Listening() {
 			p.checkRule5()
 		}
 	}()
+}
+
+func (p *process) updateTime(from, time int) {
+	p.mutex.Lock()
+
+	// 收到消息的第一件，更新自己的 clock
+	p.clock.Update(time)
+	// 然后为了 Rule5(ii) 记录收到消息的时间
+	// NOTICE: 接收时间一定要是对方发出的时间
+	p.receivedTime.Update(from, time)
+
+	p.mutex.Unlock()
 }
 
 func (p *process) handleRequestMessage(msg *message) {

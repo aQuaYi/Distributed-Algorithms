@@ -12,17 +12,17 @@ func Test_Message(t *testing.T) {
 	ts := newTimestamp(0, 0)
 	m := newMessage(requestResource, 0, 0, OTHERS, ts)
 	//
-	expected := "{申请资源, Time:0, From:0, To:-1, <T0:P0>}"
+	expected := "{申请, Time:0, From:0, To:-1, <T0:P0>}"
 	actual := m.String()
 	ast.Equal(expected, actual)
 	//
 	m.msgType = releaseResource
-	expected = "{释放资源, Time:0, From:0, To:-1, <T0:P0>}"
+	expected = "{释放, Time:0, From:0, To:-1, <T0:P0>}"
 	actual = m.String()
 	ast.Equal(expected, actual)
 	//
 	m.msgType = acknowledgment
-	expected = "{确认收到, Time:0, From:0, To:-1, <T0:P0>}"
+	expected = "{确认, Time:0, From:0, To:-1, <T0:P0>}"
 	actual = m.String()
 	ast.Equal(expected, actual)
 	//

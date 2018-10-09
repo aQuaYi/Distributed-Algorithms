@@ -46,7 +46,7 @@ func (r *resource) Occupy(ts Timestamp) {
 	}
 
 	if !r.lastOccupiedBy.Less(ts) {
-		msg := fmt.Sprintf("资源上次被 %s 占据，这次 %s 却想获取资源。", r.lastOccupiedBy, ts)
+		msg := fmt.Sprintf("资源上次被 %s 占据，这次 %s 却想占据资源。", r.lastOccupiedBy, ts)
 		panic(msg)
 	}
 
