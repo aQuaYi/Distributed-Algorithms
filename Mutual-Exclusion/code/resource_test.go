@@ -10,10 +10,6 @@ import (
 )
 
 func Test_resource_occupyAndRelease(t *testing.T) {
-	// 避免 debugprint 输出
-	temp := needDebug
-	needDebug = false
-	//
 	ast := assert.New(t)
 	//
 	p := 0
@@ -27,15 +23,9 @@ func Test_resource_occupyAndRelease(t *testing.T) {
 	r.wait()
 	ast.Equal(ts, r.lastOccupiedBy)
 	ast.Equal(ts, r.timestamps[0])
-	// 还原 needDebug
-	needDebug = temp
 }
 
 func Test_resource_occupy_occupyInvalidResource(t *testing.T) {
-	// 避免 debugprint 输出
-	temp := needDebug
-	needDebug = false
-	//
 	ast := assert.New(t)
 	//
 	p0 := 0
@@ -47,15 +37,9 @@ func Test_resource_occupy_occupyInvalidResource(t *testing.T) {
 	//
 	expected := fmt.Sprintf("资源正在被 %s 占据，%s 却想获取资源。", ts0, ts1)
 	ast.PanicsWithValue(expected, func() { r.Occupy(ts1) })
-	// 还原 needDebug
-	needDebug = temp
 }
 
 func Test_resource_occupy_panicOfEarlyTimestampWantToOccupy(t *testing.T) {
-	// 避免 debugprint 输出
-	temp := needDebug
-	needDebug = false
-	//
 	ast := assert.New(t)
 	//
 	ts0 := newTimestamp(0, 1)
@@ -66,15 +50,9 @@ func Test_resource_occupy_panicOfEarlyTimestampWantToOccupy(t *testing.T) {
 	//
 	expected := fmt.Sprintf("资源上次被 %s 占据，这次 %s 却想占据资源。", ts1, ts0)
 	ast.PanicsWithValue(expected, func() { r.Occupy(ts0) })
-	// 还原 needDebug
-	needDebug = temp
 }
 
 func Test_resource_report(t *testing.T) {
-	// 避免 debugprint 输出
-	temp := needDebug
-	needDebug = false
-	//
 	ast := assert.New(t)
 	//
 	p := 0
@@ -95,15 +73,9 @@ func Test_resource_report(t *testing.T) {
 	ast.True(strings.Contains(report, "75.00%"), report)
 	//
 	ast.Equal(4, len(r.times), "资源被占用了 2 次，但是 r.times 的长度不等于 4")
-	// 还原 needDebug
-	needDebug = temp
 }
 
 func Test_resource_Occupy_lenOfTimes(t *testing.T) {
-	// 避免 debugprint 输出
-	temp := needDebug
-	needDebug = false
-	//
 	ast := assert.New(t)
 	//
 	times := 100
@@ -125,15 +97,9 @@ func Test_resource_Occupy_lenOfTimes(t *testing.T) {
 	expected := times * 2
 	actual := len(r.times)
 	ast.Equal(expected, actual)
-	// 还原 needDebug
-	needDebug = temp
 }
 
 func Test_resource_Release_panicOfReleaseByOther(t *testing.T) {
-	// 避免 debugprint 输出
-	temp := needDebug
-	needDebug = false
-	//
 	ast := assert.New(t)
 	//
 	r := newResource(1)
@@ -142,6 +108,4 @@ func Test_resource_Release_panicOfReleaseByOther(t *testing.T) {
 	r.Occupy(ts0)
 	expected := fmt.Sprintf("%s 想要释放正在被 P%s 占据的资源。", ts1, ts0)
 	ast.PanicsWithValue(expected, func() { r.Release(ts1) })
-	// 还原 needDebug
-	needDebug = temp
 }

@@ -59,3 +59,19 @@ func Test_process(t *testing.T) {
 		})
 	}
 }
+
+func Test_process_String(t *testing.T) {
+	ast := assert.New(t)
+	//
+	me := 1
+	clock := newClock() // TODO: 使用 mock
+	p := &process{
+		me:    me,
+		clock: clock,
+	}
+	time := 999
+	p.clock.Update(time)
+	expected := fmt.Sprintf("[%d]P%d", time+1, me)
+	actual := p.String()
+	ast.Equal(expected, actual)
+}
