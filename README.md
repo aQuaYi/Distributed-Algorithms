@@ -10,4 +10,6 @@ Lamport 在论文《Time, Clocks and the Ordering of Events in a Distributed Sys
 
 ## POS
 
+## DPOS
+
 ## Paxos
