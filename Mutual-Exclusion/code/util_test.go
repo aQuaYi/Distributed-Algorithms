@@ -13,7 +13,6 @@ func Test_debugPrintf_toPrint(t *testing.T) {
 	// 避免 debugprint 输出
 	temp := needDebug
 	needDebug = true
-	defer func() { needDebug = temp }()
 
 	var sb strings.Builder
 	log.SetOutput(&sb)
@@ -26,13 +25,14 @@ func Test_debugPrintf_toPrint(t *testing.T) {
 	debugPrintf("%s", words)
 
 	ast.True(strings.Contains(sb.String(), words))
+	// 还原 needDebug
+	needDebug = temp
 }
 
 func Test_debugPrintf_notToPrint(t *testing.T) {
 	// 避免 debugprint 输出
 	temp := needDebug
 	needDebug = false
-	defer func() { needDebug = temp }()
 
 	var sb strings.Builder
 	log.SetOutput(&sb)
@@ -45,6 +45,8 @@ func Test_debugPrintf_notToPrint(t *testing.T) {
 	debugPrintf("%s", words)
 
 	ast.False(strings.Contains(sb.String(), words))
+	// 还原 needDebug
+	needDebug = temp
 }
 
 func Test_max(t *testing.T) {
@@ -84,8 +86,6 @@ func Test_max(t *testing.T) {
 			},
 			2,
 		},
-
-		// TODO: Add test cases.
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
