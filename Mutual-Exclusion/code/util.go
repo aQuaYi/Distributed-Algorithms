@@ -12,7 +12,7 @@ func init() {
 	rand.Seed(time.Now().UnixNano())
 }
 
-var needDebug = false
+var needDebug = true
 
 // debugPrintf 根据设置打印输出
 func debugPrintf(format string, a ...interface{}) {

@@ -2,12 +2,13 @@ package mutualexclusion
 
 import (
 	"fmt"
-	"time"
+	"testing"
 
 	"github.com/aQuaYi/observer"
+	"github.com/stretchr/testify/assert"
 )
 
-func newRound(all, occupyTimesPerProcess int) {
+func run(all, occupyTimesPerProcess int) {
 	rsc := newResource(all * occupyTimesPerProcess)
 
 	prop := observer.NewProperty(nil)
@@ -44,16 +45,17 @@ func newRound(all, occupyTimesPerProcess int) {
 	debugPrintf(rsc.report())
 }
 
-func main() {
-	beginTime := time.Now()
-	count := 0
-	amount := 131072 // NOTICE: 为了保证测试结果的可比性，请勿修改此数值
-	for all := 2; all <= 128; all *= 2 {
+func Test_process(t *testing.T) {
+	ast := assert.New(t)
+	//
+	amount := 131072
+	for all := 2; all <= 8; all *= 2 {
 		times := amount / all
-		fmt.Printf("~~~ %d Process，每个占用资源 %d 次，共计 %d 次 ~~~\n", all, times, amount)
-		newRound(all, times)
-		count++
+		name := fmt.Sprintf("%d Process × %d 次 = 共计 %d 次", all, times, amount)
+		t.Run(name, func(t *testing.T) {
+			ast.NotPanics(func() {
+				run(all, times)
+			})
+		})
 	}
-
-	fmt.Printf("一共测试了 %d 轮，全部通过。共耗时 %s 。\n", count, time.Now().Sub(beginTime))
 }

@@ -25,6 +25,7 @@ func Test_resource_occupyAndRelease(t *testing.T) {
 	ast.Equal(ts, r.occupiedBy)
 	// 释放
 	r.Release(ts)
+	r.wait()
 	ast.Equal(ts, r.lastOccupiedBy)
 	ast.Equal(ts, r.timestamps[0])
 }
