@@ -2,21 +2,6 @@
 
 使用 Go 语言实现了 Lamport 在论文 [《Time, Clocks and the Ordering of Events in a Distributed System》](time-clocks.pdf)中提到的 Mutual Exclusion 算法。
 
-```shell
-$ git checkout 00c7877
-$ go build -o me.exe
-$ ./me.exe
-...
-14:25:49.227003  ## {确认收到, Time:3449, From:1, To:0, <T3446:P0>}
-14:25:49.227015  ## {申请资源, Time:3445, From:1, To:-1, <T3444:P1>}
-14:25:49.227018  ## {确认收到, Time:3451, From:0, To:1, <T3444:P1>}
-14:25:49.227004 [3452]P1 准备占用资源 {request queue:<T3444:P1><T3446:P0>}
-panic: 资源正在被 <T3446:P0> 占据，<T3444:P1> 却想获取资源。
-...
-```
-
-从上图的 log 可以清除地看到，P1 先回复 P0 收到了 <T3446:P0> 消息，然后才发布了 <T3444:P1> 申请资源的消息。这导致了 <T3446:P0> 抢先占用资源，引发 panic。
-
 ## 问题
 
 多个 process 组成分享同一个 resource，但 resource 最多只能被一个 process 占用。由于 process 是分布式的，只能通过各自的 clock 读取时间值，这些 clock 的时间值不一定同步，没有办法通过时间上的编排来分别占用 resource。需要靠算法满足以下要求：
