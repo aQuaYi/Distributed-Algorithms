@@ -2,24 +2,13 @@ package mutualexclusion
 
 import (
 	"fmt"
-	"log"
-	"math/rand"
 	"sync"
-	"time"
 
 	"github.com/aQuaYi/observer"
 )
 
 // OTHERS 表示信息接收方为其他所有 process
 const OTHERS = -1
-
-var needDebug = false
-
-func init() {
-	log.SetFlags(log.LstdFlags | log.Lmicroseconds)
-	debugPrintf("程序开始运行")
-	rand.Seed(time.Now().UnixNano())
-}
 
 // Process 是进程的接口
 type Process interface {
