@@ -1,13 +1,13 @@
-* 分布式系统原型
+# 分布式系统原型
 
-** Mutual Exclusion
+## Mutual Exclusion
 
 Lamport 在论文《Time, Clocks and the Ordering of Events in a Distributed System》中提到的 Mutual Exclusion 算法。
 
-** Raft
+## Raft
 
-** POW
+## POW
 
-** POS
+## POS
 
-** Paxos
+## Paxos
