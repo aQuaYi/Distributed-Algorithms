@@ -1,6 +1,6 @@
 # 分布式系统原型
 
-[![License](http://img.shields.io/badge/license-MIT-red.svg?style=flat)](https://github.com/aQuaYi/Distributed-Algorithms/blob/master/LICENSE.txt)
+[![License](http://img.shields.io/badge/license-MIT-red.svg?style=flat)](https://github.com/aQuaYi/Distributed-Algorithms/blob/master/LICENSE)
 [![Build Status](https://www.travis-ci.org/aQuaYi/Distributed-Algorithms.svg?branch=master)](https://www.travis-ci.org/aQuaYi/Distributed-Algorithms)
 [![codecov](https://codecov.io/gh/aQuaYi/Distributed-Algorithms/branch/master/graph/badge.svg)](https://codecov.io/gh/aQuaYi/Distributed-Algorithms)
 [![Go Report Card](https://goreportcard.com/badge/github.com/aQuaYi/Distributed-Algorithms)](https://goreportcard.com/report/github.com/aQuaYi/Distributed-Algorithms)
