@@ -22,7 +22,7 @@ type resource struct {
 	occupiedBy     Timestamp      // 记录当前占用资源的 timestamp, nil 表示资源未被占用
 	timestamps     []Timestamp    // 按顺序保存占用资源的 timestamp
 	times          []time.Time    // 记录每次占用资源的起止时间，用于分析算法的效率
-	wg             sync.WaitGroup // 完成全部占用计划前，阻塞主 goroutine
+	wg             sync.WaitGroup // 完成全部占用前，阻塞主 goroutine
 }
 
 func newResource(times int) *resource {
@@ -62,11 +62,13 @@ func (r *resource) Release(ts Timestamp) {
 	}
 
 	r.lastOccupiedBy, r.occupiedBy = ts, nil
-	r.wg.Done() // 完成一次占用
 
 	r.times = append(r.times, time.Now())
 
 	debugPrintf("~~~ @resource: %s released ~~~ ", ts)
+
+	r.wg.Done() // 完成一次占用
+
 }
 
 func (r *resource) report() string {

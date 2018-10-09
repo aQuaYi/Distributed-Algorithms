@@ -50,5 +50,5 @@ func Test_timestamp_IsBefore(t *testing.T) {
 	time, process := 1, 0
 	ts := newTimestamp(time, process)
 	ast.False(ts.IsBefore(0))
-	ast.True(ts.IsBefore(1))
+	ast.True(ts.IsBefore(2))
 }

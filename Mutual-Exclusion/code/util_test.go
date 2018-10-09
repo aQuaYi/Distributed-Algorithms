@@ -27,6 +27,7 @@ func Test_debugPrintf_toPrint(t *testing.T) {
 
 	ast.True(strings.Contains(sb.String(), words))
 }
+
 func Test_debugPrintf_notToPrint(t *testing.T) {
 	// 避免 debugprint 输出
 	temp := needDebug
