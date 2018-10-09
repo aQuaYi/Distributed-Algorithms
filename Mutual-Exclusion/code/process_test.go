@@ -49,7 +49,7 @@ func Test_process(t *testing.T) {
 	ast := assert.New(t)
 	//
 	amount := 131072
-	for all := 2; all <= 128; all *= 2 {
+	for all := 2; all <= 16; all *= 2 {
 		times := amount / all
 		name := fmt.Sprintf("%d Process × %d 次 = 共计 %d 次", all, times, amount)
 		t.Run(name, func(t *testing.T) {
