@@ -9,7 +9,9 @@
 
 Lamport 在论文《Time, Clocks and the Ordering of Events in a Distributed System》中提到的 Mutual Exclusion 算法。
 
-## Raft
+## [Raft](Raft)
+
+Diego Ongaro 和 John Ousterhout 认为 Paxos 难以理解， 于是在 [《In Search of an Understandable Consensus Algorithm (Extended Version)》](Raft/raft-extended.pdf) 中以可理解为目标，提出了一种新的共识算法——Raft。
 
 ## POW
 
