@@ -14,16 +14,16 @@ import "github.com/aQuaYi/Distributed-Algorithms/Raft/code/labgob"
 // believes it is the leader.
 func (rf *Raft) GetState() (int, bool) {
 	var term int
-	var isleader bool
+	var isLeader bool
 	// Your code here (2A).
 
 	// 添加 RLock 是为了避免在 Lock 期间读取到数据
 	rf.rwmu.RLock()
 	term = rf.currentTerm
-	isleader = rf.state == LEADER
+	isLeader = rf.state == LEADER
 	rf.rwmu.RUnlock()
 
-	return term, isleader
+	return term, isLeader
 }
 
 //
