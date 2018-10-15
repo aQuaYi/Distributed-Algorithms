@@ -254,7 +254,7 @@ type toFollowerArgs struct {
 	votedFor int
 }
 
-// dicover leader or new term
+// discover leader or new term
 func toFollower(rf *Raft, args interface{}) fsmState {
 	a, ok := args.(toFollowerArgs)
 	if !ok {

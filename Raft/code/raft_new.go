@@ -18,7 +18,7 @@ type Raft struct {
 	// This implementation doesn't use disk; ti will save and restore
 	// persistent state from a Persister object
 	// Raft should initialize its state from Persister,
-	// and should use it to save its persistent state each tiem the state changes
+	// and should use it to save its persistent state each item the state changes
 	// Use ReadRaftState() and SaveRaftState
 	persister *Persister // Object to hold this peer's persisted state
 	me        int        // this peer's index into peers[]
@@ -35,7 +35,7 @@ type Raft struct {
 	logs        []LogEntry // 此 server 中保存的 logs
 
 	// Volatile state on all servers:
-	commitIndex int // logs 中已经 commited 的 log 的最大索引号
+	commitIndex int // logs 中已经 committed 的 log 的最大索引号
 	lastApplied int // logs 中最新元素的索引号
 
 	// Volatile state on leaders:

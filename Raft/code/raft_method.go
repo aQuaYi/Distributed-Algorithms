@@ -39,7 +39,7 @@ func (rf *Raft) persist() {
 
 //
 // restore previously persisted state.
-// func (*Deocder) Decode(e interface{}) error
+// func (*Decoder) Decode(e interface{}) error
 //     Decode reads the next value from the input stream and stores it in
 //     the data represented by the empty interface value. If e is nil, the
 //     value will be discarded.

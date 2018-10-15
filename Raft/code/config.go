@@ -173,20 +173,20 @@ func (cfg *config) start1(i int) {
 			} else if v, ok := (m.Command).(int); ok {
 				cfg.mu.Lock()
 				for j := 0; j < len(cfg.logs); j++ {
-					if old, oldok := cfg.logs[j][m.CommandIndex]; oldok && old != v {
+					if old, oldOK := cfg.logs[j][m.CommandIndex]; oldOK && old != v {
 						// some server has already committed a different value for this entry!
 						errMsg = fmt.Sprintf("commit index=%v S#%v %v != S#%v %v",
 							m.CommandIndex, i, m.Command, j, old)
 					}
 				}
-				_, prevok := cfg.logs[i][m.CommandIndex-1]
+				_, prevOK := cfg.logs[i][m.CommandIndex-1]
 				cfg.logs[i][m.CommandIndex] = v
 				if m.CommandIndex > cfg.maxIndex {
 					cfg.maxIndex = m.CommandIndex
 				}
 				cfg.mu.Unlock()
 
-				if m.CommandIndex > 1 && prevok == false {
+				if m.CommandIndex > 1 && prevOK == false {
 					errMsg = fmt.Sprintf("server %v apply out of order %v", i, m.CommandIndex)
 				}
 			} else {
@@ -285,8 +285,8 @@ func (cfg *config) rpcTotal() int {
 	return cfg.net.GetTotalCount()
 }
 
-func (cfg *config) setunreliable(unrel bool) {
-	cfg.net.Reliable(!unrel)
+func (cfg *config) setunreliable(unRel bool) {
+	cfg.net.Reliable(!unRel)
 }
 
 func (cfg *config) setlongreordering(longrel bool) {
@@ -492,12 +492,12 @@ func (cfg *config) end() {
 	if cfg.t.Failed() == false {
 		cfg.mu.Lock()
 		t := time.Since(cfg.t0).Seconds()     // real time
-		npeers := cfg.n                       // number of Raft peers
-		nrpc := cfg.rpcTotal() - cfg.rpcs0    // number of RPC sends
-		ncmds := cfg.maxIndex - cfg.maxIndex0 // number of Raft agreements reported
+		nPeers := cfg.n                       // number of Raft peers
+		nRPC := cfg.rpcTotal() - cfg.rpcs0    // number of RPC sends
+		nCMDs := cfg.maxIndex - cfg.maxIndex0 // number of Raft agreements reported
 		cfg.mu.Unlock()
 
 		fmt.Printf("  ... Passed --")
-		fmt.Printf("  %4.1f  %d %4d %4d\n", t, npeers, nrpc, ncmds)
+		fmt.Printf("  %4.1f  %d %4d %4d\n", t, nPeers, nRPC, nCMDs)
 	}
 }
