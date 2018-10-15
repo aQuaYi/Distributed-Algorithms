@@ -9,8 +9,6 @@ import (
 // field names must start with capital letters!
 //
 type RequestVoteArgs struct {
-	// Your data here (2A, 2B).
-
 	Term         int // candidate's term
 	CandidateID  int // candidate requesting vote
 	LastLogIndex int // index of candidate's last log entry

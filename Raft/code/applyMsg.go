@@ -88,7 +88,7 @@ func (rf *Raft) checkApplyLoop(applyCh chan ApplyMsg) {
 // 	     temp == {4,5,6,7,8}
 // i = (5-1)/2 = 2
 // 超过半数的 server 拥有 {4,5,6}
-// 其中 temp[i] == 6 是最大值
+// 其中 temp[i] == 6
 func maxMajorityIndex(matchIndex []int) int {
 	temp := make([]int, len(matchIndex))
 	copy(temp, matchIndex)
