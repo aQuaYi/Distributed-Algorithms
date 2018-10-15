@@ -125,7 +125,7 @@ func (rf *Raft) AppendEntries(args *AppendEntriesArgs, reply *AppendEntriesReply
 	if len(args.Entries) == 0 {
 		debugPrintf("%s 接收到 heartbeat", rf)
 		// 由于并没有给 rf.logs 添加 entries
-		// 所以，reply.Succuess 为 false
+		// 所以，reply.Success 为 false
 		// 避免了频繁的 checkApply
 		reply.Success = false
 		// 下次继续发送 leader.logs[PrevLogIndex+1:] 过来，就好了

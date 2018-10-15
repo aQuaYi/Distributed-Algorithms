@@ -36,61 +36,8 @@ func (reply RequestVoteReply) String() string {
 	return fmt.Sprintf("voteReply{Term:%d,isGranted:%t}", reply.Term, reply.IsVoteGranted)
 }
 
-// // RequestVote 投票工作
-// // example RequestVote RPC handler.
-// //
-// func (rf *Raft) RequestVote(args *RequestVoteArgs, reply *RequestVoteReply) {
-// 	// Your code here (2A, 2B).
-
-// 	// TODO: 注释这里的每一句话
-
-// 	rf.rwmu.Lock()
-// 	defer rf.rwmu.Unlock()
-
-// 	debugPrintf("[Enter RequestVote][server: %v]term :%v voted for:%v, log len: %v, logs: %v, commitIndex: %v, received RequestVote: %v\n", rf.me, rf.currentTerm, rf.votedFor, len(rf.logs), rf.logs, rf.commitIndex, args)
-
-// 	// 1. false if term < currentTerm
-// 	if args.Term < rf.currentTerm {
-// 		reply.IsVoteGranted = false
-// 		// TODO: 此处直接 return 可否
-// 	} else if args.Term > rf.currentTerm {
-// 		rf.votedFor = NULL
-// 		rf.state = FOLLOWER
-// 		// TODO: 此处直接 return 可否
-// 	}
-// 	// TODO: Term 相等的情况是什么
-
-// 	// 2. votedFor is null or candidateId and
-// 	//    candidate's log is at least as up-to-date as receiver's log, then grant vote
-// 	//    If the logs have last entries with different terms, then the log with the later term is more up-to-date
-// 	//    If the logs end with the same term, then whichever log is longer is more up-to-date
-// 	//
-// 	// if (rf.votedFor == NULL || rf.votedFor == args.CandidateID) &&
-// 	// 	((args.LastLogTerm > rf.logs[len(rf.logs)-1].LogTerm) ||
-// 	// 		((args.LastLogTerm == rf.logs[len(rf.logs)-1].LogTerm) && args.LastLogIndex >= len(rf.logs)-1)) {
-// 	if isValidArgs(rf, args) {
-// 		debugPrintf("[RequestVote][server: %v]term :%v voted for:%v, logs: %v, commitIndex: %v, received RequestVote: %v\n", rf.me, rf.currentTerm, rf.votedFor, rf.logs, rf.commitIndex, args)
-// 		reply.Term = rf.currentTerm
-// 		reply.IsVoteGranted = true
-// 		rf.votedFor = args.CandidateID
-
-// 		// TODO: 遇见了合格的候选人，为什么要等到 rf.electionTimer.Stop 才返回 requestVote
-// 		if !rf.electionTimer.Stop() {
-// 			debugPrintf("[server %d] RequestVote: drain timer\n", rf.me)
-// 			<-rf.electionTimer.C
-// 		}
-
-// 		timeout := time.Duration(500 + rand.Int31n(400))
-// 		rf.electionTimer.Reset(timeout * time.Millisecond)
-// 	} else {
-// 		reply.IsVoteGranted = false
-// 	}
-
-// }
-
 // RequestVote 投票工作
 // example RequestVote RPC handler.
-//
 func (rf *Raft) RequestVote(args *RequestVoteArgs, reply *RequestVoteReply) {
 	// Your code here (2A, 2B).
 
@@ -169,7 +116,7 @@ func isValidArgs(rf *Raft, args *RequestVoteArgs) bool {
 // look at the comments in ./labrpc/labrpc.go for more details.
 //
 // if you're having trouble getting RPC to work, check that you've
-// capitalized all field names in structs passed over RPC, and
+// capitalized all field names in struct passed over RPC, and
 // that the caller passes the address of the reply struct with &, not
 // the struct itself.
 //
