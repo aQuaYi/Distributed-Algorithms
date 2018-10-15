@@ -7,7 +7,6 @@ type LogEntry struct {
 	Command  interface{} // 具体的命令内容
 }
 
-// TODO: 注释 truncateLog
 func truncateLog(lastIncludedIndex int, lastIncludedTerm int, log []LogEntry) []LogEntry {
 	var newLogEntries []LogEntry
 	newLogEntries = append(newLogEntries, LogEntry{LogIndex: lastIncludedIndex, LogTerm: lastIncludedTerm})
