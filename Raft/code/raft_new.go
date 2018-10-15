@@ -2,11 +2,12 @@ package raft
 
 import (
 	"fmt"
+	"math/rand"
 	"sync"
 	"time"
-)
 
-import "github.com/aQuaYi/Distributed-Algorithms/Raft/code/labrpc"
+	"github.com/aQuaYi/Distributed-Algorithms/Raft/code/labrpc"
+)
 
 // Raft implements a single Raft peer.
 type Raft struct {
@@ -36,7 +37,7 @@ type Raft struct {
 
 	// Volatile state on all servers:
 	commitIndex int // logs 中已经 committed 的 log 的最大索引号
-	lastApplied int // logs 中最新元素的索引号
+	lastApplied int // logs 中已经执行的最后的 log 的索引号
 
 	// Volatile state on leaders:
 	nextIndex  []int // 下一个要发送给 follower 的 log 的索引号
@@ -53,8 +54,8 @@ type Raft struct {
 	shutdownChan chan struct{}
 	shutdownWG   sync.WaitGroup
 
-	// 当 rf 接收到合格的 rpc 信号时，会通过 resetElectionTimerChan 发送信号
-	resetElectionTimerChan chan struct{}
+	// 当 rf 接收到合格的 rpc 信号时，会通过 resetElectionChan 发送信号
+	resetElectionChan chan struct{}
 
 	// candidate 或 leader 中途转变为 follower 的话，就关闭这个 channel 来发送信号
 	// 因为，同一个 rf 不可能既是 candidate 又是 leader
@@ -67,7 +68,9 @@ type Raft struct {
 	// 关闭，则表示需要终结此次 election
 	endElectionChan chan struct{}
 
-	//
+	// 2018-10-15 新添加的属性
+	// closeElectionLoopChan 成为 Leader 时，关闭 electionLoop
+	closeElectionLoopChan chan struct{} // TODO: 在 newRaft 中添加
 }
 
 func (rf *Raft) String() string {
@@ -106,34 +109,41 @@ func newRaft(peers []*labrpc.ClientEnd, me int, persister *Persister) *Raft {
 		// endElectionChan 需要用到的时候，再赋值
 
 		// 靠数据来传递信号，所以,  设置缓冲
-		resetElectionTimerChan: make(chan struct{}, 3),
-		toCheckApplyChan:       make(chan struct{}, 3),
+		resetElectionChan:     make(chan struct{}, 3),
+		toCheckApplyChan:      make(chan struct{}, 3),
+		closeElectionLoopChan: make(chan struct{}, 2),
 	}
 
 	rf.addHandlers()
 
-	go electionLoop(rf)
+	electionLoop2(rf)
 
 	return rf
 }
 
 // 触发 election timer 超时，就开始新的选举
-func electionLoop(rf *Raft) {
-	rf.shutdownWG.Add(1)
+func electionLoop2(rf *Raft) {
+	rf.resetElectionChan <- struct{}{}
 
-	for {
-		rf.resetElectionTimer()
-
-		select {
-		case <-rf.electionTimer.C:
-			debugPrintf("%s 在 electionLoop 中，从 case <-rf.electionTimer.C 收到信号, 将要开始 term(%d) 的 election", rf, rf.currentTerm+1)
-			rf.call(electionTimeOutEvent, nil)
-		case <-rf.resetElectionTimerChan:
-			debugPrintf("%s 在 electionLoop 中，从 case <-rf.resetElectionTimerChan 收到信号", rf)
-		case <-rf.shutdownChan:
-			debugPrintf(" S#%d 在 electionLoop 的 case <- rf.shutdownChan，收到信号。关闭 electionLoop", rf.me)
-			rf.shutdownWG.Done()
-			return
+	go func() {
+		for {
+			select {
+			case <-rf.electionTimer.C:
+				debugPrintf("%s 在 electionLoop 中，从 case <-rf.electionTimer.C 收到信号, 将要开始 term(%d) 的 election", rf, rf.currentTerm+1)
+				rf.call(electionTimeOutEvent, nil)
+			case <-rf.resetElectionChan:
+				debugPrintf("%s 在 electionLoop 中，从 case <-rf.resetElectionTimerChan 收到信号", rf)
+				rf.resetElectionTimer()
+			case <-rf.closeElectionLoopChan:
+				debugPrintf(" S#%d 在 electionLoop 的 case <- rf.shutdownChan，收到信号。关闭 electionLoop", rf.me)
+				return
+			}
 		}
-	}
+	}()
+}
+
+func (rf *Raft) resetElectionTimer() {
+	timeout := time.Duration(150+rand.Int63n(151)) * time.Millisecond
+	rf.electionTimer.Reset(timeout)
+	debugPrintf("%s election timer 已经重置, 时长： %s", rf, timeout)
 }

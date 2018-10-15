@@ -83,6 +83,6 @@ func (rf *Raft) addHandlers() {
 	rf.addHandler(CANDIDATE, discoverNewLeaderEvent, fsmHandler(toFollower))
 
 	// 添加 LEADER 状态下的处理函数
-	rf.addHandler(LEADER, discoverNewTermEvent, fsmHandler(toFollower))
-	rf.addHandler(LEADER, discoverNewLeaderEvent, fsmHandler(toFollower))
+	rf.addHandler(LEADER, discoverNewTermEvent, fsmHandler(leaderToFollower))
+	rf.addHandler(LEADER, discoverNewLeaderEvent, fsmHandler(leaderToFollower))
 }

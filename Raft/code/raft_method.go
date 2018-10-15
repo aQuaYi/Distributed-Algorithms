@@ -3,8 +3,6 @@ package raft
 import (
 	"bytes"
 	"io"
-	"math/rand"
-	"time"
 )
 
 import "github.com/aQuaYi/Distributed-Algorithms/Raft/code/labgob"
@@ -87,10 +85,4 @@ func (rf *Raft) readPersist(data []byte) {
 	}
 
 	debugPrintf("%s readPersisted!", rf)
-}
-
-func (rf *Raft) resetElectionTimer() {
-	timeout := time.Duration(150+rand.Int63n(151)) * time.Millisecond
-	rf.electionTimer.Reset(timeout)
-	debugPrintf("%s election timer 已经重置, 时长： %s", rf, timeout)
 }

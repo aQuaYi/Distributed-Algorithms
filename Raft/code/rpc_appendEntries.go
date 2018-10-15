@@ -76,7 +76,7 @@ func (rf *Raft) AppendEntries(args *AppendEntriesArgs, reply *AppendEntriesReply
 
 	// 运行到这里，可以认为接收到了合格的 rpc 信号，可以重置 election timer 了
 	debugPrintf("%s 收到了 valid appendEntries RPC 信号，准备重置 election timer", rf)
-	rf.resetElectionTimerChan <- struct{}{}
+	rf.resetElectionChan <- struct{}{}
 
 	// 2. Reply false at once if log doesn't contain an entry at prevLogIndex whose term matches prevLogTerm
 	if len(rf.logs) <= args.PrevLogIndex {

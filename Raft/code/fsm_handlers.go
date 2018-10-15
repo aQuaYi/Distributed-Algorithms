@@ -119,6 +119,11 @@ func comeToPower(rf *Raft, args interface{}) fsmState {
 	}
 	rf.convertToFollowerChan = make(chan struct{})
 
+	// 关闭 electionLoop
+	close(rf.closeElectionLoopChan)
+	rf.closeElectionLoopChan = nil
+	rf.electionTimer = nil
+
 	// 新当选的 Leader 需要重置以下两个属性
 	rf.nextIndex = make([]int, len(rf.peers))
 	for i := range rf.nextIndex {
@@ -139,7 +144,7 @@ func heartbeating(rf *Raft) {
 
 	for {
 		// 对于自己只用直接重置 timer
-		rf.resetElectionTimerChan <- struct{}{}
+		// rf.resetElectionChan <- struct{}{}
 
 		// 并行地给 所有的 FOLLOWER 发送 appendEntries RPC
 		go oneHearteat(rf)
@@ -277,6 +282,37 @@ func toFollower(rf *Raft, args interface{}) fsmState {
 		close(rf.endElectionChan)
 		rf.endElectionChan = nil
 	}
+
+	return FOLLOWER
+}
+
+// discover leader or new term
+func leaderToFollower(rf *Raft, args interface{}) fsmState {
+	a, ok := args.(toFollowerArgs)
+	if !ok {
+		panic("toFollower 需要正确的参数")
+	}
+
+	// 遇到新 term 的话，需要更新 currentTerm
+	rf.currentTerm = max(rf.currentTerm, a.term)
+	// 遇到新 leader 的话，需要更新 votedFor
+	rf.votedFor = a.votedFor
+
+	// rf.convertToFollowerChan != nil 就一定是 open 的
+	// 这是靠锁保证的
+	if rf.convertToFollowerChan != nil {
+		close(rf.convertToFollowerChan)
+		rf.convertToFollowerChan = nil
+	}
+
+	if rf.endElectionChan != nil {
+		close(rf.endElectionChan)
+		rf.endElectionChan = nil
+	}
+
+	rf.electionTimer = time.NewTimer(time.Second)
+	rf.closeElectionLoopChan = make(chan struct{}, 3)
+	electionLoop2(rf)
 
 	return FOLLOWER
 }
