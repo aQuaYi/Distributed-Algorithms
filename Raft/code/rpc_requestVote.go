@@ -39,10 +39,6 @@ func (reply RequestVoteReply) String() string {
 // RequestVote 投票工作
 // example RequestVote RPC handler.
 func (rf *Raft) RequestVote(args *RequestVoteArgs, reply *RequestVoteReply) {
-	// Your code here (2A, 2B).
-
-	// TODO: 注释这里的每一句话
-
 	debugPrintf("%s  收到投票请求 [%s]", rf, args)
 
 	// 1. replay false if term < currentTerm
@@ -66,10 +62,6 @@ func (rf *Raft) RequestVote(args *RequestVoteArgs, reply *RequestVoteReply) {
 	//    candidate's log is at least as up-to-date as receiver's log, then grant vote
 	//    If the logs have last entries with different terms, then the log with the later term is more up-to-date
 	//    If the logs end with the same term, then whichever log is longer is more up-to-date
-	//
-	// if (rf.votedFor == NULL || rf.votedFor == args.CandidateID) &&
-	// 	((args.LastLogTerm > rf.logs[len(rf.logs)-1].LogTerm) ||
-	// 		((args.LastLogTerm == rf.logs[len(rf.logs)-1].LogTerm) && args.LastLogIndex >= len(rf.logs)-1)) {
 	if isValidArgs(rf, args) {
 		debugPrintf("%s   投票给了 < %s >", rf, args)
 		reply.Term = rf.currentTerm
