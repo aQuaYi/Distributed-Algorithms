@@ -116,13 +116,13 @@ func newRaft(peers []*labrpc.ClientEnd, me int, persister *Persister) *Raft {
 
 	rf.addHandlers()
 
-	electionLoop2(rf)
+	electionLoop(rf)
 
 	return rf
 }
 
 // 触发 election timer 超时，就开始新的选举
-func electionLoop2(rf *Raft) {
+func electionLoop(rf *Raft) {
 	rf.resetElectionChan <- struct{}{}
 
 	go func() {

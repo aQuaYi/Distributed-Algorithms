@@ -312,7 +312,7 @@ func leaderToFollower(rf *Raft, args interface{}) fsmState {
 
 	rf.electionTimer = time.NewTimer(time.Second)
 	rf.closeElectionLoopChan = make(chan struct{}, 3)
-	electionLoop2(rf)
+	electionLoop(rf)
 
 	return FOLLOWER
 }
