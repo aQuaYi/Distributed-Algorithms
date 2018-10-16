@@ -36,9 +36,9 @@ func (rf *Raft) checkApplyLoop(applyCh chan ApplyMsg) {
 	for {
 		select {
 		case <-rf.toCheckApplyChan:
-			debugPrintf(" S#%d 在 checkApplyLoop 的 case <- rf.toCheckApplyChan，收到信号。将要检查是否有新的 entry 可以 commit", rf.me)
+			debugPrintf(" R%d 在 checkApplyLoop 的 case <- rf.toCheckApplyChan，收到信号。将要检查是否有新的 entry 可以 commit", rf.me)
 		case <-rf.shutdownChan:
-			debugPrintf(" S#%d 在 checkApplyLoop 的 case <- rf.shutdownChan，收到信号。关闭 checkApplyLoop", rf.me)
+			debugPrintf(" R%d 在 checkApplyLoop 的 case <- rf.shutdownChan，收到信号。关闭 checkApplyLoop", rf.me)
 			rf.shutdownWG.Done()
 			return
 		}

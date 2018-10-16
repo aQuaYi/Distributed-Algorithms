@@ -16,7 +16,7 @@ type RequestVoteArgs struct {
 }
 
 func (a RequestVoteArgs) String() string {
-	return fmt.Sprintf("voteArgs{S#%d;Term:%d;LastLogIndex:%d;LastLogTerm:%d}",
+	return fmt.Sprintf("voteArgs{R%d;Term:%d;LastLogIndex:%d;LastLogTerm:%d}",
 		a.CandidateID, a.Term, a.LastLogIndex, a.LastLogTerm)
 }
 

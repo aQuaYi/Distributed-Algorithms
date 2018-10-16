@@ -126,7 +126,7 @@ func (rf *Raft) GetState() (int, bool) {
 //
 func (rf *Raft) Kill() {
 	// Your code here, if desired.
-	debugPrintf("S#%d Killing", rf.me)
+	debugPrintf("R%d Killing", rf.me)
 
 	// 关闭前，先去检查一遍 apply
 	rf.toCheckApplyChan <- struct{}{}

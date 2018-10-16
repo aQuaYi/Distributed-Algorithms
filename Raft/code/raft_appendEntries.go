@@ -17,7 +17,7 @@ type AppendEntriesArgs struct {
 }
 
 func (a AppendEntriesArgs) String() string {
-	return fmt.Sprintf("appendEntriesArgs{S#%d, term:%d, PrevLogIndex:%d, PrevLogTerm:%d, LeaderCommit:%d, entries:%v}",
+	return fmt.Sprintf("appendEntriesArgs{R%d, term:%d, PrevLogIndex:%d, PrevLogTerm:%d, LeaderCommit:%d, entries:%v}",
 		a.LeaderID, a.Term, a.PrevLogIndex, a.PrevLogTerm, a.LeaderCommit, a.Entries)
 }
 

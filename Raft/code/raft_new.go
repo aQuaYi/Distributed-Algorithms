@@ -78,7 +78,7 @@ func (rf *Raft) String() string {
 	if rf.state == LEADER {
 		postfix = fmt.Sprintf(", nextIndex%v, matchIndex%v", rf.nextIndex, rf.matchIndex)
 	}
-	return fmt.Sprintf("@@ S#%d:T%d:L%d:%s:%2d, commitIndex:%d, lastApplied:%d, logs:%v%s @@",
+	return fmt.Sprintf("@@ R%d:T%d:L%d:%s:%2d, commitIndex:%d, lastApplied:%d, logs:%v%s @@",
 		rf.me, rf.currentTerm, len(rf.logs), rf.state, rf.votedFor,
 		rf.commitIndex, rf.lastApplied, rf.logs, postfix)
 }
@@ -135,7 +135,7 @@ func electionLoop2(rf *Raft) {
 				debugPrintf("%s 在 electionLoop 中，从 case <-rf.resetElectionTimerChan 收到信号", rf)
 				rf.resetElectionTimer()
 			case <-rf.closeElectionLoopChan:
-				debugPrintf(" S#%d 在 electionLoop 的 case <- rf.shutdownChan，收到信号。关闭 electionLoop", rf.me)
+				debugPrintf(" R%d 在 electionLoop 的 case <- rf.shutdownChan，收到信号。关闭 electionLoop", rf.me)
 				return
 			}
 		}
