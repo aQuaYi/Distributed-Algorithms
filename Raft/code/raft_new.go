@@ -147,7 +147,8 @@ func electionLoop(rf *Raft) {
 }
 
 func (rf *Raft) resetElectionTimer() {
-	timeout := time.Duration(150+rand.Int63n(151)) * time.Millisecond
-	rf.electionTimer.Reset(timeout)
-	debugPrintf("%s election timer 已经重置, 时长： %s", rf, timeout)
+	interval := MinElectionInterval + rand.Intn(MinElectionInterval)
+	d := time.Duration(interval) * time.Millisecond
+	rf.electionTimer.Reset(d)
+	debugPrintf("%s election timer 已经重置, 时长： %s", rf, d)
 }
