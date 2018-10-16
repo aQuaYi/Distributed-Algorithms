@@ -127,6 +127,8 @@ func newRaft(peers []*labrpc.ClientEnd, me int, persister *Persister) *Raft {
 
 // 触发 election timer 超时，就开始新的选举
 func electionLoop(rf *Raft) {
+	debugPrintf("%s 启动 electionLoop", rf)
+
 	rf.heartbeatChan <- struct{}{}
 
 	go func() {
@@ -139,7 +141,7 @@ func electionLoop(rf *Raft) {
 				debugPrintf("%s 收到 heartbeat 准备重置 election timer", rf)
 				rf.resetElectionTimer()
 			case <-rf.closeElectionLoopChan:
-				debugPrintf(" R%d 在 electionLoop 的 case <- rf.shutdownChan，收到信号。关闭 electionLoop", rf.me)
+				debugPrintf("%s 关闭 electionLoop", rf)
 				return
 			}
 		}

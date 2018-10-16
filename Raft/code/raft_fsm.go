@@ -44,7 +44,7 @@ var (
 	// 如果发现对方的 term 数比自己的高，会触发此事件
 	discoverNewTermEvent = fsmEvent("discover new term")
 	// server 在接收到 appendEntriesArgs 后，发现对方的 term
-	discoverNewLeaderEvent = fsmEvent("disover a leader with higher term")
+	discoverNewLeaderEvent = fsmEvent("discover a leader with higher term")
 )
 
 // 添加 rf 转换状态时的处理函数
