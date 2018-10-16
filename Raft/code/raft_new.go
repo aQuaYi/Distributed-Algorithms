@@ -54,8 +54,8 @@ type Raft struct {
 	shutdownChan chan struct{}
 	shutdownWG   sync.WaitGroup
 
-	// 当 rf 接收到合格的 rpc 信号时，会通过 resetElectionChan 发送信号
-	resetElectionChan chan struct{}
+	// 当 rf 接收到合格的 rpc 信号时，会通过 heartbeatChan 发送信号
+	heartbeatChan chan struct{}
 
 	// candidate 或 leader 中途转变为 follower 的话，就关闭这个 channel 来发送信号
 	// 因为，同一个 rf 不可能既是 candidate 又是 leader
@@ -113,7 +113,7 @@ func newRaft(peers []*labrpc.ClientEnd, me int, persister *Persister) *Raft {
 		// endElectionChan 需要用到的时候，再赋值
 
 		// 靠数据来传递信号，所以,  设置缓冲
-		resetElectionChan:     make(chan struct{}, 3),
+		heartbeatChan:         make(chan struct{}, 3),
 		toCheckApplyChan:      make(chan struct{}, 3),
 		closeElectionLoopChan: make(chan struct{}, 2),
 	}
@@ -127,16 +127,16 @@ func newRaft(peers []*labrpc.ClientEnd, me int, persister *Persister) *Raft {
 
 // 触发 election timer 超时，就开始新的选举
 func electionLoop(rf *Raft) {
-	rf.resetElectionChan <- struct{}{}
+	rf.heartbeatChan <- struct{}{}
 
 	go func() {
 		for {
 			select {
 			case <-rf.electionTimer.C:
-				debugPrintf("%s 在 electionLoop 中，从 case <-rf.electionTimer.C 收到信号, 将要开始 term(%d) 的 election", rf, rf.currentTerm+1)
+				debugPrintf("%s election timeout", rf)
 				rf.call(electionTimeOutEvent, nil)
-			case <-rf.resetElectionChan:
-				debugPrintf("%s 在 electionLoop 中，从 case <-rf.resetElectionTimerChan 收到信号", rf)
+			case <-rf.heartbeatChan:
+				debugPrintf("%s 收到 heartbeat 准备重置 election timer", rf)
 				rf.resetElectionTimer()
 			case <-rf.closeElectionLoopChan:
 				debugPrintf(" R%d 在 electionLoop 的 case <- rf.shutdownChan，收到信号。关闭 electionLoop", rf.me)

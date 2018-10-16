@@ -68,7 +68,7 @@ func (rf *Raft) RequestVote(args *RequestVoteArgs, reply *RequestVoteReply) {
 
 		// 运行到这里，可以认为接收到了合格的 rpc 信号，可以重置 election timer 了
 		debugPrintf("%s  准备发送重置 election timer 信号", rf)
-		rf.resetElectionChan <- struct{}{}
+		rf.heartbeatChan <- struct{}{}
 	} else {
 		debugPrintf("%s  拒绝投票给 < %s >", rf, args)
 	}
