@@ -3,7 +3,6 @@ package raft
 // RequestVoteArgs is
 // example RequestVote RPC arguments structure.
 // field names must start with capital letters!
-//
 type RequestVoteArgs struct {
 	// Your data here (2A, 2B).
 }
