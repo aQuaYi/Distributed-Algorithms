@@ -1,15 +1,15 @@
 package raft
 
-type state int
+type fsmState int
 
 // 规定了 server 所需的 3 种状态
 const (
-	LEADER state = iota
+	LEADER fsmState = iota
 	CANDIDATE
 	FOLLOWER
 )
 
-func (s state) String() string {
+func (s fsmState) String() string {
 	switch s {
 	case LEADER:
 		return "Leader"
