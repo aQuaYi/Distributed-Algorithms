@@ -22,13 +22,13 @@ func (rf *Raft) call(event fsmEvent, args interface{}) {
 
 	if rf.handlers[oldState] == nil ||
 		rf.handlers[oldState][event] == nil {
-		msg := fmt.Sprintf("%s  的状态 (%s) 没有事件 (%s) 的转换 handler", rf, oldState, event)
+		msg := fmt.Sprintf("%s 的状态 (%s) 没有事件 (%s) 的转换 handler", rf, oldState, event)
 		panic(msg)
 	}
 
 	rf.state = rf.handlers[oldState][event](rf, args)
 
-	debugPrintf("%s  事件(%s)，已从 (%s) → (%s)", rf, event, oldState, rf.state)
+	debugPrintf("%s  事件(%s)，(%s) → (%s)", rf, event, oldState, rf.state)
 
 	rf.rwmu.Unlock()
 
