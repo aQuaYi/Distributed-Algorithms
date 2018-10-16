@@ -70,7 +70,7 @@ type Raft struct {
 
 	// 2018-10-15 新添加的属性
 	// closeElectionLoopChan 成为 Leader 时，关闭 electionLoop
-	closeElectionLoopChan chan struct{} // TODO: 在 newRaft 中添加
+	closeElectionLoopChan chan struct{}
 }
 
 func (rf *Raft) String() string {
