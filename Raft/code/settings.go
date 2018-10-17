@@ -12,10 +12,10 @@ func init() {
 }
 
 const (
-	// heartbeatInterval 发送心跳的时间间隔，ms
-	heartbeatInterval = 50 * time.Millisecond
+	// heartBeatInterval 发送心跳的时间间隔，ms
+	heartBeatInterval = 50 * time.Millisecond
 	// minElectionInterval 选举过期的最小时间间隔，ms
-	minElectionInterval = heartbeatInterval * 10
+	minElectionInterval = heartBeatInterval * 10
 	// minElectionInterval 选举过期的最大时间间隔，ms
 	maxElectionInterval = minElectionInterval * 8 / 5
 
