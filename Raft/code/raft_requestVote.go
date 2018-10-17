@@ -16,7 +16,7 @@ type RequestVoteArgs struct {
 }
 
 func (a RequestVoteArgs) String() string {
-	return fmt.Sprintf("voteArgs{R%d;Term:%d;LastLogIndex:%d;LastLogTerm:%d}",
+	return fmt.Sprintf("voteArgs{R%d:T%d;LastLogIndex:%d;LastLogTerm:%d}",
 		a.CandidateID, a.Term, a.LastLogIndex, a.LastLogTerm)
 }
 
@@ -25,13 +25,12 @@ func (a RequestVoteArgs) String() string {
 // field names must start with capital letters!
 //
 type RequestVoteReply struct {
-	// Your data here (2A).
 	Term          int  // 投票人的 currentTerm
 	IsVoteGranted bool // 返回 true，表示获得投票
 }
 
 func (reply RequestVoteReply) String() string {
-	return fmt.Sprintf("voteReply{Term:%d,isGranted:%t}", reply.Term, reply.IsVoteGranted)
+	return fmt.Sprintf("voteReply{T%d,isGranted:%t}", reply.Term, reply.IsVoteGranted)
 }
 
 // RequestVote 投票工作

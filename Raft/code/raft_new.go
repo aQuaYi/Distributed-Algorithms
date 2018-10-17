@@ -70,6 +70,8 @@ type Raft struct {
 	// 2018-10-15 新添加的属性
 	// closeElectionLoopChan 成为 Leader 时，关闭 electionLoop
 	closeElectionLoopChan chan struct{}
+
+	chanApply chan ApplyMsg
 }
 
 func (rf *Raft) String() string {
@@ -86,7 +88,7 @@ func (rf *Raft) details() string {
 		rf.commitIndex, rf.lastApplied, rf.logs, postfix)
 }
 
-func newRaft(peers []*labrpc.ClientEnd, me int, persister *Persister) *Raft {
+func newRaft(peers []*labrpc.ClientEnd, me int, persister *Persister, applyCh chan ApplyMsg) *Raft {
 	rf := &Raft{
 		peers:       peers,
 		persister:   persister,
@@ -115,6 +117,8 @@ func newRaft(peers []*labrpc.ClientEnd, me int, persister *Persister) *Raft {
 		heartbeatChan:         make(chan struct{}, 3),
 		toCheckApplyChan:      make(chan struct{}, 3),
 		closeElectionLoopChan: make(chan struct{}, 2),
+
+		chanApply: applyCh,
 	}
 
 	rf.addHandlers()

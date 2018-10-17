@@ -64,6 +64,16 @@ func (rf *Raft) sendInstallSnapshot(server int, args InstallSnapshotArgs, reply 
 	return ok
 }
 
+// restore previously persisted state.
+// func (*Decoder) Decode(e interface{}) error
+//     Decode reads the next value from the input stream and stores it in
+//     the data represented by the empty interface value. If e is nil, the
+//     value will be discarded.
+//     Otherwise, the value underlying e must be a pointer to the correct
+//     type for the next data item received. If the input is at EOF,
+//     Decode returns io.EOF and does not modify e
+//
+
 func (rf *Raft) readSnapshot(data []byte) {
 
 	rf.readPersist(rf.persister.ReadRaftState())
@@ -86,9 +96,9 @@ func (rf *Raft) readSnapshot(data []byte) {
 
 	rf.logs = truncateLog(LastIncludedIndex, LastIncludedTerm, rf.logs)
 
-	// msg := ApplyMsg{UseSnapshot: true, Snapshot: data}
+	msg := ApplyMsg{UseSnapshot: true, Snapshot: data}
 
 	go func() {
-		// rf.chanApply <- msg
+		rf.chanApply <- msg
 	}()
 }

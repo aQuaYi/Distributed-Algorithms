@@ -6,18 +6,16 @@ import (
 
 // AppendEntriesArgs 是添加 log 的参数
 type AppendEntriesArgs struct {
-	Term         int // leader.currentTerm
-	LeaderID     int // leader.me
-	PrevLogIndex int // index of log entry immediately preceding new ones
-	PrevLogTerm  int // term of prevLogIndex entry
-	LeaderCommit int // leader.commitIndex
-
-	Entries []LogEntry // 需要添加的 log 单元，为空时，表示此条消息是 heartBeat
-
+	Term         int        // leader.currentTerm
+	LeaderID     int        // leader.me
+	PrevLogIndex int        // index of log entry immediately preceding new ones
+	PrevLogTerm  int        // term of prevLogIndex entry
+	LeaderCommit int        // leader.commitIndex
+	Entries      []LogEntry // 需要添加的 log 单元，为空时，表示此条消息是 heartBeat
 }
 
 func (a AppendEntriesArgs) String() string {
-	return fmt.Sprintf("appendEntriesArgs{R%d, term:%d, PrevLogIndex:%d, PrevLogTerm:%d, LeaderCommit:%d, entries:%v}",
+	return fmt.Sprintf("appendEntriesArgs{R%d:T%d, PrevLogIndex:%d, PrevLogTerm:%d, LeaderCommit:%d, entries:%v}",
 		a.LeaderID, a.Term, a.PrevLogIndex, a.PrevLogTerm, a.LeaderCommit, a.Entries)
 }
 
@@ -29,7 +27,7 @@ type AppendEntriesReply struct {
 }
 
 func (r AppendEntriesReply) String() string {
-	return fmt.Sprintf("appendEntriesReply{term:%d, Success:%t, NextIndex:%d}",
+	return fmt.Sprintf("appendEntriesReply{T%d, Success:%t, NextIndex:%d}",
 		r.Term, r.Success, r.NextIndex)
 }
 

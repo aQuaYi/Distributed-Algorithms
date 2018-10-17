@@ -20,6 +20,8 @@ type ApplyMsg struct {
 	CommandValid bool        // TODO: 弄清楚这个干嘛的
 	CommandIndex int         // Command zd Raft.logs 中的索引号
 	Command      interface{} // Command 的具体内容
+	UseSnapshot  bool        // ignore for lab2; only used in lab3
+	Snapshot     []byte      // ignore for lab2; only used in lab3
 }
 
 func (a ApplyMsg) String() string {

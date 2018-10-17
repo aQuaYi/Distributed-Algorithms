@@ -32,7 +32,7 @@ import "github.com/aQuaYi/Distributed-Algorithms/Raft/code/labrpc"
 
 // Make is
 func Make(peers []*labrpc.ClientEnd, me int, persister *Persister, applyCh chan ApplyMsg) *Raft {
-	rf := newRaft(peers, me, persister)
+	rf := newRaft(peers, me, persister, applyCh)
 
 	go rf.checkApplyLoop(applyCh)
 
