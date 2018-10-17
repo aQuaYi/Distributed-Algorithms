@@ -137,7 +137,7 @@ func comeToPower(rf *Raft, args interface{}) fsmState {
 }
 
 func heartbeating(rf *Raft) {
-	hbPeriod := time.Duration(HBInterval) * time.Millisecond
+	hbPeriod := heartbeatInterval
 	hbTimer := time.NewTicker(hbPeriod)
 
 	debugPrintf("%s 开始发送周期性心跳，周期:%s", rf, hbPeriod)

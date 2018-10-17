@@ -2,7 +2,6 @@ package raft
 
 import (
 	"fmt"
-	"math/rand"
 	"sync"
 	"time"
 
@@ -149,8 +148,7 @@ func electionLoop(rf *Raft) {
 }
 
 func (rf *Raft) resetElectionTimer() {
-	interval := MinElectionInterval + rand.Intn(MinElectionInterval)
-	d := time.Duration(interval) * time.Millisecond
+	d := electionTimeout()
 	rf.electionTimer.Reset(d)
 	debugPrintf("%s election timer 已经重置, 时长： %s", rf, d)
 }
