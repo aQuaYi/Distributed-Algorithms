@@ -15,7 +15,7 @@ func (rf *Raft) addHandler(state fsmState, event fsmEvent, handler fsmHandler) {
 	rf.handlers[state][event] = handler
 }
 
-func (rf *Raft) call(event fsmEvent, args interface{}) {
+func (rf *Raft) call(event fsmEvent, args interface{}) { // TODO: 不需要 args 参数
 	rf.rwmu.Lock()
 
 	oldState := rf.state

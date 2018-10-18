@@ -38,6 +38,10 @@ func (reply RequestVoteReply) String() string {
 func (rf *Raft) RequestVote(args *RequestVoteArgs, reply *RequestVoteReply) {
 	debugPrintf("%s  收到投票请求 [%s]", rf, args)
 
+	// rf.rwmu.Lock() // TODO: 这里是否需要锁
+	// defer rf.rwmu.Unlock()
+	// defer rf.persist()
+
 	// 1. replay false if term < currentTerm
 	if args.Term < rf.currentTerm {
 		reply.Term = rf.currentTerm
@@ -49,7 +53,7 @@ func (rf *Raft) RequestVote(args *RequestVoteArgs, reply *RequestVoteReply) {
 	// 更新选民的 currentTerm
 	if args.Term > rf.currentTerm {
 		rf.call(discoverNewTermEvent,
-			toFollowerArgs{
+			toFollowerArgs{ // TODO: 所有的状态转换出发，其实都是不需要参数的
 				term:     args.Term,
 				votedFor: NOBODY,
 			})
@@ -60,24 +64,29 @@ func (rf *Raft) RequestVote(args *RequestVoteArgs, reply *RequestVoteReply) {
 	//    If the logs have last entries with different terms, then the log with the later term is more up-to-date
 	//    If the logs end with the same term, then whichever log is longer is more up-to-date
 	if isValidArgs(rf, args) {
-		debugPrintf("%s   投票给了 < %s >", rf, args)
+		debugPrintf("%s 投票给了 < %s >", rf, args)
+		// 运行到这里，可以认为接收到了合格的 rpc 信号，可以重置 election timer 了
+		rf.heartbeatChan <- struct{}{}
+		rf.votedFor = args.CandidateID
 		reply.Term = rf.currentTerm
 		reply.IsVoteGranted = true
-		rf.votedFor = args.CandidateID
-
-		// 运行到这里，可以认为接收到了合格的 rpc 信号，可以重置 election timer 了
-		debugPrintf("%s  准备发送重置 election timer 信号", rf)
-		rf.heartbeatChan <- struct{}{}
+		debugPrintf("%s 准备发送重置 election timer 信号", rf)
 	} else {
-		debugPrintf("%s  拒绝投票给 < %s >", rf, args)
+		debugPrintf("%s 拒绝投票给 < %s >", rf, args)
 	}
 
 }
 
 func isValidArgs(rf *Raft, args *RequestVoteArgs) bool {
+	term := rf.getLastTerm()
+	index := rf.getLastIndex()
 	return (rf.votedFor == NOBODY || rf.votedFor == args.CandidateID) &&
-		((args.LastLogTerm > rf.logs[len(rf.logs)-1].LogTerm) ||
-			((args.LastLogTerm == rf.logs[len(rf.logs)-1].LogTerm) && args.LastLogIndex >= len(rf.logs)-1))
+		isUpToDate(args, term, index)
+}
+
+func isUpToDate(args *RequestVoteArgs, term, index int) bool {
+	return (args.LastLogTerm > term) ||
+		(args.LastLogTerm == term && args.LastLogIndex >= index)
 }
 
 //

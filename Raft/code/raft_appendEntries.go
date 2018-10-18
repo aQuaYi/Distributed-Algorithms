@@ -53,17 +53,21 @@ func (rf *Raft) AppendEntries(args *AppendEntriesArgs, reply *AppendEntriesReply
 
 	debugPrintf("%s receive %s", rf, args)
 
-	reply.Term = rf.currentTerm
-	reply.NextIndex = args.PrevLogIndex + 1
+	// rf.rwmu.Lock() // TODO: 这里是否需要锁
+	// defer rf.rwmu.Unlock()
+	// defer rf.persist()
 
 	// 1. Replay false at once if term < currentTerm
+	reply.Success = false
 	if args.Term < rf.currentTerm {
-		reply.Success = false
+		reply.Term = rf.currentTerm
+		// reply.NextIndex = args.PrevLogIndex + 1
+		reply.NextIndex = rf.getLastIndex() + 1 // TODO: 这是什么意思呀？
 		return
 	}
 
 	if args.Term > rf.currentTerm ||
-		(rf.state == CANDIDATE && args.Term >= rf.currentTerm) {
+		(args.Term == rf.currentTerm && rf.state == CANDIDATE) {
 		rf.call(discoverNewLeaderEvent,
 			toFollowerArgs{
 				term:     args.Term,
@@ -76,13 +80,32 @@ func (rf *Raft) AppendEntries(args *AppendEntriesArgs, reply *AppendEntriesReply
 	debugPrintf("%s 收到了 valid appendEntries RPC 信号，准备重置 election timer", rf)
 	rf.heartbeatChan <- struct{}{}
 
+	reply.Term = rf.currentTerm
+	reply.Success = false
+
 	// 2. Reply false at once if log doesn't contain an entry at prevLogIndex whose term matches prevLogTerm
-	if len(rf.logs) <= args.PrevLogIndex {
+	if args.PrevLogIndex > rf.getLastIndex() {
 		debugPrintf("%s 含有的 logs 太短，不含有 PrevLogIndex == %d", rf, args.PrevLogIndex)
-		reply.NextIndex = len(rf.logs)
-		reply.Success = false
+		reply.NextIndex = rf.getLastIndex() + 1
 		return
 	}
+
+	baseIndex := rf.logs[0].LogIndex
+
+	if args.PrevLogIndex > baseIndex { // TODO: 这段代码是什么意思呀
+		term := rf.logs[args.PrevLogIndex-baseIndex].LogTerm
+		if args.PrevLogTerm != term {
+			for i := args.PrevLogIndex - 1; i >= baseIndex; i-- {
+				if rf.logs[i-baseIndex].LogTerm != term {
+					reply.NextIndex = i + 1
+					break // TODO: 试着把下面的 return 放上来
+				}
+			}
+			return
+		}
+	}
+
+	/* 以下是我的旧代码 */
 
 	if args.PrevLogIndex < rf.commitIndex {
 		debugPrintf("%s 收到一个旧的 appendEntriesArgs，因为 args.PrevLogIndex(%d) < rf.commitIndex(%d)", rf, args.PrevLogIndex, rf.commitIndex)
