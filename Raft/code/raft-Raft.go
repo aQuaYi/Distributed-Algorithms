@@ -45,5 +45,5 @@ type Raft struct {
 
 	/* ↑ state of raft on Figure 2 ↑ */
 
-	//
+	// TODO: 继续添加代码
 }
