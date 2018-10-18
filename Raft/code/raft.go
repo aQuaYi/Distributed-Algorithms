@@ -7,7 +7,7 @@ package raft
 //
 // rf = Make(...)
 //   create a new Raft server.
-// rf.Start(command interface{}) (index, term, isleader)
+// rf.Start(command interface{}) (index, term, isLeader)
 //   start agreement on a new log entry
 // rf.GetState() (term, isLeader)
 //   ask a Raft for its current term, and whether it thinks it is leader
@@ -26,7 +26,7 @@ import (
 // import "bytes"
 // import "labgob"
 
-//
+// ApplyMsg is
 // as each Raft peer becomes aware that successive log entries are
 // committed, the peer should send an ApplyMsg to the service (or
 // tester) on the same server, via the applyCh passed to Make(). set
@@ -43,7 +43,7 @@ type ApplyMsg struct {
 	CommandIndex int
 }
 
-//
+// Raft is
 // A Go object implementing a single Raft peer.
 //
 type Raft struct {
@@ -58,14 +58,15 @@ type Raft struct {
 
 }
 
+// GetState is
 // return currentTerm and whether this server
 // believes it is the leader.
 func (rf *Raft) GetState() (int, bool) {
 
 	var term int
-	var isleader bool
+	var isLeader bool
 	// Your code here (2A).
-	return term, isleader
+	return term, isLeader
 }
 
 //
@@ -106,7 +107,7 @@ func (rf *Raft) readPersist(data []byte) {
 	// }
 }
 
-//
+// RequestVoteArgs is
 // example RequestVote RPC arguments structure.
 // field names must start with capital letters!
 //
@@ -114,7 +115,7 @@ type RequestVoteArgs struct {
 	// Your data here (2A, 2B).
 }
 
-//
+// RequestVoteReply is
 // example RequestVote RPC reply structure.
 // field names must start with capital letters!
 //
@@ -122,7 +123,7 @@ type RequestVoteReply struct {
 	// Your data here (2A).
 }
 
-//
+// RequestVote is
 // example RequestVote RPC handler.
 //
 func (rf *Raft) RequestVote(args *RequestVoteArgs, reply *RequestVoteReply) {
@@ -154,7 +155,7 @@ func (rf *Raft) RequestVote(args *RequestVoteArgs, reply *RequestVoteReply) {
 // look at the comments in ../labrpc/labrpc.go for more details.
 //
 // if you're having trouble getting RPC to work, check that you've
-// capitalized all field names in structs passed over RPC, and
+// capitalized all field names in struts passed over RPC, and
 // that the caller passes the address of the reply struct with &, not
 // the struct itself.
 //
@@ -163,7 +164,7 @@ func (rf *Raft) sendRequestVote(server int, args *RequestVoteArgs, reply *Reques
 	return ok
 }
 
-//
+// Start is
 // the service using Raft (e.g. a k/v server) wants to start
 // agreement on the next command to be appended to Raft's log. if this
 // server isn't the leader, returns false. otherwise start the
@@ -187,7 +188,7 @@ func (rf *Raft) Start(command interface{}) (int, int, bool) {
 	return index, term, isLeader
 }
 
-//
+// Kill is
 // the tester calls Kill() when a Raft instance won't
 // be needed again. you are not required to do anything
 // in Kill(), but it might be convenient to (for example)
@@ -197,7 +198,7 @@ func (rf *Raft) Kill() {
 	// Your code here, if desired.
 }
 
-//
+// Make is
 // the service or tester wants to create a Raft server. the ports
 // of all the Raft servers (including this one) are in peers[]. this
 // server's port is peers[me]. all the servers' peers[] arrays

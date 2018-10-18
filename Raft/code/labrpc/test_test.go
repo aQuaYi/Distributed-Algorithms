@@ -218,9 +218,9 @@ func TestConcurrentMany(t *testing.T) {
 
 	ch := make(chan int)
 
-	nclients := 20
-	nrpcs := 10
-	for ii := 0; ii < nclients; ii++ {
+	nClients := 20
+	nRPCs := 10
+	for ii := 0; ii < nClients; ii++ {
 		go func(i int) {
 			n := 0
 			defer func() { ch <- n }()
@@ -229,7 +229,7 @@ func TestConcurrentMany(t *testing.T) {
 			rn.Connect(i, 1000)
 			rn.Enable(i, true)
 
-			for j := 0; j < nrpcs; j++ {
+			for j := 0; j < nRPCs; j++ {
 				arg := i*100 + j
 				reply := ""
 				e.Call("JunkServer.Handler2", arg, &reply)
@@ -237,19 +237,19 @@ func TestConcurrentMany(t *testing.T) {
 				if reply != wanted {
 					t.Fatalf("wrong reply %v from Handler1, expecting %v", reply, wanted)
 				}
-				n += 1
+				n++
 			}
 		}(ii)
 	}
 
 	total := 0
-	for ii := 0; ii < nclients; ii++ {
+	for ii := 0; ii < nClients; ii++ {
 		x := <-ch
 		total += x
 	}
 
-	if total != nclients*nrpcs {
-		t.Fatalf("wrong number of RPCs completed, got %v, expected %v", total, nclients*nrpcs)
+	if total != nClients*nRPCs {
+		t.Fatalf("wrong number of RPCs completed, got %v, expected %v", total, nClients*nRPCs)
 	}
 
 	n := rn.GetCount(1000)
@@ -277,8 +277,8 @@ func TestUnreliable(t *testing.T) {
 
 	ch := make(chan int)
 
-	nclients := 300
-	for ii := 0; ii < nclients; ii++ {
+	nClients := 300
+	for ii := 0; ii < nClients; ii++ {
 		go func(i int) {
 			n := 0
 			defer func() { ch <- n }()
@@ -295,18 +295,18 @@ func TestUnreliable(t *testing.T) {
 				if reply != wanted {
 					t.Fatalf("wrong reply %v from Handler1, expecting %v", reply, wanted)
 				}
-				n += 1
+				n++
 			}
 		}(ii)
 	}
 
 	total := 0
-	for ii := 0; ii < nclients; ii++ {
+	for ii := 0; ii < nClients; ii++ {
 		x := <-ch
 		total += x
 	}
 
-	if total == nclients || total == 0 {
+	if total == nClients || total == 0 {
 		t.Fatalf("all RPCs succeeded despite unreliable")
 	}
 }
@@ -333,8 +333,8 @@ func TestConcurrentOne(t *testing.T) {
 
 	ch := make(chan int)
 
-	nrpcs := 20
-	for ii := 0; ii < nrpcs; ii++ {
+	nRPCs := 20
+	for ii := 0; ii < nRPCs; ii++ {
 		go func(i int) {
 			n := 0
 			defer func() { ch <- n }()
@@ -346,23 +346,23 @@ func TestConcurrentOne(t *testing.T) {
 			if reply != wanted {
 				t.Fatalf("wrong reply %v from Handler2, expecting %v", reply, wanted)
 			}
-			n += 1
+			n++
 		}(ii)
 	}
 
 	total := 0
-	for ii := 0; ii < nrpcs; ii++ {
+	for ii := 0; ii < nRPCs; ii++ {
 		x := <-ch
 		total += x
 	}
 
-	if total != nrpcs {
-		t.Fatalf("wrong number of RPCs completed, got %v, expected %v", total, nrpcs)
+	if total != nRPCs {
+		t.Fatalf("wrong number of RPCs completed, got %v, expected %v", total, nRPCs)
 	}
 
 	js.mu.Lock()
 	defer js.mu.Unlock()
-	if len(js.log2) != nrpcs {
+	if len(js.log2) != nRPCs {
 		t.Fatalf("wrong number of RPCs delivered")
 	}
 
@@ -396,8 +396,8 @@ func TestRegression1(t *testing.T) {
 	// they'll be delayed.
 	rn.Enable("c", false)
 	ch := make(chan bool)
-	nrpcs := 20
-	for ii := 0; ii < nrpcs; ii++ {
+	nRPCs := 20
+	for ii := 0; ii < nRPCs; ii++ {
 		go func(i int) {
 			ok := false
 			defer func() { ch <- ok }()
@@ -430,7 +430,7 @@ func TestRegression1(t *testing.T) {
 		t.Fatalf("RPC took too long (%v) after Enable", dur)
 	}
 
-	for ii := 0; ii < nrpcs; ii++ {
+	for ii := 0; ii < nRPCs; ii++ {
 		<-ch
 	}
 

@@ -72,12 +72,14 @@ type replyMsg struct {
 	reply []byte
 }
 
+// ClientEnd is
 type ClientEnd struct {
 	endname interface{}   // this end-point's name
 	ch      chan reqMsg   // copy of Network.endCh
 	done    chan struct{} // closed when Network is cleaned up
 }
 
+// Call is
 // send an RPC, wait for the reply.
 // the return value indicates success; false means that
 // no reply was received from the server.
@@ -141,9 +143,9 @@ func MakeNetwork() *Network {
 	go func() {
 		for {
 			select {
-			case xreq := <-rn.endCh:
+			case xReq := <-rn.endCh:
 				atomic.AddInt32(&rn.count, 1)
-				go rn.ProcessReq(xreq)
+				go rn.ProcessReq(xReq)
 			case <-rn.done:
 				return
 			}
@@ -411,12 +413,14 @@ func (rs *Server) dispatch(req reqMsg) replyMsg {
 	}
 }
 
+// GetCount is
 func (rs *Server) GetCount() int {
 	rs.mu.Lock()
 	defer rs.mu.Unlock()
 	return rs.count
 }
 
+// Service is
 // an object with methods that can be called via RPC.
 // a single server may have more than one Service.
 type Service struct {
@@ -426,6 +430,7 @@ type Service struct {
 	methods map[string]reflect.Method
 }
 
+// MakeService is
 func MakeService(rcvr interface{}) *Service {
 	svc := &Service{}
 	svc.typ = reflect.TypeOf(rcvr)
@@ -435,22 +440,22 @@ func MakeService(rcvr interface{}) *Service {
 
 	for m := 0; m < svc.typ.NumMethod(); m++ {
 		method := svc.typ.Method(m)
-		mtype := method.Type
-		mname := method.Name
+		mType := method.Type
+		mName := method.Name
 
 		//fmt.Printf("%v pp %v ni %v 1k %v 2k %v no %v\n",
-		//	mname, method.PkgPath, mtype.NumIn(), mtype.In(1).Kind(), mtype.In(2).Kind(), mtype.NumOut())
+		//	mName, method.PkgPath, mType.NumIn(), mType.In(1).Kind(), mType.In(2).Kind(), mType.NumOut())
 
 		if method.PkgPath != "" || // capitalized?
-			mtype.NumIn() != 3 ||
-			//mtype.In(1).Kind() != reflect.Ptr ||
-			mtype.In(2).Kind() != reflect.Ptr ||
-			mtype.NumOut() != 0 {
+			mType.NumIn() != 3 ||
+			//mType.In(1).Kind() != reflect.Ptr ||
+			mType.In(2).Kind() != reflect.Ptr ||
+			mType.NumOut() != 0 {
 			// the method is not suitable for a handler
-			//fmt.Printf("bad method: %v\n", mname)
+			//fmt.Printf("bad method: %v\n", mName)
 		} else {
 			// the method looks like a handler
-			svc.methods[mname] = method
+			svc.methods[mName] = method
 		}
 	}
 
@@ -485,7 +490,7 @@ func (svc *Service) dispatch(methname string, req reqMsg) replyMsg {
 		return replyMsg{true, rb.Bytes()}
 	} else {
 		choices := []string{}
-		for k, _ := range svc.methods {
+		for k := range svc.methods {
 			choices = append(choices, k)
 		}
 		log.Fatalf("labrpc.Service.dispatch(): unknown method %v in %v; expecting one of %v\n",

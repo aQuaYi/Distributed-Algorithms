@@ -2,11 +2,12 @@ package raft
 
 import "log"
 
-// Debugging
-const Debug = 0
+// Debugging is
+const Debugging = 0
 
+// DPrintf is
 func DPrintf(format string, a ...interface{}) (n int, err error) {
-	if Debug > 0 {
+	if Debugging > 0 {
 		log.Printf(format, a...)
 	}
 	return

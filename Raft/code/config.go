@@ -58,10 +58,10 @@ type config struct {
 	maxIndex0 int
 }
 
-var ncpu_once sync.Once
+var ncpuOnce sync.Once
 
-func make_config(t *testing.T, n int, unreliable bool) *config {
-	ncpu_once.Do(func() {
+func makeConfig(t *testing.T, n int, unreliable bool) *config {
+	ncpuOnce.Do(func() {
 		if runtime.NumCPU() < 2 {
 			fmt.Printf("warning: only one CPU, which may conceal locking bugs\n")
 		}
@@ -171,35 +171,35 @@ func (cfg *config) start1(i int) {
 	applyCh := make(chan ApplyMsg)
 	go func() {
 		for m := range applyCh {
-			err_msg := ""
+			errMsg := ""
 			if m.CommandValid == false {
 				// ignore other types of ApplyMsg
 			} else if v, ok := (m.Command).(int); ok {
 				cfg.mu.Lock()
 				for j := 0; j < len(cfg.logs); j++ {
-					if old, oldok := cfg.logs[j][m.CommandIndex]; oldok && old != v {
+					if old, oldOK := cfg.logs[j][m.CommandIndex]; oldOK && old != v {
 						// some server has already committed a different value for this entry!
-						err_msg = fmt.Sprintf("commit index=%v server=%v %v != server=%v %v",
+						errMsg = fmt.Sprintf("commit index=%v server=%v %v != server=%v %v",
 							m.CommandIndex, i, m.Command, j, old)
 					}
 				}
-				_, prevok := cfg.logs[i][m.CommandIndex-1]
+				_, prevOK := cfg.logs[i][m.CommandIndex-1]
 				cfg.logs[i][m.CommandIndex] = v
 				if m.CommandIndex > cfg.maxIndex {
 					cfg.maxIndex = m.CommandIndex
 				}
 				cfg.mu.Unlock()
 
-				if m.CommandIndex > 1 && prevok == false {
-					err_msg = fmt.Sprintf("server %v apply out of order %v", i, m.CommandIndex)
+				if m.CommandIndex > 1 && prevOK == false {
+					errMsg = fmt.Sprintf("server %v apply out of order %v", i, m.CommandIndex)
 				}
 			} else {
-				err_msg = fmt.Sprintf("committed command %v is not an int", m.Command)
+				errMsg = fmt.Sprintf("committed command %v is not an int", m.Command)
 			}
 
-			if err_msg != "" {
-				log.Fatalf("apply error: %v\n", err_msg)
-				cfg.applyErr[i] = err_msg
+			if errMsg != "" {
+				log.Fatalf("apply error: %v\n", errMsg)
+				cfg.applyErr[i] = errMsg
 				// keep reading after error so that Raft doesn't block
 				// holding locks...
 			}
@@ -289,8 +289,8 @@ func (cfg *config) rpcTotal() int {
 	return cfg.net.GetTotalCount()
 }
 
-func (cfg *config) setunreliable(unrel bool) {
-	cfg.net.Reliable(!unrel)
+func (cfg *config) setunreliable(unRel bool) {
+	cfg.net.Reliable(!unRel)
 }
 
 func (cfg *config) setlongreordering(longrel bool) {
@@ -351,8 +351,8 @@ func (cfg *config) checkTerms() int {
 func (cfg *config) checkNoLeader() {
 	for i := 0; i < cfg.n; i++ {
 		if cfg.connected[i] {
-			_, is_leader := cfg.rafts[i].GetState()
-			if is_leader {
+			_, isLeader := cfg.rafts[i].GetState()
+			if isLeader {
 				cfg.t.Fatalf("expected no leader, but %v claims to be leader", i)
 			}
 		}
@@ -377,7 +377,7 @@ func (cfg *config) nCommitted(index int) (int, interface{}) {
 				cfg.t.Fatalf("committed values do not match: index %v, %v, %v\n",
 					index, cmd, cmd1)
 			}
-			count += 1
+			count++
 			cmd = cmd1
 		}
 	}
@@ -496,12 +496,12 @@ func (cfg *config) end() {
 	if cfg.t.Failed() == false {
 		cfg.mu.Lock()
 		t := time.Since(cfg.t0).Seconds()     // real time
-		npeers := cfg.n                       // number of Raft peers
-		nrpc := cfg.rpcTotal() - cfg.rpcs0    // number of RPC sends
-		ncmds := cfg.maxIndex - cfg.maxIndex0 // number of Raft agreements reported
+		nPeers := cfg.n                       // number of Raft peers
+		nRPC := cfg.rpcTotal() - cfg.rpcs0    // number of RPC sends
+		nCMDs := cfg.maxIndex - cfg.maxIndex0 // number of Raft agreements reported
 		cfg.mu.Unlock()
 
 		fmt.Printf("  ... Passed --")
-		fmt.Printf("  %4.1f  %d %4d %4d\n", t, npeers, nrpc, ncmds)
+		fmt.Printf("  %4.1f  %d %4d %4d\n", t, nPeers, nRPC, nCMDs)
 	}
 }
