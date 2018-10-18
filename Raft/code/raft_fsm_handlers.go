@@ -40,6 +40,7 @@ func startNewElection(rf *Raft, null interface{}) fsmState {
 
 		// 并行拉票
 		go func(server int, replyChan chan *RequestVoteReply) {
+			// TODO: 应该统一生成选票，而不是每个单独生成
 			args := rf.newRequestVoteArgs()
 			// 生成投票结果变量
 			reply := new(RequestVoteReply)
@@ -52,7 +53,7 @@ func startNewElection(rf *Raft, null interface{}) fsmState {
 			}
 
 			if args.Term == rf.currentTerm && rf.state == CANDIDATE {
-				// 返回投票结果
+				// rf 仍为 CANDIDATE 且 处于发出选票的同一个 term 才表示获得了有效回复
 				replyChan <- reply
 				debugPrintf("%s 已经收集 R%d 对 %s 的 %s", rf, server, args, reply)
 			}
@@ -209,6 +210,12 @@ func oneHearteat(rf *Raft) {
 			// if get an old RPC reply
 			// TODO: 为什么接收到一个 old rpc reply
 			if args.Term != rf.currentTerm {
+				return
+			}
+
+			if !rf.isLeader() {
+				// TODO: 不是 Leader 的话，就肯定不出同一个 term 了。
+				// 所以，感觉这个有点多余
 				return
 			}
 

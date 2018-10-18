@@ -105,66 +105,82 @@ func (rf *Raft) AppendEntries(args *AppendEntriesArgs, reply *AppendEntriesReply
 		}
 	}
 
+	if args.PrevLogIndex >= baseIndex {
+		rf.logs = rf.logs[:args.PrevLogIndex+1-baseIndex]
+		rf.logs = append(rf.logs, args.Entries...)
+		reply.Success = true
+		reply.NextIndex = rf.getLastIndex() + 1
+	}
+
+	//println(rf.me,rf.getLastIndex(),reply.NextIndex,rf.log)
+	if args.LeaderCommit > rf.commitIndex {
+		rf.commitIndex = min(rf.getLastIndex(), args.LeaderCommit)
+		rf.toCheckApplyChan <- struct{}{}
+	}
+
+	return
+
 	/* 以下是我的旧代码 */
 
-	if args.PrevLogIndex < rf.commitIndex {
-		debugPrintf("%s 收到一个旧的 appendEntriesArgs，因为 args.PrevLogIndex(%d) < rf.commitIndex(%d)", rf, args.PrevLogIndex, rf.commitIndex)
-		reply.Success = false
-		// reply,Success == false，会使用 min 方法更新 leader.nextIndex[server]
-		// 所以，把 reply.NextIndex 设置成最大值，
-		// 这样就不会更改 leader.nextIndex[server]
-		reply.NextIndex = 1<<63 - 1
-		return
-	}
+	// if args.PrevLogIndex < rf.commitIndex {
+	// 	debugPrintf("%s 收到一个旧的 appendEntriesArgs，因为 args.PrevLogIndex(%d) < rf.commitIndex(%d)", rf, args.PrevLogIndex, rf.commitIndex)
+	// 	reply.Success = false
+	// 	// reply,Success == false，会使用 min 方法更新 leader.nextIndex[server]
+	// 	// 所以，把 reply.NextIndex 设置成最大值，
+	// 	// 这样就不会更改 leader.nextIndex[server]
+	// 	reply.NextIndex = 1<<63 - 1
+	// 	return
+	// }
 
-	rf.rwmu.Lock()
-	defer rf.rwmu.Unlock()
+	// rf.rwmu.Lock()
+	// defer rf.rwmu.Unlock()
 
-	// 3. if an existing entry conflicts with a new one (same index but diff terms),
-	//    delete the existing entry and all that follows it
-	if rf.logs[args.PrevLogIndex].LogTerm != args.PrevLogTerm {
-		debugPrintf("%s 中 rf.logs[args.PrevLogIndex].LogTerm(%d)!=args.PrevLogTerm(%d) ", rf, rf.logs[args.PrevLogIndex].LogTerm, args.PrevLogTerm)
-		reply.NextIndex = args.PrevLogIndex
-		wrongTerm := rf.logs[args.PrevLogIndex].LogTerm
+	// // 3. if an existing entry conflicts with a new one (same index but diff terms),
+	// //    delete the existing entry and all that follows it
+	// if rf.logs[args.PrevLogIndex].LogTerm != args.PrevLogTerm {
+	// 	debugPrintf("%s 中 rf.logs[args.PrevLogIndex].LogTerm(%d)!=args.PrevLogTerm(%d) ", rf, rf.logs[args.PrevLogIndex].LogTerm, args.PrevLogTerm)
+	// 	reply.NextIndex = args.PrevLogIndex
+	// 	wrongTerm := rf.logs[args.PrevLogIndex].LogTerm
 
-		for reply.NextIndex > rf.commitIndex+1 &&
-			rf.logs[reply.NextIndex].LogTerm == wrongTerm {
-			reply.NextIndex--
-		}
-		debugPrintf("%s reply.NextIndex == %d", rf, reply.NextIndex)
+	// for reply.NextIndex > rf.commitIndex+1 &&
+	// 	rf.logs[reply.NextIndex].LogTerm == wrongTerm {
+	// 	reply.NextIndex--
+	// }
+	// debugPrintf("%s reply.NextIndex == %d", rf, reply.NextIndex)
 
-		// 删除失效的 logs
-		rf.logs = rf.logs[:reply.NextIndex]
-		reply.Success = false
-		return
-	}
+	// 	// 删除失效的 logs
+	// 	rf.logs = rf.logs[:reply.NextIndex]
+	// 	reply.Success = false
+	// 	return
+	// }
 
 	// 运行到这里，说明 rf.logs[args.PrevLogIndex].LogTerm == args.PrevLogTerm
 
 	// 4. append any new entries not already in the log
 
-	if len(args.Entries) == 0 {
-		debugPrintf("%s 接收到 heartbeat", rf)
-		// 由于并没有给 rf.logs 添加 entries
-		// 所以，reply.Success 为 false
-		// 避免了频繁的 checkApply
-		reply.Success = false
-		// 下次继续发送 leader.logs[PrevLogIndex+1:] 过来，就好了
-		reply.NextIndex = args.PrevLogIndex + 1
-	} else {
-		// 只保留合规的 logs
-		rf.logs = rf.logs[:args.PrevLogIndex+1]
-		rf.logs = append(rf.logs, args.Entries...)
-		debugPrintf("%s  len(rf.logs)== %d，已经 添加 entries{%v}", rf, len(rf.logs), args.Entries)
-		rf.persist()
-		reply.NextIndex = len(rf.logs)
-		reply.Success = true
-	}
+	// if len(args.Entries) == 0 {
+	// 	debugPrintf("%s 接收到 heartbeat", rf)
+	// 	// 由于并没有给 rf.logs 添加 entries
+	// 	// 所以，reply.Success 为 false
+	// 	// 避免了频繁的 checkApply
+	// 	reply.Success = false
+	// 	// 下次继续发送 leader.logs[PrevLogIndex+1:] 过来，就好了
+	// 	reply.NextIndex = args.PrevLogIndex + 1
+	// } else {
+	// 	// 只保留合规的 logs
+	// 	rf.logs = rf.logs[:args.PrevLogIndex+1]
+	// 	rf.logs = append(rf.logs, args.Entries...)
+	// 	debugPrintf("%s  len(rf.logs)== %d，已经 添加 entries{%v}", rf, len(rf.logs), args.Entries)
+	// 	rf.persist()
+	// 	reply.NextIndex = len(rf.logs)
+	// 	reply.Success = true
+	// }
 
-	// 5. if leadercommit > commitIndex, set commitIndex = min(leaderCommit, index of last new entry)
-	if args.LeaderCommit > rf.commitIndex {
-		rf.commitIndex = min(args.LeaderCommit, len(rf.logs)-1)
-	}
+	// // 5. if leadercommit > commitIndex, set commitIndex = min(leaderCommit, index of last new entry)
+	// if args.LeaderCommit > rf.commitIndex {
+	// 	rf.commitIndex = min(args.LeaderCommit, len(rf.logs)-1)
+	// }
 
-	rf.toCheckApplyChan <- struct{}{}
+	// rf.toCheckApplyChan <- struct{}{}
+
 }
