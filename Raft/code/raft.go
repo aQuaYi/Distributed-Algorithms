@@ -17,29 +17,8 @@ package raft
 //   in the same server.
 //
 
-import (
-	"sync"
-
-	"github.com/aQuaYi/Distributed-Algorithms/Raft/code/labrpc"
-)
-
 // import "bytes"
 // import "labgob"
-
-// Raft is
-// A Go object implementing a single Raft peer.
-//
-type Raft struct {
-	mu        sync.Mutex          // Lock to protect shared access to this peer's state
-	peers     []*labrpc.ClientEnd // RPC end points of all peers
-	persister *Persister          // Object to hold this peer's persisted state
-	me        int                 // this peer's index into peers[]
-
-	// Your data here (2A, 2B, 2C).
-	// Look at the paper's Figure 2 for a description of what
-	// state a Raft server must maintain.
-
-}
 
 //
 // save Raft's persistent state to stable storage,
