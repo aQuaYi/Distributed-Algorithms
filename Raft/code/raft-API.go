@@ -1,6 +1,10 @@
 package raft
 
-import "github.com/aQuaYi/Distributed-Algorithms/Raft/code/labrpc"
+import (
+	"time"
+
+	"github.com/aQuaYi/Distributed-Algorithms/Raft/code/labrpc"
+)
 
 /**
  * // create a new Raft server instance:
@@ -37,11 +41,97 @@ func Make(peers []*labrpc.ClientEnd, me int,
 	rf.me = me
 
 	// Your initialization code here (2A, 2B, 2C).
+	rf.state = FOLLOWER
+	rf.votedFor = NOBODY
+	rf.logs = append(rf.logs, LogEntry{LogIndex: 1, LogTerm: 0})
+	rf.currentTerm = 0
+	rf.chanCommit = make(chan struct{}, 100)
+	rf.chanHeartbeat = make(chan struct{}, 100)
+	rf.chanGrantVote = make(chan struct{}, 100)
+	rf.chanLeader = make(chan struct{}, 100)
+	rf.chanApply = applyCh
 
 	// initialize from state persisted before a crash
 	rf.readPersist(persister.ReadRaftState())
 
+	go rf.stateLoop()
+
+	go rf.applyLoop()
+
 	return rf
+}
+
+func (rf *Raft) stateLoop() {
+	for {
+		switch rf.state {
+		case FOLLOWER:
+			select {
+			case <-time.After(electionTimeout()):
+				rf.state = CANDIDATE
+			case <-rf.chanHeartbeat:
+			case <-rf.chanGrantVote:
+			}
+		case CANDIDATE:
+			rf.newElection()
+		case LEADER:
+			rf.newHeartBeat()
+		}
+	}
+}
+
+func (rf *Raft) newElection() {
+	DPrintf("%s begin new election\n", rf)
+
+	rf.mu.Lock()
+	rf.currentTerm++
+	rf.votedFor = rf.me
+	rf.voteCount = 1
+	rf.persist()
+	rf.mu.Unlock()
+
+	go rf.boatcastRequestVote()
+
+	select {
+	case <-rf.chanHeartbeat:
+		rf.state = FOLLOWER
+		DPrintf("%s receives chanHeartbeat", rf)
+	case <-rf.chanLeader:
+		rf.mu.Lock()
+		rf.state = LEADER
+		DPrintf("%s is Leader now", rf)
+		rf.nextIndex = make([]int, len(rf.peers))
+		rf.matchIndex = make([]int, len(rf.peers))
+		for i := range rf.peers {
+			rf.nextIndex[i] = rf.getLastIndex() + 1
+			rf.matchIndex[i] = 0
+		}
+		rf.mu.Unlock()
+	case <-time.After(electionTimeout()):
+	}
+}
+
+func (rf *Raft) newHeartBeat() {
+	DPrintf("%s boatcastAppendEntries", rf)
+	rf.boatcastAppendEntries()
+	<-time.After(heartBeat)
+}
+
+func (rf *Raft) applyLoop() {
+	for {
+		select {
+		case <-rf.chanCommit:
+			rf.mu.Lock()
+			commitIndex := rf.commitIndex
+			baseIndex := rf.getBaseIndex()
+			for i := rf.lastApplied + 1; i <= commitIndex; i++ {
+				msg := ApplyMsg{CommandIndex: i, Command: rf.logs[i-baseIndex].Command}
+				rf.chanApply <- msg
+				//fmt.Printf("me:%d %v\n",rf.me,msg)
+				rf.lastApplied = i
+			}
+			rf.mu.Unlock()
+		}
+	}
 }
 
 // Start is

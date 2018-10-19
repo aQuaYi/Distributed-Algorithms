@@ -52,6 +52,40 @@ func (rf *Raft) RequestVote(args *RequestVoteArgs, reply *RequestVoteReply) {
 		return
 	}
 
+	if args.Term > rf.currentTerm {
+		rf.currentTerm = args.Term
+		rf.state = FOLLOWER
+		rf.votedFor = NOBODY
+	}
+
+	reply.Term = rf.currentTerm
+
+	// 2. votedFor is null or candidateId and
+	//    candidate's log is at least as up-to-date as receiver's log, then grant vote
+	//    If the logs have last entries with different terms, then the log with the later term is more up-to-date
+	//    If the logs end with the same term, then whichever log is longer is more up-to-date
+
+	if isValidArgs(rf, args) {
+		reply.VoteGranted = true
+		rf.chanGrantVote <- struct{}{}
+		rf.state = FOLLOWER
+		rf.votedFor = args.CandidateID
+		DPrintf("%s voted for %s", rf, args)
+		return
+	}
+	DPrintf("%s **NOT** voted for %s", rf, args)
+}
+
+func isValidArgs(rf *Raft, args *RequestVoteArgs) bool {
+	term := rf.getLastTerm()
+	index := rf.getLastIndex()
+	return (rf.votedFor == NOBODY || rf.votedFor == args.CandidateID) &&
+		isUpToDate(args, term, index)
+}
+
+func isUpToDate(args *RequestVoteArgs, term, index int) bool {
+	return (args.LastLogTerm > term) ||
+		(args.LastLogTerm == term && args.LastLogIndex >= index)
 }
 
 //
@@ -86,4 +120,8 @@ func (rf *Raft) RequestVote(args *RequestVoteArgs, reply *RequestVoteReply) {
 func (rf *Raft) sendRequestVote(server int, args *RequestVoteArgs, reply *RequestVoteReply) bool {
 	ok := rf.peers[server].Call("Raft.RequestVote", args, reply)
 	return ok
+}
+
+func (rf *Raft) boatcastRequestVote() {
+	panic("boatcastRequestVote is empty")
 }
