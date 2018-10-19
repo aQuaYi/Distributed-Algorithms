@@ -1,14 +1,13 @@
 package raft
 
-import (
-	"fmt"
-)
+import "fmt"
 
 // RequestVoteArgs 获取投票参数
 // example RequestVote RPC arguments structure.
 // field names must start with capital letters!
 //
 type RequestVoteArgs struct {
+	// Your data here (2A, 2B).
 	Term         int // candidate's term
 	CandidateID  int // candidate requesting vote
 	LastLogIndex int // index of candidate's last log entry
@@ -20,23 +19,27 @@ func (a RequestVoteArgs) String() string {
 		a.CandidateID, a.Term, a.LastLogIndex, a.LastLogTerm)
 }
 
-// RequestVoteReply 投票回复
+// RequestVoteReply is
 // example RequestVote RPC reply structure.
 // field names must start with capital letters!
 //
 type RequestVoteReply struct {
-	Term          int  // 投票人的 currentTerm
-	IsVoteGranted bool // 返回 true，表示获得投票
+	// Your data here (2A).
+	Term        int
+	VoteGranted bool
 }
 
 func (reply RequestVoteReply) String() string {
-	return fmt.Sprintf("voteReply{T%d,isGranted:%t}", reply.Term, reply.IsVoteGranted)
+	return fmt.Sprintf("voteReply{T%d,Granted:%t}", reply.Term, reply.VoteGranted)
 }
 
-// RequestVote 投票工作
+// RequestVote is
 // example RequestVote RPC handler.
+//
 func (rf *Raft) RequestVote(args *RequestVoteArgs, reply *RequestVoteReply) {
-	debugPrintf("%s  收到投票请求 [%s]", rf, args)
+	// Your code here (2A, 2B).
+
+	DPrintf("%s 收到投票请求 [%s]", rf, args)
 
 	// rf.rwmu.Lock() // TODO: 这里是否需要锁
 	// defer rf.rwmu.Unlock()
@@ -45,48 +48,10 @@ func (rf *Raft) RequestVote(args *RequestVoteArgs, reply *RequestVoteReply) {
 	// 1. replay false if term < currentTerm
 	if args.Term < rf.currentTerm {
 		reply.Term = rf.currentTerm
-		reply.IsVoteGranted = false
+		reply.VoteGranted = false
 		return
 	}
 
-	// 如果 args.Term > rf.currentTerm 的话
-	// 更新选民的 currentTerm
-	if args.Term > rf.currentTerm {
-		rf.call(discoverNewTermEvent,
-			toFollowerArgs{ // TODO: 所有的状态转换出发，其实都是不需要参数的
-				term:     args.Term,
-				votedFor: NOBODY,
-			})
-	}
-
-	// 2. votedFor is null or candidateId and
-	//    candidate's log is at least as up-to-date as receiver's log, then grant vote
-	//    If the logs have last entries with different terms, then the log with the later term is more up-to-date
-	//    If the logs end with the same term, then whichever log is longer is more up-to-date
-	if isValidArgs(rf, args) {
-		debugPrintf("%s 投票给了 < %s >", rf, args)
-		// 运行到这里，可以认为接收到了合格的 rpc 信号，可以重置 election timer 了
-		rf.heartbeatChan <- struct{}{}
-		rf.votedFor = args.CandidateID
-		reply.Term = rf.currentTerm
-		reply.IsVoteGranted = true
-		debugPrintf("%s 准备发送重置 election timer 信号", rf)
-	} else {
-		debugPrintf("%s 拒绝投票给 < %s >", rf, args)
-	}
-
-}
-
-func isValidArgs(rf *Raft, args *RequestVoteArgs) bool {
-	term := rf.getLastTerm()
-	index := rf.getLastIndex()
-	return (rf.votedFor == NOBODY || rf.votedFor == args.CandidateID) &&
-		isUpToDate(args, term, index)
-}
-
-func isUpToDate(args *RequestVoteArgs, term, index int) bool {
-	return (args.LastLogTerm > term) ||
-		(args.LastLogTerm == term && args.LastLogIndex >= index)
 }
 
 //
@@ -111,24 +76,14 @@ func isUpToDate(args *RequestVoteArgs, term, index int) bool {
 // handler function on the server side does not return.  Thus there
 // is no need to implement your own timeouts around Call().
 //
-// look at the comments in ./labrpc/labrpc.go for more details.
+// look at the comments in ../labrpc/labrpc.go for more details.
 //
 // if you're having trouble getting RPC to work, check that you've
-// capitalized all field names in struct passed over RPC, and
+// capitalized all field names in struts passed over RPC, and
 // that the caller passes the address of the reply struct with &, not
 // the struct itself.
 //
 func (rf *Raft) sendRequestVote(server int, args *RequestVoteArgs, reply *RequestVoteReply) bool {
 	ok := rf.peers[server].Call("Raft.RequestVote", args, reply)
 	return ok
-}
-
-func (rf *Raft) newRequestVoteArgs() *RequestVoteArgs {
-	args := &RequestVoteArgs{
-		Term:         rf.currentTerm,
-		CandidateID:  rf.me,
-		LastLogIndex: len(rf.logs) - 1,
-		LastLogTerm:  rf.logs[len(rf.logs)-1].LogTerm,
-	}
-	return args
 }

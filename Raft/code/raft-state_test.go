@@ -5,7 +5,7 @@ import "testing"
 func Test_state_String(t *testing.T) {
 	tests := []struct {
 		name string
-		s    fsmState
+		s    state
 		want string
 	}{
 
