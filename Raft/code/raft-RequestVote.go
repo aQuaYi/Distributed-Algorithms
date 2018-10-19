@@ -88,7 +88,7 @@ func isUpToDate(args *RequestVoteArgs, term, index int) bool {
 		(args.LastLogTerm == term && args.LastLogIndex >= index)
 }
 
-func (rf *Raft) boatcastRequestVote() {
+func (rf *Raft) broadcastRequestVote() {
 	var args RequestVoteArgs
 
 	rf.mu.Lock()

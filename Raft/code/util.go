@@ -3,7 +3,7 @@ package raft
 import "log"
 
 // Debugging is
-const Debugging = 0
+const Debugging = 1
 
 // DPrintf is
 func DPrintf(format string, a ...interface{}) (n int, err error) {

@@ -81,10 +81,11 @@ func (rf *Raft) stateLoop() {
 }
 
 func (rf *Raft) newElection() {
-	DPrintf("%s begin new election\n", rf)
-
 	rf.mu.Lock()
 	rf.currentTerm++
+
+	DPrintf("%s begin new election\n", rf)
+
 	rf.votedFor = rf.me
 	rf.voteCount = 1
 
@@ -93,7 +94,7 @@ func (rf *Raft) newElection() {
 
 	rf.mu.Unlock()
 
-	go rf.boatcastRequestVote()
+	go rf.broadcastRequestVote()
 
 	select {
 	case <-rf.chanHeartbeat:
@@ -115,8 +116,8 @@ func (rf *Raft) newElection() {
 }
 
 func (rf *Raft) newHeartBeat() {
-	DPrintf("%s boatcastAppendEntries", rf)
-	rf.boatcastAppendEntries()
+	DPrintf("%s broadcastAppendEntries", rf)
+	rf.broadcastAppendEntries()
 	<-time.After(heartBeat)
 }
 
@@ -161,6 +162,8 @@ func (rf *Raft) Start(command interface{}) (int, int, bool) {
 
 	// Your code here (2B).
 
+	// Your code above
+
 	return index, term, isLeader
 }
 
@@ -172,6 +175,11 @@ func (rf *Raft) GetState() (int, bool) {
 	var term int
 	var isLeader bool
 	// Your code here (2A).
+
+	term = rf.currentTerm
+	isLeader = rf.isLeader()
+
+	// Your code above (2A)
 	return term, isLeader
 }
 

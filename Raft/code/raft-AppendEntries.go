@@ -46,7 +46,7 @@ func (rf *Raft) sendAppendEntries(server int, args AppendEntriesArgs, reply *App
 	return rf.peers[server].Call("Raft.AppendEntries", args, reply)
 }
 
-func (rf *Raft) boatcastAppendEntries() {
+func (rf *Raft) broadcastAppendEntries() {
 
 	rf.mu.Lock()
 	defer rf.mu.Unlock()

@@ -1,0 +1,298 @@
+2018/10/19 16:08:52.906231 程序开始运行
+Test (2A): initial election ...
+2018/10/19 16:08:53.534106  <R2:T1:Candidate>  begin new election
+2018/10/19 16:08:53.534211  <R2:T1:Candidate>  RequestVote to 1
+2018/10/19 16:08:53.534338  <R2:T1:Candidate>  RequestVote to 0
+2018/10/19 16:08:53.534715  <R1:T0:Follower>  收到投票请求 [voteArgs{R2:T1;LastLogIndex:1;LastLogTerm:0}]
+2018/10/19 16:08:53.534724  <R1:T1:Follower>  voted for voteArgs{R2:T1;LastLogIndex:1;LastLogTerm:0}
+2018/10/19 16:08:53.534746  <R0:T0:Follower>  收到投票请求 [voteArgs{R2:T1;LastLogIndex:1;LastLogTerm:0}]
+2018/10/19 16:08:53.534775  <R0:T1:Follower>  voted for voteArgs{R2:T1;LastLogIndex:1;LastLogTerm:0}
+2018/10/19 16:08:53.534833  <R2:T1:Leader>  is Leader now
+2018/10/19 16:08:53.534841  <R2:T1:Leader>  broadcastAppendEntries
+2018/10/19 16:08:53.534864  <R2:T1:Leader>  AppendEntries to 1
+2018/10/19 16:08:53.534985  <R2:T1:Leader>  AppendEntries to 0
+2018/10/19 16:08:53.535128  <R1:T1:Follower>  收到了真实有效的信号 appendEntriesArgs{R2:T1, PrevLogIndex:1, PrevLogTerm:0, LeaderCommit:0, entries:[]}
+2018/10/19 16:08:53.535347  <R0:T1:Follower>  收到了真实有效的信号 appendEntriesArgs{R2:T1, PrevLogIndex:1, PrevLogTerm:0, LeaderCommit:0, entries:[]}
+2018/10/19 16:08:53.586122  <R2:T1:Leader>  broadcastAppendEntries
+2018/10/19 16:08:53.586190  <R2:T1:Leader>  AppendEntries to 0
+2018/10/19 16:08:53.586199  <R2:T1:Leader>  AppendEntries to 1
+2018/10/19 16:08:53.586385  <R0:T1:Follower>  收到了真实有效的信号 appendEntriesArgs{R2:T1, PrevLogIndex:1, PrevLogTerm:0, LeaderCommit:0, entries:[]}
+2018/10/19 16:08:53.586799  <R1:T1:Follower>  收到了真实有效的信号 appendEntriesArgs{R2:T1, PrevLogIndex:1, PrevLogTerm:0, LeaderCommit:0, entries:[]}
+2018/10/19 16:08:53.637036  <R2:T1:Leader>  broadcastAppendEntries
+2018/10/19 16:08:53.637098  <R2:T1:Leader>  AppendEntries to 1
+2018/10/19 16:08:53.637175  <R2:T1:Leader>  AppendEntries to 0
+2018/10/19 16:08:53.637370  <R1:T1:Follower>  收到了真实有效的信号 appendEntriesArgs{R2:T1, PrevLogIndex:1, PrevLogTerm:0, LeaderCommit:0, entries:[]}
+2018/10/19 16:08:53.637458  <R0:T1:Follower>  收到了真实有效的信号 appendEntriesArgs{R2:T1, PrevLogIndex:1, PrevLogTerm:0, LeaderCommit:0, entries:[]}
+2018/10/19 16:08:53.687812  <R2:T1:Leader>  broadcastAppendEntries
+2018/10/19 16:08:53.687914  <R2:T1:Leader>  AppendEntries to 1
+2018/10/19 16:08:53.688020  <R2:T1:Leader>  AppendEntries to 0
+2018/10/19 16:08:53.688266  <R0:T1:Follower>  收到了真实有效的信号 appendEntriesArgs{R2:T1, PrevLogIndex:1, PrevLogTerm:0, LeaderCommit:0, entries:[]}
+2018/10/19 16:08:53.688269  <R1:T1:Follower>  收到了真实有效的信号 appendEntriesArgs{R2:T1, PrevLogIndex:1, PrevLogTerm:0, LeaderCommit:0, entries:[]}
+2018/10/19 16:08:53.738329  <R2:T1:Leader>  broadcastAppendEntries
+2018/10/19 16:08:53.738371  <R2:T1:Leader>  AppendEntries to 1
+2018/10/19 16:08:53.738613  <R1:T1:Follower>  收到了真实有效的信号 appendEntriesArgs{R2:T1, PrevLogIndex:1, PrevLogTerm:0, LeaderCommit:0, entries:[]}
+2018/10/19 16:08:53.738701  <R2:T1:Leader>  AppendEntries to 0
+2018/10/19 16:08:53.738823  <R0:T1:Follower>  收到了真实有效的信号 appendEntriesArgs{R2:T1, PrevLogIndex:1, PrevLogTerm:0, LeaderCommit:0, entries:[]}
+2018/10/19 16:08:53.789074  <R2:T1:Leader>  broadcastAppendEntries
+2018/10/19 16:08:53.789106  <R2:T1:Leader>  AppendEntries to 1
+2018/10/19 16:08:53.789190  <R2:T1:Leader>  AppendEntries to 0
+2018/10/19 16:08:53.789354  <R1:T1:Follower>  收到了真实有效的信号 appendEntriesArgs{R2:T1, PrevLogIndex:1, PrevLogTerm:0, LeaderCommit:0, entries:[]}
+2018/10/19 16:08:53.789421  <R0:T1:Follower>  收到了真实有效的信号 appendEntriesArgs{R2:T1, PrevLogIndex:1, PrevLogTerm:0, LeaderCommit:0, entries:[]}
+2018/10/19 16:08:53.839476  <R2:T1:Leader>  broadcastAppendEntries
+2018/10/19 16:08:53.839507  <R2:T1:Leader>  AppendEntries to 1
+2018/10/19 16:08:53.839674  <R1:T1:Follower>  收到了真实有效的信号 appendEntriesArgs{R2:T1, PrevLogIndex:1, PrevLogTerm:0, LeaderCommit:0, entries:[]}
+2018/10/19 16:08:53.839741  <R2:T1:Leader>  AppendEntries to 0
+2018/10/19 16:08:53.839817  <R0:T1:Follower>  收到了真实有效的信号 appendEntriesArgs{R2:T1, PrevLogIndex:1, PrevLogTerm:0, LeaderCommit:0, entries:[]}
+2018/10/19 16:08:53.889927  <R2:T1:Leader>  broadcastAppendEntries
+2018/10/19 16:08:53.889977  <R2:T1:Leader>  AppendEntries to 1
+2018/10/19 16:08:53.890000  <R2:T1:Leader>  AppendEntries to 0
+2018/10/19 16:08:53.890186  <R0:T1:Follower>  收到了真实有效的信号 appendEntriesArgs{R2:T1, PrevLogIndex:1, PrevLogTerm:0, LeaderCommit:0, entries:[]}
+2018/10/19 16:08:53.890338  <R1:T1:Follower>  收到了真实有效的信号 appendEntriesArgs{R2:T1, PrevLogIndex:1, PrevLogTerm:0, LeaderCommit:0, entries:[]}
+2018/10/19 16:08:53.940594  <R2:T1:Leader>  broadcastAppendEntries
+2018/10/19 16:08:53.940642  <R2:T1:Leader>  AppendEntries to 1
+2018/10/19 16:08:53.940719  <R2:T1:Leader>  AppendEntries to 0
+2018/10/19 16:08:53.940872  <R1:T1:Follower>  收到了真实有效的信号 appendEntriesArgs{R2:T1, PrevLogIndex:1, PrevLogTerm:0, LeaderCommit:0, entries:[]}
+2018/10/19 16:08:53.940938  <R0:T1:Follower>  收到了真实有效的信号 appendEntriesArgs{R2:T1, PrevLogIndex:1, PrevLogTerm:0, LeaderCommit:0, entries:[]}
+2018/10/19 16:08:53.992018  <R2:T1:Leader>  broadcastAppendEntries
+2018/10/19 16:08:53.992056  <R2:T1:Leader>  AppendEntries to 1
+2018/10/19 16:08:53.992121  <R2:T1:Leader>  AppendEntries to 0
+2018/10/19 16:08:53.992229  <R1:T1:Follower>  收到了真实有效的信号 appendEntriesArgs{R2:T1, PrevLogIndex:1, PrevLogTerm:0, LeaderCommit:0, entries:[]}
+2018/10/19 16:08:53.992273  <R0:T1:Follower>  收到了真实有效的信号 appendEntriesArgs{R2:T1, PrevLogIndex:1, PrevLogTerm:0, LeaderCommit:0, entries:[]}
+2018/10/19 16:08:54.042621  <R2:T1:Leader>  broadcastAppendEntries
+2018/10/19 16:08:54.042717  <R2:T1:Leader>  AppendEntries to 1
+2018/10/19 16:08:54.042737  <R2:T1:Leader>  AppendEntries to 0
+2018/10/19 16:08:54.042875  <R0:T1:Follower>  收到了真实有效的信号 appendEntriesArgs{R2:T1, PrevLogIndex:1, PrevLogTerm:0, LeaderCommit:0, entries:[]}
+2018/10/19 16:08:54.042933  <R1:T1:Follower>  收到了真实有效的信号 appendEntriesArgs{R2:T1, PrevLogIndex:1, PrevLogTerm:0, LeaderCommit:0, entries:[]}
+2018/10/19 16:08:54.093560  <R2:T1:Leader>  broadcastAppendEntries
+2018/10/19 16:08:54.093591  <R2:T1:Leader>  AppendEntries to 0
+2018/10/19 16:08:54.093650  <R2:T1:Leader>  AppendEntries to 1
+2018/10/19 16:08:54.093761  <R0:T1:Follower>  收到了真实有效的信号 appendEntriesArgs{R2:T1, PrevLogIndex:1, PrevLogTerm:0, LeaderCommit:0, entries:[]}
+2018/10/19 16:08:54.093811  <R1:T1:Follower>  收到了真实有效的信号 appendEntriesArgs{R2:T1, PrevLogIndex:1, PrevLogTerm:0, LeaderCommit:0, entries:[]}
+2018/10/19 16:08:54.143714  <R2:T1:Leader>  broadcastAppendEntries
+2018/10/19 16:08:54.143789  <R2:T1:Leader>  AppendEntries to 1
+2018/10/19 16:08:54.143958  <R1:T1:Follower>  收到了真实有效的信号 appendEntriesArgs{R2:T1, PrevLogIndex:1, PrevLogTerm:0, LeaderCommit:0, entries:[]}
+2018/10/19 16:08:54.143794  <R2:T1:Leader>  AppendEntries to 0
+2018/10/19 16:08:54.144184  <R0:T1:Follower>  收到了真实有效的信号 appendEntriesArgs{R2:T1, PrevLogIndex:1, PrevLogTerm:0, LeaderCommit:0, entries:[]}
+2018/10/19 16:08:54.194063  <R2:T1:Leader>  broadcastAppendEntries
+2018/10/19 16:08:54.194093  <R2:T1:Leader>  AppendEntries to 1
+2018/10/19 16:08:54.194176  <R2:T1:Leader>  AppendEntries to 0
+2018/10/19 16:08:54.194258  <R1:T1:Follower>  收到了真实有效的信号 appendEntriesArgs{R2:T1, PrevLogIndex:1, PrevLogTerm:0, LeaderCommit:0, entries:[]}
+2018/10/19 16:08:54.194420  <R0:T1:Follower>  收到了真实有效的信号 appendEntriesArgs{R2:T1, PrevLogIndex:1, PrevLogTerm:0, LeaderCommit:0, entries:[]}
+2018/10/19 16:08:54.244227  <R2:T1:Leader>  broadcastAppendEntries
+2018/10/19 16:08:54.244259  <R2:T1:Leader>  AppendEntries to 1
+2018/10/19 16:08:54.244264  <R2:T1:Leader>  AppendEntries to 0
+2018/10/19 16:08:54.244461  <R0:T1:Follower>  收到了真实有效的信号 appendEntriesArgs{R2:T1, PrevLogIndex:1, PrevLogTerm:0, LeaderCommit:0, entries:[]}
+2018/10/19 16:08:54.244461  <R1:T1:Follower>  收到了真实有效的信号 appendEntriesArgs{R2:T1, PrevLogIndex:1, PrevLogTerm:0, LeaderCommit:0, entries:[]}
+2018/10/19 16:08:54.294390  <R2:T1:Leader>  broadcastAppendEntries
+2018/10/19 16:08:54.294426  <R2:T1:Leader>  AppendEntries to 1
+2018/10/19 16:08:54.294526  <R2:T1:Leader>  AppendEntries to 0
+2018/10/19 16:08:54.294713  <R0:T1:Follower>  收到了真实有效的信号 appendEntriesArgs{R2:T1, PrevLogIndex:1, PrevLogTerm:0, LeaderCommit:0, entries:[]}
+2018/10/19 16:08:54.294823  <R1:T1:Follower>  收到了真实有效的信号 appendEntriesArgs{R2:T1, PrevLogIndex:1, PrevLogTerm:0, LeaderCommit:0, entries:[]}
+2018/10/19 16:08:54.344734  <R2:T1:Leader>  broadcastAppendEntries
+2018/10/19 16:08:54.344767  <R2:T1:Leader>  AppendEntries to 1
+2018/10/19 16:08:54.344903  <R1:T1:Follower>  收到了真实有效的信号 appendEntriesArgs{R2:T1, PrevLogIndex:1, PrevLogTerm:0, LeaderCommit:0, entries:[]}
+2018/10/19 16:08:54.344973  <R2:T1:Leader>  AppendEntries to 0
+2018/10/19 16:08:54.345079  <R0:T1:Follower>  收到了真实有效的信号 appendEntriesArgs{R2:T1, PrevLogIndex:1, PrevLogTerm:0, LeaderCommit:0, entries:[]}
+2018/10/19 16:08:54.399197  <R2:T1:Leader>  broadcastAppendEntries
+2018/10/19 16:08:54.399232  <R2:T1:Leader>  AppendEntries to 1
+2018/10/19 16:08:54.399392  <R1:T1:Follower>  收到了真实有效的信号 appendEntriesArgs{R2:T1, PrevLogIndex:1, PrevLogTerm:0, LeaderCommit:0, entries:[]}
+2018/10/19 16:08:54.399445  <R2:T1:Leader>  AppendEntries to 0
+2018/10/19 16:08:54.399542  <R0:T1:Follower>  收到了真实有效的信号 appendEntriesArgs{R2:T1, PrevLogIndex:1, PrevLogTerm:0, LeaderCommit:0, entries:[]}
+2018/10/19 16:08:54.449920  <R2:T1:Leader>  broadcastAppendEntries
+2018/10/19 16:08:54.449962  <R2:T1:Leader>  AppendEntries to 1
+2018/10/19 16:08:54.450048  <R2:T1:Leader>  AppendEntries to 0
+2018/10/19 16:08:54.450148  <R1:T1:Follower>  收到了真实有效的信号 appendEntriesArgs{R2:T1, PrevLogIndex:1, PrevLogTerm:0, LeaderCommit:0, entries:[]}
+2018/10/19 16:08:54.450287  <R0:T1:Follower>  收到了真实有效的信号 appendEntriesArgs{R2:T1, PrevLogIndex:1, PrevLogTerm:0, LeaderCommit:0, entries:[]}
+2018/10/19 16:08:54.500084  <R2:T1:Leader>  broadcastAppendEntries
+2018/10/19 16:08:54.500127  <R2:T1:Leader>  AppendEntries to 1
+2018/10/19 16:08:54.500233  <R2:T1:Leader>  AppendEntries to 0
+2018/10/19 16:08:54.500370  <R1:T1:Follower>  收到了真实有效的信号 appendEntriesArgs{R2:T1, PrevLogIndex:1, PrevLogTerm:0, LeaderCommit:0, entries:[]}
+2018/10/19 16:08:54.500575  <R0:T1:Follower>  收到了真实有效的信号 appendEntriesArgs{R2:T1, PrevLogIndex:1, PrevLogTerm:0, LeaderCommit:0, entries:[]}
+2018/10/19 16:08:54.551652  <R2:T1:Leader>  broadcastAppendEntries
+2018/10/19 16:08:54.551793  <R2:T1:Leader>  AppendEntries to 1
+2018/10/19 16:08:54.551803  <R2:T1:Leader>  AppendEntries to 0
+2018/10/19 16:08:54.552070  <R0:T1:Follower>  收到了真实有效的信号 appendEntriesArgs{R2:T1, PrevLogIndex:1, PrevLogTerm:0, LeaderCommit:0, entries:[]}
+2018/10/19 16:08:54.552190  <R1:T1:Follower>  收到了真实有效的信号 appendEntriesArgs{R2:T1, PrevLogIndex:1, PrevLogTerm:0, LeaderCommit:0, entries:[]}
+2018/10/19 16:08:54.602097  <R2:T1:Leader>  broadcastAppendEntries
+2018/10/19 16:08:54.602154  <R2:T1:Leader>  AppendEntries to 0
+2018/10/19 16:08:54.602260  <R2:T1:Leader>  AppendEntries to 1
+2018/10/19 16:08:54.602297  <R0:T1:Follower>  收到了真实有效的信号 appendEntriesArgs{R2:T1, PrevLogIndex:1, PrevLogTerm:0, LeaderCommit:0, entries:[]}
+2018/10/19 16:08:54.602396  <R1:T1:Follower>  收到了真实有效的信号 appendEntriesArgs{R2:T1, PrevLogIndex:1, PrevLogTerm:0, LeaderCommit:0, entries:[]}
+2018/10/19 16:08:54.652244  <R2:T1:Leader>  broadcastAppendEntries
+2018/10/19 16:08:54.652281  <R2:T1:Leader>  AppendEntries to 1
+2018/10/19 16:08:54.652291  <R2:T1:Leader>  AppendEntries to 0
+2018/10/19 16:08:54.652498  <R1:T1:Follower>  收到了真实有效的信号 appendEntriesArgs{R2:T1, PrevLogIndex:1, PrevLogTerm:0, LeaderCommit:0, entries:[]}
+2018/10/19 16:08:54.652515  <R0:T1:Follower>  收到了真实有效的信号 appendEntriesArgs{R2:T1, PrevLogIndex:1, PrevLogTerm:0, LeaderCommit:0, entries:[]}
+2018/10/19 16:08:54.702665  <R2:T1:Leader>  broadcastAppendEntries
+2018/10/19 16:08:54.702696  <R2:T1:Leader>  AppendEntries to 1
+2018/10/19 16:08:54.702904  <R1:T1:Follower>  收到了真实有效的信号 appendEntriesArgs{R2:T1, PrevLogIndex:1, PrevLogTerm:0, LeaderCommit:0, entries:[]}
+2018/10/19 16:08:54.702967  <R2:T1:Leader>  AppendEntries to 0
+2018/10/19 16:08:54.703071  <R0:T1:Follower>  收到了真实有效的信号 appendEntriesArgs{R2:T1, PrevLogIndex:1, PrevLogTerm:0, LeaderCommit:0, entries:[]}
+2018/10/19 16:08:54.752892  <R2:T1:Leader>  broadcastAppendEntries
+2018/10/19 16:08:54.752926  <R2:T1:Leader>  AppendEntries to 1
+2018/10/19 16:08:54.752954  <R2:T1:Leader>  AppendEntries to 0
+2018/10/19 16:08:54.753126  <R0:T1:Follower>  收到了真实有效的信号 appendEntriesArgs{R2:T1, PrevLogIndex:1, PrevLogTerm:0, LeaderCommit:0, entries:[]}
+2018/10/19 16:08:54.753297  <R1:T1:Follower>  收到了真实有效的信号 appendEntriesArgs{R2:T1, PrevLogIndex:1, PrevLogTerm:0, LeaderCommit:0, entries:[]}
+2018/10/19 16:08:54.803731  <R2:T1:Leader>  broadcastAppendEntries
+2018/10/19 16:08:54.803826  <R2:T1:Leader>  AppendEntries to 1
+2018/10/19 16:08:54.803997  <R1:T1:Follower>  收到了真实有效的信号 appendEntriesArgs{R2:T1, PrevLogIndex:1, PrevLogTerm:0, LeaderCommit:0, entries:[]}
+2018/10/19 16:08:54.804109  <R2:T1:Leader>  AppendEntries to 0
+2018/10/19 16:08:54.804218  <R0:T1:Follower>  收到了真实有效的信号 appendEntriesArgs{R2:T1, PrevLogIndex:1, PrevLogTerm:0, LeaderCommit:0, entries:[]}
+2018/10/19 16:08:54.854151  <R2:T1:Leader>  broadcastAppendEntries
+2018/10/19 16:08:54.854298  <R2:T1:Leader>  AppendEntries to 0
+2018/10/19 16:08:54.854298  <R2:T1:Leader>  AppendEntries to 1
+2018/10/19 16:08:54.854487  <R0:T1:Follower>  收到了真实有效的信号 appendEntriesArgs{R2:T1, PrevLogIndex:1, PrevLogTerm:0, LeaderCommit:0, entries:[]}
+2018/10/19 16:08:54.854619  <R1:T1:Follower>  收到了真实有效的信号 appendEntriesArgs{R2:T1, PrevLogIndex:1, PrevLogTerm:0, LeaderCommit:0, entries:[]}
+2018/10/19 16:08:54.904372  <R2:T1:Leader>  broadcastAppendEntries
+2018/10/19 16:08:54.904477  <R2:T1:Leader>  AppendEntries to 1
+2018/10/19 16:08:54.904688  <R1:T1:Follower>  收到了真实有效的信号 appendEntriesArgs{R2:T1, PrevLogIndex:1, PrevLogTerm:0, LeaderCommit:0, entries:[]}
+2018/10/19 16:08:54.904782  <R2:T1:Leader>  AppendEntries to 0
+2018/10/19 16:08:54.904919  <R0:T1:Follower>  收到了真实有效的信号 appendEntriesArgs{R2:T1, PrevLogIndex:1, PrevLogTerm:0, LeaderCommit:0, entries:[]}
+2018/10/19 16:08:54.954599  <R2:T1:Leader>  broadcastAppendEntries
+2018/10/19 16:08:54.954805  <R2:T1:Leader>  AppendEntries to 1
+2018/10/19 16:08:54.955230  <R1:T1:Follower>  收到了真实有效的信号 appendEntriesArgs{R2:T1, PrevLogIndex:1, PrevLogTerm:0, LeaderCommit:0, entries:[]}
+2018/10/19 16:08:54.955394  <R2:T1:Leader>  AppendEntries to 0
+2018/10/19 16:08:54.955560  <R0:T1:Follower>  收到了真实有效的信号 appendEntriesArgs{R2:T1, PrevLogIndex:1, PrevLogTerm:0, LeaderCommit:0, entries:[]}
+2018/10/19 16:08:55.005269  <R2:T1:Leader>  broadcastAppendEntries
+2018/10/19 16:08:55.005381  <R2:T1:Leader>  AppendEntries to 1
+2018/10/19 16:08:55.005577  <R1:T1:Follower>  收到了真实有效的信号 appendEntriesArgs{R2:T1, PrevLogIndex:1, PrevLogTerm:0, LeaderCommit:0, entries:[]}
+2018/10/19 16:08:55.005688  <R2:T1:Leader>  AppendEntries to 0
+2018/10/19 16:08:55.005816  <R0:T1:Follower>  收到了真实有效的信号 appendEntriesArgs{R2:T1, PrevLogIndex:1, PrevLogTerm:0, LeaderCommit:0, entries:[]}
+2018/10/19 16:08:55.055480  <R2:T1:Leader>  broadcastAppendEntries
+2018/10/19 16:08:55.055606  <R2:T1:Leader>  AppendEntries to 1
+2018/10/19 16:08:55.055872  <R2:T1:Leader>  AppendEntries to 0
+2018/10/19 16:08:55.056141  <R1:T1:Follower>  收到了真实有效的信号 appendEntriesArgs{R2:T1, PrevLogIndex:1, PrevLogTerm:0, LeaderCommit:0, entries:[]}
+2018/10/19 16:08:55.056174  <R0:T1:Follower>  收到了真实有效的信号 appendEntriesArgs{R2:T1, PrevLogIndex:1, PrevLogTerm:0, LeaderCommit:0, entries:[]}
+2018/10/19 16:08:55.106667  <R2:T1:Leader>  broadcastAppendEntries
+2018/10/19 16:08:55.106711  <R2:T1:Leader>  AppendEntries to 1
+2018/10/19 16:08:55.106786  <R2:T1:Leader>  AppendEntries to 0
+2018/10/19 16:08:55.106873  <R1:T1:Follower>  收到了真实有效的信号 appendEntriesArgs{R2:T1, PrevLogIndex:1, PrevLogTerm:0, LeaderCommit:0, entries:[]}
+2018/10/19 16:08:55.107030  <R0:T1:Follower>  收到了真实有效的信号 appendEntriesArgs{R2:T1, PrevLogIndex:1, PrevLogTerm:0, LeaderCommit:0, entries:[]}
+2018/10/19 16:08:55.157153  <R2:T1:Leader>  broadcastAppendEntries
+2018/10/19 16:08:55.157277  <R2:T1:Leader>  AppendEntries to 0
+2018/10/19 16:08:55.157316  <R2:T1:Leader>  AppendEntries to 1
+2018/10/19 16:08:55.157504  <R0:T1:Follower>  收到了真实有效的信号 appendEntriesArgs{R2:T1, PrevLogIndex:1, PrevLogTerm:0, LeaderCommit:0, entries:[]}
+2018/10/19 16:08:55.157594  <R1:T1:Follower>  收到了真实有效的信号 appendEntriesArgs{R2:T1, PrevLogIndex:1, PrevLogTerm:0, LeaderCommit:0, entries:[]}
+2018/10/19 16:08:55.207739  <R2:T1:Leader>  broadcastAppendEntries
+2018/10/19 16:08:55.207777  <R2:T1:Leader>  AppendEntries to 1
+2018/10/19 16:08:55.207840  <R2:T1:Leader>  AppendEntries to 0
+2018/10/19 16:08:55.207970  <R0:T1:Follower>  收到了真实有效的信号 appendEntriesArgs{R2:T1, PrevLogIndex:1, PrevLogTerm:0, LeaderCommit:0, entries:[]}
+2018/10/19 16:08:55.207973  <R1:T1:Follower>  收到了真实有效的信号 appendEntriesArgs{R2:T1, PrevLogIndex:1, PrevLogTerm:0, LeaderCommit:0, entries:[]}
+2018/10/19 16:08:55.258228  <R2:T1:Leader>  broadcastAppendEntries
+2018/10/19 16:08:55.258276  <R2:T1:Leader>  AppendEntries to 1
+2018/10/19 16:08:55.258286  <R2:T1:Leader>  AppendEntries to 0
+2018/10/19 16:08:55.258472  <R0:T1:Follower>  收到了真实有效的信号 appendEntriesArgs{R2:T1, PrevLogIndex:1, PrevLogTerm:0, LeaderCommit:0, entries:[]}
+2018/10/19 16:08:55.258685  <R1:T1:Follower>  收到了真实有效的信号 appendEntriesArgs{R2:T1, PrevLogIndex:1, PrevLogTerm:0, LeaderCommit:0, entries:[]}
+2018/10/19 16:08:55.308657  <R2:T1:Leader>  broadcastAppendEntries
+2018/10/19 16:08:55.308708  <R2:T1:Leader>  AppendEntries to 1
+2018/10/19 16:08:55.308714  <R2:T1:Leader>  AppendEntries to 0
+2018/10/19 16:08:55.308880  <R1:T1:Follower>  收到了真实有效的信号 appendEntriesArgs{R2:T1, PrevLogIndex:1, PrevLogTerm:0, LeaderCommit:0, entries:[]}
+2018/10/19 16:08:55.308882  <R0:T1:Follower>  收到了真实有效的信号 appendEntriesArgs{R2:T1, PrevLogIndex:1, PrevLogTerm:0, LeaderCommit:0, entries:[]}
+2018/10/19 16:08:55.359772  <R2:T1:Leader>  broadcastAppendEntries
+2018/10/19 16:08:55.359899  <R2:T1:Leader>  AppendEntries to 1
+2018/10/19 16:08:55.359902  <R2:T1:Leader>  AppendEntries to 0
+2018/10/19 16:08:55.360231  <R1:T1:Follower>  收到了真实有效的信号 appendEntriesArgs{R2:T1, PrevLogIndex:1, PrevLogTerm:0, LeaderCommit:0, entries:[]}
+2018/10/19 16:08:55.360280  <R0:T1:Follower>  收到了真实有效的信号 appendEntriesArgs{R2:T1, PrevLogIndex:1, PrevLogTerm:0, LeaderCommit:0, entries:[]}
+2018/10/19 16:08:55.410706  <R2:T1:Leader>  broadcastAppendEntries
+2018/10/19 16:08:55.410833  <R2:T1:Leader>  AppendEntries to 0
+2018/10/19 16:08:55.410906  <R2:T1:Leader>  AppendEntries to 1
+2018/10/19 16:08:55.411058  <R1:T1:Follower>  收到了真实有效的信号 appendEntriesArgs{R2:T1, PrevLogIndex:1, PrevLogTerm:0, LeaderCommit:0, entries:[]}
+2018/10/19 16:08:55.411059  <R0:T1:Follower>  收到了真实有效的信号 appendEntriesArgs{R2:T1, PrevLogIndex:1, PrevLogTerm:0, LeaderCommit:0, entries:[]}
+2018/10/19 16:08:55.461187  <R2:T1:Leader>  broadcastAppendEntries
+2018/10/19 16:08:55.461290  <R2:T1:Leader>  AppendEntries to 1
+2018/10/19 16:08:55.461472  <R1:T1:Follower>  收到了真实有效的信号 appendEntriesArgs{R2:T1, PrevLogIndex:1, PrevLogTerm:0, LeaderCommit:0, entries:[]}
+2018/10/19 16:08:55.461554  <R2:T1:Leader>  AppendEntries to 0
+2018/10/19 16:08:55.461764  <R0:T1:Follower>  收到了真实有效的信号 appendEntriesArgs{R2:T1, PrevLogIndex:1, PrevLogTerm:0, LeaderCommit:0, entries:[]}
+2018/10/19 16:08:55.512252  <R2:T1:Leader>  broadcastAppendEntries
+2018/10/19 16:08:55.512371  <R2:T1:Leader>  AppendEntries to 1
+2018/10/19 16:08:55.512442  <R2:T1:Leader>  AppendEntries to 0
+2018/10/19 16:08:55.512733  <R0:T1:Follower>  收到了真实有效的信号 appendEntriesArgs{R2:T1, PrevLogIndex:1, PrevLogTerm:0, LeaderCommit:0, entries:[]}
+2018/10/19 16:08:55.512836  <R1:T1:Follower>  收到了真实有效的信号 appendEntriesArgs{R2:T1, PrevLogIndex:1, PrevLogTerm:0, LeaderCommit:0, entries:[]}
+2018/10/19 16:08:55.564310  <R2:T1:Leader>  broadcastAppendEntries
+2018/10/19 16:08:55.564407  <R2:T1:Leader>  AppendEntries to 1
+2018/10/19 16:08:55.564593  <R1:T1:Follower>  收到了真实有效的信号 appendEntriesArgs{R2:T1, PrevLogIndex:1, PrevLogTerm:0, LeaderCommit:0, entries:[]}
+2018/10/19 16:08:55.564426  <R2:T1:Leader>  AppendEntries to 0
+2018/10/19 16:08:55.564768  <R0:T1:Follower>  收到了真实有效的信号 appendEntriesArgs{R2:T1, PrevLogIndex:1, PrevLogTerm:0, LeaderCommit:0, entries:[]}
+2018/10/19 16:08:55.614704  <R2:T1:Leader>  broadcastAppendEntries
+2018/10/19 16:08:55.614827  <R2:T1:Leader>  AppendEntries to 1
+2018/10/19 16:08:55.615022  <R1:T1:Follower>  收到了真实有效的信号 appendEntriesArgs{R2:T1, PrevLogIndex:1, PrevLogTerm:0, LeaderCommit:0, entries:[]}
+2018/10/19 16:08:55.614832  <R2:T1:Leader>  AppendEntries to 0
+2018/10/19 16:08:55.615248  <R0:T1:Follower>  收到了真实有效的信号 appendEntriesArgs{R2:T1, PrevLogIndex:1, PrevLogTerm:0, LeaderCommit:0, entries:[]}
+2018/10/19 16:08:55.665237  <R2:T1:Leader>  broadcastAppendEntries
+2018/10/19 16:08:55.665291  <R2:T1:Leader>  AppendEntries to 1
+2018/10/19 16:08:55.665366  <R2:T1:Leader>  AppendEntries to 0
+2018/10/19 16:08:55.665477  <R1:T1:Follower>  收到了真实有效的信号 appendEntriesArgs{R2:T1, PrevLogIndex:1, PrevLogTerm:0, LeaderCommit:0, entries:[]}
+2018/10/19 16:08:55.665624  <R0:T1:Follower>  收到了真实有效的信号 appendEntriesArgs{R2:T1, PrevLogIndex:1, PrevLogTerm:0, LeaderCommit:0, entries:[]}
+2018/10/19 16:08:55.715339  <R2:T1:Leader>  broadcastAppendEntries
+2018/10/19 16:08:55.715469  <R2:T1:Leader>  AppendEntries to 1
+2018/10/19 16:08:55.715471  <R2:T1:Leader>  AppendEntries to 0
+2018/10/19 16:08:55.715786  <R1:T1:Follower>  收到了真实有效的信号 appendEntriesArgs{R2:T1, PrevLogIndex:1, PrevLogTerm:0, LeaderCommit:0, entries:[]}
+2018/10/19 16:08:55.715792  <R0:T1:Follower>  收到了真实有效的信号 appendEntriesArgs{R2:T1, PrevLogIndex:1, PrevLogTerm:0, LeaderCommit:0, entries:[]}
+2018/10/19 16:08:55.765603  <R2:T1:Leader>  broadcastAppendEntries
+2018/10/19 16:08:55.765727  <R2:T1:Leader>  AppendEntries to 1
+2018/10/19 16:08:55.765799  <R2:T1:Leader>  AppendEntries to 0
+2018/10/19 16:08:55.765960  <R1:T1:Follower>  收到了真实有效的信号 appendEntriesArgs{R2:T1, PrevLogIndex:1, PrevLogTerm:0, LeaderCommit:0, entries:[]}
+2018/10/19 16:08:55.765964  <R0:T1:Follower>  收到了真实有效的信号 appendEntriesArgs{R2:T1, PrevLogIndex:1, PrevLogTerm:0, LeaderCommit:0, entries:[]}
+2018/10/19 16:08:55.816435  <R2:T1:Leader>  broadcastAppendEntries
+2018/10/19 16:08:55.816468  <R2:T1:Leader>  AppendEntries to 1
+2018/10/19 16:08:55.816515  <R2:T1:Leader>  AppendEntries to 0
+2018/10/19 16:08:55.816626  <R1:T1:Follower>  收到了真实有效的信号 appendEntriesArgs{R2:T1, PrevLogIndex:1, PrevLogTerm:0, LeaderCommit:0, entries:[]}
+2018/10/19 16:08:55.816790  <R0:T1:Follower>  收到了真实有效的信号 appendEntriesArgs{R2:T1, PrevLogIndex:1, PrevLogTerm:0, LeaderCommit:0, entries:[]}
+2018/10/19 16:08:55.867367  <R2:T1:Leader>  broadcastAppendEntries
+2018/10/19 16:08:55.867479  <R2:T1:Leader>  AppendEntries to 1
+2018/10/19 16:08:55.867480  <R2:T1:Leader>  AppendEntries to 0
+2018/10/19 16:08:55.867770  <R0:T1:Follower>  收到了真实有效的信号 appendEntriesArgs{R2:T1, PrevLogIndex:1, PrevLogTerm:0, LeaderCommit:0, entries:[]}
+2018/10/19 16:08:55.867819  <R1:T1:Follower>  收到了真实有效的信号 appendEntriesArgs{R2:T1, PrevLogIndex:1, PrevLogTerm:0, LeaderCommit:0, entries:[]}
+2018/10/19 16:08:55.917786  <R2:T1:Leader>  broadcastAppendEntries
+2018/10/19 16:08:55.917822  <R2:T1:Leader>  AppendEntries to 1
+2018/10/19 16:08:55.917984  <R1:T1:Follower>  收到了真实有效的信号 appendEntriesArgs{R2:T1, PrevLogIndex:1, PrevLogTerm:0, LeaderCommit:0, entries:[]}
+2018/10/19 16:08:55.918055  <R2:T1:Leader>  AppendEntries to 0
+2018/10/19 16:08:55.918126  <R0:T1:Follower>  收到了真实有效的信号 appendEntriesArgs{R2:T1, PrevLogIndex:1, PrevLogTerm:0, LeaderCommit:0, entries:[]}
+2018/10/19 16:08:55.968266  <R2:T1:Leader>  broadcastAppendEntries
+2018/10/19 16:08:55.968468  <R2:T1:Leader>  AppendEntries to 1
+2018/10/19 16:08:55.968691  <R1:T1:Follower>  收到了真实有效的信号 appendEntriesArgs{R2:T1, PrevLogIndex:1, PrevLogTerm:0, LeaderCommit:0, entries:[]}
+2018/10/19 16:08:55.968765  <R2:T1:Leader>  AppendEntries to 0
+2018/10/19 16:08:55.968954  <R0:T1:Follower>  收到了真实有效的信号 appendEntriesArgs{R2:T1, PrevLogIndex:1, PrevLogTerm:0, LeaderCommit:0, entries:[]}
+2018/10/19 16:08:56.018797  <R2:T1:Leader>  broadcastAppendEntries
+2018/10/19 16:08:56.018840  <R2:T1:Leader>  AppendEntries to 1
+2018/10/19 16:08:56.018919  <R2:T1:Leader>  AppendEntries to 0
+2018/10/19 16:08:56.019024  <R1:T1:Follower>  收到了真实有效的信号 appendEntriesArgs{R2:T1, PrevLogIndex:1, PrevLogTerm:0, LeaderCommit:0, entries:[]}
+2018/10/19 16:08:56.019230  <R0:T1:Follower>  收到了真实有效的信号 appendEntriesArgs{R2:T1, PrevLogIndex:1, PrevLogTerm:0, LeaderCommit:0, entries:[]}
+2018/10/19 16:08:56.069673  <R2:T1:Leader>  broadcastAppendEntries
+2018/10/19 16:08:56.069835  <R2:T1:Leader>  AppendEntries to 1
+2018/10/19 16:08:56.069856  <R2:T1:Leader>  AppendEntries to 0
+2018/10/19 16:08:56.070087  <R0:T1:Follower>  收到了真实有效的信号 appendEntriesArgs{R2:T1, PrevLogIndex:1, PrevLogTerm:0, LeaderCommit:0, entries:[]}
+2018/10/19 16:08:56.070218  <R1:T1:Follower>  收到了真实有效的信号 appendEntriesArgs{R2:T1, PrevLogIndex:1, PrevLogTerm:0, LeaderCommit:0, entries:[]}
+2018/10/19 16:08:56.120321  <R2:T1:Leader>  broadcastAppendEntries
+2018/10/19 16:08:56.120353  <R2:T1:Leader>  AppendEntries to 1
+2018/10/19 16:08:56.120500  <R1:T1:Follower>  收到了真实有效的信号 appendEntriesArgs{R2:T1, PrevLogIndex:1, PrevLogTerm:0, LeaderCommit:0, entries:[]}
+2018/10/19 16:08:56.120568  <R2:T1:Leader>  AppendEntries to 0
+2018/10/19 16:08:56.120641  <R0:T1:Follower>  收到了真实有效的信号 appendEntriesArgs{R2:T1, PrevLogIndex:1, PrevLogTerm:0, LeaderCommit:0, entries:[]}
+2018/10/19 16:08:56.171291  <R2:T1:Leader>  broadcastAppendEntries
+2018/10/19 16:08:56.171331  <R2:T1:Leader>  AppendEntries to 1
+2018/10/19 16:08:56.171490  <R1:T1:Follower>  收到了真实有效的信号 appendEntriesArgs{R2:T1, PrevLogIndex:1, PrevLogTerm:0, LeaderCommit:0, entries:[]}
+2018/10/19 16:08:56.171557  <R2:T1:Leader>  AppendEntries to 0
+2018/10/19 16:08:56.171645  <R0:T1:Follower>  收到了真实有效的信号 appendEntriesArgs{R2:T1, PrevLogIndex:1, PrevLogTerm:0, LeaderCommit:0, entries:[]}
+2018/10/19 16:08:56.221795  <R2:T1:Leader>  broadcastAppendEntries
+2018/10/19 16:08:56.221833  <R2:T1:Leader>  AppendEntries to 1
+2018/10/19 16:08:56.222010  <R1:T1:Follower>  收到了真实有效的信号 appendEntriesArgs{R2:T1, PrevLogIndex:1, PrevLogTerm:0, LeaderCommit:0, entries:[]}
+2018/10/19 16:08:56.222087  <R2:T1:Leader>  AppendEntries to 0
+2018/10/19 16:08:56.222182  <R0:T1:Follower>  收到了真实有效的信号 appendEntriesArgs{R2:T1, PrevLogIndex:1, PrevLogTerm:0, LeaderCommit:0, entries:[]}
+2018/10/19 16:08:56.272284  <R2:T1:Leader>  broadcastAppendEntries
+2018/10/19 16:08:56.272321  <R2:T1:Leader>  AppendEntries to 1
+2018/10/19 16:08:56.272478  <R1:T1:Follower>  收到了真实有效的信号 appendEntriesArgs{R2:T1, PrevLogIndex:1, PrevLogTerm:0, LeaderCommit:0, entries:[]}
+2018/10/19 16:08:56.272548  <R2:T1:Leader>  AppendEntries to 0
+2018/10/19 16:08:56.272623  <R0:T1:Follower>  收到了真实有效的信号 appendEntriesArgs{R2:T1, PrevLogIndex:1, PrevLogTerm:0, LeaderCommit:0, entries:[]}
+2018/10/19 16:08:56.322367  <R2:T1:Leader>  broadcastAppendEntries
+2018/10/19 16:08:56.322399  <R2:T1:Leader>  AppendEntries to 1
+2018/10/19 16:08:56.322563  <R1:T1:Follower>  收到了真实有效的信号 appendEntriesArgs{R2:T1, PrevLogIndex:1, PrevLogTerm:0, LeaderCommit:0, entries:[]}
+2018/10/19 16:08:56.322616  <R2:T1:Leader>  AppendEntries to 0
+2018/10/19 16:08:56.322693  <R0:T1:Follower>  收到了真实有效的信号 appendEntriesArgs{R2:T1, PrevLogIndex:1, PrevLogTerm:0, LeaderCommit:0, entries:[]}
+2018/10/19 16:08:56.372587  <R2:T1:Leader>  broadcastAppendEntries
+2018/10/19 16:08:56.372627  <R2:T1:Leader>  AppendEntries to 1
+2018/10/19 16:08:56.372815  <R1:T1:Follower>  收到了真实有效的信号 appendEntriesArgs{R2:T1, PrevLogIndex:1, PrevLogTerm:0, LeaderCommit:0, entries:[]}
+2018/10/19 16:08:56.372879  <R2:T1:Leader>  AppendEntries to 0
+2018/10/19 16:08:56.372952  <R0:T1:Follower>  收到了真实有效的信号 appendEntriesArgs{R2:T1, PrevLogIndex:1, PrevLogTerm:0, LeaderCommit:0, entries:[]}
+  ... Passed --   3.5  3  116    0
+PASS
+ok  	github.com/aQuaYi/Distributed-Algorithms/Raft/code	3.510s
