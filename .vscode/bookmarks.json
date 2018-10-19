@@ -23,5 +23,15 @@
 				"label": ""
 			}
 		]
+	},
+	{
+		"path": "$ROOTPATH$/Raft/code/config.go",
+		"bookmarks": [
+			{
+				"line": 470,
+				"column": 11,
+				"label": ""
+			}
+		]
 	}
 ]

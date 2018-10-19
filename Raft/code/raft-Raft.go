@@ -62,3 +62,12 @@ type Raft struct {
 func (rf *Raft) String() string {
 	return fmt.Sprintf(" <R%d:T%d:%s> ", rf.me, rf.currentTerm, rf.state)
 }
+
+func (rf *Raft) details() string {
+	postfix := ""
+	if rf.state == LEADER {
+		postfix = fmt.Sprintf(", nextIndex%v, matchIndex%v", rf.nextIndex, rf.matchIndex)
+	}
+	return fmt.Sprintf("@@ votedFor:%2d, commitIndex:%d, lastApplied:%d, logs:%v%s @@",
+		rf.votedFor, rf.commitIndex, rf.lastApplied, rf.logs, postfix)
+}

@@ -70,6 +70,7 @@ func (rf *Raft) broadcastAppendEntries() {
 	if N != rf.commitIndex {
 		rf.commitIndex = N
 		rf.chanCommit <- struct{}{}
+		DPrintf("%s COMMITTED %s", rf, rf.details())
 	}
 
 	for i := range rf.peers {
@@ -83,7 +84,7 @@ func (rf *Raft) broadcastAppendEntries() {
 func (rf *Raft) sendAppendEntriesAndDealReply(i int, args AppendEntriesArgs) {
 	var reply AppendEntriesReply
 
-	DPrintf("%s AppendEntries to %d", rf, i)
+	DPrintf("%s AppendEntries to R%d with %s", rf, i, args)
 
 	ok := rf.sendAppendEntries(i, args, &reply)
 	if !ok {
@@ -153,7 +154,7 @@ func (rf *Raft) AppendEntries(args AppendEntriesArgs, reply *AppendEntriesReply)
 	if args.Term > rf.currentTerm {
 		rf.currentTerm = args.Term
 		rf.state = FOLLOWER
-		rf.votedFor = NOBODY
+		rf.votedFor = NOBODY // TODO: 真的是 NOBODY 吗
 	}
 
 	reply.Term = args.Term
@@ -189,6 +190,7 @@ func (rf *Raft) AppendEntries(args AppendEntriesArgs, reply *AppendEntriesReply)
 	if args.LeaderCommit > rf.commitIndex {
 		rf.commitIndex = min(args.LeaderCommit, rf.getLastIndex())
 		rf.chanCommit <- struct{}{}
+		DPrintf("%s COMMITTED %s", rf, rf.details())
 	}
-	return
+
 }

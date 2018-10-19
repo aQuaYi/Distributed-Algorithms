@@ -445,6 +445,7 @@ func (cfg *config) one(cmd int, expectedServers int, retry bool) int {
 				index1, _, ok := rf.Start(cmd)
 				if ok {
 					index = index1
+					cfg.t.Logf(" ## %v 的 logIndex: %d, %s %s ", cmd, index, rf, rf.details())
 					break
 				}
 			}
@@ -456,6 +457,7 @@ func (cfg *config) one(cmd int, expectedServers int, retry bool) int {
 			t1 := time.Now()
 			for time.Since(t1).Seconds() < 2 {
 				nd, cmd1 := cfg.nCommitted(index)
+				cfg.t.Logf(" ## %d/%d raft 的 logIndex：%d 的值为 %v", nd, len(cfg.logs), index, cmd1)
 				if nd > 0 && nd >= expectedServers {
 					// committed
 					if cmd2, ok := cmd1.(int); ok && cmd2 == cmd {

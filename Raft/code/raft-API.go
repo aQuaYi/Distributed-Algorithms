@@ -44,7 +44,7 @@ func Make(peers []*labrpc.ClientEnd, me int,
 	// Your initialization code here (2A, 2B, 2C).
 	rf.state = FOLLOWER
 	rf.votedFor = NOBODY
-	rf.logs = append(rf.logs, LogEntry{LogIndex: 1, LogTerm: 0})
+	rf.logs = append(rf.logs, LogEntry{LogIndex: 0, LogTerm: 0, Command: 0})
 	rf.currentTerm = 0
 	rf.chanCommit = make(chan struct{}, 100)
 	rf.chanHeartbeat = make(chan struct{}, 100)
@@ -129,10 +129,14 @@ func (rf *Raft) applyLoop() {
 			commitIndex := rf.commitIndex
 			baseIndex := rf.getBaseIndex()
 			for i := rf.lastApplied + 1; i <= commitIndex; i++ {
-				msg := ApplyMsg{CommandIndex: i, Command: rf.logs[i-baseIndex].Command}
+				msg := ApplyMsg{
+					CommandValid: true,
+					CommandIndex: i,
+					Command:      rf.logs[i-baseIndex].Command,
+				}
 				rf.chanApply <- msg
-				DPrintf("%s ApplyMSG: %s", rf, msg)
 				rf.lastApplied = i
+				DPrintf("%s ApplyMSG: %s %s", rf, msg, rf.details())
 			}
 			rf.mu.Unlock()
 		}
@@ -156,15 +160,32 @@ func (rf *Raft) applyLoop() {
 // the leader.
 //
 func (rf *Raft) Start(command interface{}) (int, int, bool) {
-	index := -1
-	term := -1
-	isLeader := true
-
 	// Your code here (2B).
+	rf.mu.Lock()
+	defer rf.mu.Unlock()
+
+	if !rf.isLeader() {
+		return -1, -1, false
+	}
+
+	DPrintf("%s Start %v", rf, command)
+
+	logIndex := rf.getLastIndex() + 1
+	term := rf.currentTerm
+	isLeader := rf.isLeader()
+
+	rf.logs = append(rf.logs,
+		LogEntry{
+			LogIndex: logIndex,
+			LogTerm:  term,
+			Command:  command,
+		}) // append new entry from client
+
+	// rf.persist()
+	// TODO: 放出这一句
 
 	// Your code above
-
-	return index, term, isLeader
+	return logIndex, term, isLeader
 }
 
 // GetState is
