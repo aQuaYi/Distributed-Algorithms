@@ -88,6 +88,56 @@ func isUpToDate(args *RequestVoteArgs, term, index int) bool {
 		(args.LastLogTerm == term && args.LastLogIndex >= index)
 }
 
+func (rf *Raft) boatcastRequestVote() {
+	var args RequestVoteArgs
+
+	rf.mu.Lock()
+	args.Term = rf.currentTerm
+	args.CandidateID = rf.me
+	args.LastLogTerm = rf.getLastTerm()
+	args.LastLogIndex = rf.getLastIndex()
+	rf.mu.Unlock()
+
+	for i := range rf.peers {
+		if i != rf.me && rf.isCandidate() {
+			go rf.sendRequestVoteAndDealReply(i, args)
+		}
+	}
+}
+
+func (rf *Raft) sendRequestVoteAndDealReply(i int, args RequestVoteArgs) {
+	var reply RequestVoteReply
+
+	DPrintf("%s RequestVote to %d", rf, i)
+
+	ok := rf.sendRequestVote(i, &args, &reply)
+	if !ok {
+		return
+	}
+
+	rf.mu.Lock()
+	defer rf.mu.Unlock()
+
+	if reply.Term > rf.currentTerm {
+		rf.currentTerm = reply.Term
+		rf.state = FOLLOWER
+		rf.votedFor = NOBODY
+		// rf.persist() // TODO: 放出这个语句
+		return
+	}
+
+	if rf.currentTerm != args.Term || !reply.VoteGranted {
+		// term 已经改变 或 没有投我的票
+		return
+	}
+
+	// TODO: 这里需要加锁吗？
+	rf.voteCount++
+	if 2*rf.voteCount > len(rf.peers) && rf.isCandidate() {
+		rf.chanLeader <- struct{}{}
+	}
+}
+
 //
 // example code to send a RequestVote RPC to a server.
 // server is the index of the target server in rf.peers[].
@@ -118,10 +168,5 @@ func isUpToDate(args *RequestVoteArgs, term, index int) bool {
 // the struct itself.
 //
 func (rf *Raft) sendRequestVote(server int, args *RequestVoteArgs, reply *RequestVoteReply) bool {
-	ok := rf.peers[server].Call("Raft.RequestVote", args, reply)
-	return ok
-}
-
-func (rf *Raft) boatcastRequestVote() {
-	panic("boatcastRequestVote is empty")
+	return rf.peers[server].Call("Raft.RequestVote", args, reply)
 }

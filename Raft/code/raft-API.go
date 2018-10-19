@@ -1,6 +1,7 @@
 package raft
 
 import (
+	"fmt"
 	"time"
 
 	"github.com/aQuaYi/Distributed-Algorithms/Raft/code/labrpc"
@@ -86,7 +87,10 @@ func (rf *Raft) newElection() {
 	rf.currentTerm++
 	rf.votedFor = rf.me
 	rf.voteCount = 1
-	rf.persist()
+
+	// TODO: 放出这一句
+	// rf.persist()
+
 	rf.mu.Unlock()
 
 	go rf.boatcastRequestVote()
@@ -118,7 +122,7 @@ func (rf *Raft) newHeartBeat() {
 
 func (rf *Raft) applyLoop() {
 	for {
-		select {
+		select { // TODO: select 只有一个 case ，可以删掉
 		case <-rf.chanCommit:
 			rf.mu.Lock()
 			commitIndex := rf.commitIndex
@@ -126,7 +130,7 @@ func (rf *Raft) applyLoop() {
 			for i := rf.lastApplied + 1; i <= commitIndex; i++ {
 				msg := ApplyMsg{CommandIndex: i, Command: rf.logs[i-baseIndex].Command}
 				rf.chanApply <- msg
-				//fmt.Printf("me:%d %v\n",rf.me,msg)
+				DPrintf("%s ApplyMSG: %s", rf, msg)
 				rf.lastApplied = i
 			}
 			rf.mu.Unlock()
@@ -186,4 +190,8 @@ type ApplyMsg struct {
 	CommandValid bool
 	Command      interface{}
 	CommandIndex int
+}
+
+func (m ApplyMsg) String() string {
+	return fmt.Sprintf("ApplyMsg{Valid:%t,Index:%d,Command:%v}", m.CommandValid, m.CommandIndex, m.Command)
 }
