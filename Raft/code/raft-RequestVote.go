@@ -41,9 +41,9 @@ func (rf *Raft) RequestVote(args *RequestVoteArgs, reply *RequestVoteReply) {
 
 	DPrintf("%s 收到投票请求 [%s]", rf, args)
 
-	// rf.rwmu.Lock() // TODO: 这里是否需要锁
-	// defer rf.rwmu.Unlock()
-	// defer rf.persist()
+	rf.mu.Lock()
+	defer rf.mu.Unlock()
+	defer rf.persist()
 
 	// 1. replay false if term < currentTerm
 	if args.Term < rf.currentTerm {
@@ -131,7 +131,6 @@ func (rf *Raft) sendRequestVoteAndDealReply(i int, args RequestVoteArgs) {
 		return
 	}
 
-	// TODO: 这里需要加锁吗？
 	rf.voteCount++
 	if 2*rf.voteCount > len(rf.peers) && rf.isCandidate() {
 		rf.chanLeader <- struct{}{}

@@ -122,23 +122,21 @@ func (rf *Raft) newHeartBeat() {
 
 func (rf *Raft) applyLoop() {
 	for {
-		select { // TODO: select 只有一个 case ，可以删掉
-		case <-rf.chanCommit:
-			rf.mu.Lock()
-			commitIndex := rf.commitIndex
-			baseIndex := rf.getBaseIndex()
-			for i := rf.lastApplied + 1; i <= commitIndex; i++ {
-				msg := ApplyMsg{
-					CommandValid: true,
-					CommandIndex: i,
-					Command:      rf.logs[i-baseIndex].Command,
-				}
-				rf.chanApply <- msg
-				rf.lastApplied = i
-				DPrintf("%s ApplyMSG: %s %s", rf, msg, rf.details())
+		<-rf.chanCommit
+		rf.mu.Lock()
+		commitIndex := rf.commitIndex
+		baseIndex := rf.getBaseIndex()
+		for i := rf.lastApplied + 1; i <= commitIndex; i++ {
+			msg := ApplyMsg{
+				CommandValid: true,
+				CommandIndex: i,
+				Command:      rf.logs[i-baseIndex].Command,
 			}
-			rf.mu.Unlock()
+			rf.chanApply <- msg
+			rf.lastApplied = i
+			DPrintf("%s ApplyMSG: %s %s", rf, msg, rf.details())
 		}
+		rf.mu.Unlock()
 	}
 }
 
