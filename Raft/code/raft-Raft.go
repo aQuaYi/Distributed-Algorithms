@@ -47,16 +47,15 @@ type Raft struct {
 	/* ↑ state of raft on Figure 2 ↑ */
 
 	state     state
-	voteCount int // TODO: 去除这个属性
+	voteCount int
+
+	chanApply chan ApplyMsg
 
 	//channel
 	chanCommit    chan struct{}
 	chanHeartbeat chan struct{}
 	chanGrantVote chan struct{}
 	chanLeader    chan struct{}
-	chanApply     chan ApplyMsg
-
-	// TODO: 继续添加代码
 }
 
 func (rf *Raft) String() string {

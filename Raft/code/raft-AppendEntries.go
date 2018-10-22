@@ -54,7 +54,6 @@ func (rf *Raft) broadcastAppendEntries() {
 	last := rf.getLastIndex()
 	baseIndex := rf.getBaseIndex()
 
-	// TODO: 这个循环是干嘛的呀
 	// 统计 leader 的此 term 的已复制 log 数量，超过半数，就可以 commit 了
 	for i := rf.commitIndex + 1; i <= last; i++ {
 		num := 1
@@ -107,8 +106,6 @@ func (rf *Raft) sendAppendEntriesAndDealReply(i int, args AppendEntriesArgs) {
 		return
 	}
 
-	// TODO: 这里需要加锁吗？
-
 	if !reply.Success {
 		rf.nextIndex[i] = reply.NextIndex
 		return
@@ -142,10 +139,6 @@ func (rf *Raft) AppendEntries(args AppendEntriesArgs, reply *AppendEntriesReply)
 		return
 	}
 
-	// TODO: 离群的 leader 突然收到 append entries 会怎么样？
-
-	// TODO: 还是觉得我的旧代码好，要是不行，就换回旧代码
-
 	rf.chanHeartbeat <- struct{}{}
 
 	DPrintf("%s 收到了真实有效的信号 %s", rf, args)
@@ -153,7 +146,7 @@ func (rf *Raft) AppendEntries(args AppendEntriesArgs, reply *AppendEntriesReply)
 	if args.Term > rf.currentTerm {
 		rf.currentTerm = args.Term
 		rf.state = FOLLOWER
-		rf.votedFor = NOBODY // TODO: 真的是 NOBODY 吗
+		rf.votedFor = NOBODY
 	}
 
 	reply.Term = args.Term
@@ -165,7 +158,7 @@ func (rf *Raft) AppendEntries(args AppendEntriesArgs, reply *AppendEntriesReply)
 
 	baseIndex := rf.getBaseIndex()
 
-	if args.PrevLogIndex > baseIndex { // TODO: 这里是什么意思呀
+	if args.PrevLogIndex > baseIndex {
 		term := rf.logs[args.PrevLogIndex-baseIndex].LogTerm
 		if args.PrevLogTerm != term {
 			for i := args.PrevLogIndex - 1; i >= baseIndex; i-- {
