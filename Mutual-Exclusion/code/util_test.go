@@ -10,7 +10,7 @@ import (
 )
 
 func Test_debugPrintf_toPrint(t *testing.T) {
-	rwm.Lock() // TODO: 删除此处的锁
+	rwm.Lock()
 	temp := needDebug
 	needDebug = true
 	rwm.Unlock()
@@ -27,13 +27,13 @@ func Test_debugPrintf_toPrint(t *testing.T) {
 	//
 	ast.True(strings.Contains(sb.String(), words))
 	// 还原 needDebug
-	rwm.Lock() // TODO: 删除此处的锁
+	rwm.Lock()
 	needDebug = temp
 	rwm.Unlock()
 }
 
 func Test_debugPrintf_notToPrint(t *testing.T) {
-	rwm.Lock() // TODO: 删除此处的锁
+	rwm.Lock()
 	temp := needDebug
 	needDebug = false
 	rwm.Unlock()
@@ -50,7 +50,7 @@ func Test_debugPrintf_notToPrint(t *testing.T) {
 	//
 	ast.False(strings.Contains(b.String(), words))
 	// 还原 needDebug
-	rwm.Lock() // TODO: 删除此处的锁
+	rwm.Lock()
 	needDebug = temp
 	rwm.Unlock()
 }

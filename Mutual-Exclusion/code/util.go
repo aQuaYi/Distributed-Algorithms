@@ -16,11 +16,11 @@ func init() {
 var needDebug = false
 
 // 读取和修改 needebug 前需要上锁
-var rwm sync.RWMutex // TODO: 删除此处的锁
+var rwm sync.RWMutex
 
 // debugPrintf 根据设置打印输出
 func debugPrintf(format string, a ...interface{}) {
-	rwm.RLock() // TODO: 删除此处的锁
+	rwm.RLock()
 	if needDebug {
 		log.Printf(format, a...)
 	}
