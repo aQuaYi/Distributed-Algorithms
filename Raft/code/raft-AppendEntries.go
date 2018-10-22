@@ -9,7 +9,7 @@ type AppendEntriesArgs struct {
 	PrevLogIndex int        // index of log entry immediately preceding new ones
 	PrevLogTerm  int        // term of prevLogIndex entry
 	LeaderCommit int        // leader.commitIndex
-	Entries      []LogEntry // 需要添加的 log 单元，为空时，表示此条消息是 heartBeat
+	Entries      []LogEntry // 需要添加的 log 单元
 }
 
 func (a AppendEntriesArgs) String() string {
@@ -17,16 +17,16 @@ func (a AppendEntriesArgs) String() string {
 		a.LeaderID, a.Term, a.PrevLogIndex, a.PrevLogTerm, a.LeaderCommit, a.Entries)
 }
 
-func newAppendEntriesArgs(leader *Raft, server int) AppendEntriesArgs {
-	prevLogIndex := leader.nextIndex[server] - 1
-	baseIndex := leader.getBaseIndex()
+func (rf *Raft) newAppendEntriesArgs(server int) AppendEntriesArgs {
+	prevLogIndex := rf.nextIndex[server] - 1
+	baseIndex := rf.getBaseIndex()
 	return AppendEntriesArgs{
-		Term:         leader.currentTerm,
-		LeaderID:     leader.me,
+		Term:         rf.currentTerm,
+		LeaderID:     rf.me,
 		PrevLogIndex: prevLogIndex,
-		PrevLogTerm:  leader.logs[prevLogIndex-baseIndex].LogTerm,
-		Entries:      leader.logs[prevLogIndex+1-baseIndex:],
-		LeaderCommit: leader.commitIndex,
+		PrevLogTerm:  rf.logs[prevLogIndex-baseIndex].LogTerm,
+		Entries:      rf.logs[prevLogIndex+1-baseIndex:],
+		LeaderCommit: rf.commitIndex,
 	}
 }
 
@@ -46,46 +46,51 @@ func (rf *Raft) sendAppendEntries(server int, args AppendEntriesArgs, reply *App
 	return rf.peers[server].Call("Raft.AppendEntries", args, reply)
 }
 
+// 广播 AppendEntries 有两个作用
+// 1. heart beat: 阻止其他 server 发起选举
+// 2. 同步 log 到其他 server
 func (rf *Raft) broadcastAppendEntries() {
-
 	rf.mu.Lock()
 	defer rf.mu.Unlock()
-	N := rf.commitIndex
-	last := rf.getLastIndex()
+
+	lastIndex := rf.getLastIndex()
 	baseIndex := rf.getBaseIndex()
 
+	newCommitIndex := 0
 	// 统计 leader 的此 term 的已复制 log 数量，超过半数，就可以 commit 了
-	for i := rf.commitIndex + 1; i <= last; i++ {
-		num := 1
-		for j := range rf.peers {
-			if j != rf.me && rf.matchIndex[j] >= i && rf.logs[i-baseIndex].LogTerm == rf.currentTerm {
-				num++
+	for idx := rf.commitIndex + 1; idx <= lastIndex; idx++ {
+		count := 1 // 1 是 rf 自己的一票
+		for id := range rf.peers {
+			if id != rf.me &&
+				rf.matchIndex[id] >= idx &&
+				rf.logs[idx-baseIndex].LogTerm == rf.currentTerm {
+				count++
 			}
 		}
-		if 2*num > len(rf.peers) {
-			N = i
+		if 2*count > len(rf.peers) {
+			newCommitIndex = idx
 		}
 	}
-	if N != rf.commitIndex {
-		rf.commitIndex = N
+	if newCommitIndex > rf.commitIndex {
+		rf.commitIndex = newCommitIndex
 		rf.chanCommit <- struct{}{}
 		DPrintf("%s COMMITTED %s", rf, rf.details())
 	}
 
-	for i := range rf.peers {
-		if i != rf.me && rf.isLeader() {
-			args := newAppendEntriesArgs(rf, i)
-			go rf.sendAppendEntriesAndDealReply(i, args)
+	for id := range rf.peers {
+		if id != rf.me && rf.isLeader() {
+			args := rf.newAppendEntriesArgs(id)
+			go rf.endAppendEntriesAndDealReply(id, args)
 		}
 	}
 }
 
-func (rf *Raft) sendAppendEntriesAndDealReply(i int, args AppendEntriesArgs) {
+func (rf *Raft) endAppendEntriesAndDealReply(id int, args AppendEntriesArgs) {
 	var reply AppendEntriesReply
 
-	DPrintf("%s AppendEntries to R%d with %s", rf, i, args)
+	DPrintf("%s AppendEntries to R%d with %s", rf, id, args)
 
-	ok := rf.sendAppendEntries(i, args, &reply)
+	ok := rf.sendAppendEntries(id, args, &reply)
 	if !ok {
 		return
 	}
@@ -107,18 +112,21 @@ func (rf *Raft) sendAppendEntriesAndDealReply(i int, args AppendEntriesArgs) {
 	}
 
 	if !reply.Success {
-		rf.nextIndex[i] = reply.NextIndex
+		rf.nextIndex[id] = reply.NextIndex
 		return
 	}
 
 	if len(args.Entries) == 0 {
+		// 纯 heartBeat 就无需进一步处理了
 		return
 	}
 
 	lastArgsLogIndex := args.Entries[len(args.Entries)-1].LogIndex
-	rf.matchIndex[i] = lastArgsLogIndex
-	rf.nextIndex[i] = lastArgsLogIndex + 1
+	rf.matchIndex[id] = lastArgsLogIndex
+	rf.nextIndex[id] = lastArgsLogIndex + 1
 }
+
+// TODO: 从这里继续开始看代码
 
 // AppendEntries 会处理收到 AppendEntries RPC
 func (rf *Raft) AppendEntries(args AppendEntriesArgs, reply *AppendEntriesReply) {
