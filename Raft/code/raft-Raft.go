@@ -53,9 +53,8 @@ type Raft struct {
 
 	//channel
 	chanCommit    chan struct{}
-	chanHeartbeat chan struct{}
-	chanGrantVote chan struct{}
-	chanLeader    chan struct{}
+	chanHeartBeat chan struct{}
+	chanBeElected chan struct{}
 }
 
 func (rf *Raft) String() string {

@@ -67,8 +67,8 @@ func (rf *Raft) RequestVote(args *RequestVoteArgs, reply *RequestVoteReply) {
 
 	if isValidArgs(rf, args) {
 		reply.VoteGranted = true
-		rf.chanGrantVote <- struct{}{}
-		rf.state = FOLLOWER
+		rf.chanHeartBeat <- struct{}{}
+		rf.state = FOLLOWER // REVIEW: 删除这行，试试看
 		rf.votedFor = args.CandidateID
 		DPrintf("%s voted for %s", rf, args)
 		return
@@ -133,7 +133,7 @@ func (rf *Raft) sendRequestVoteAndDealReply(i int, args RequestVoteArgs) {
 
 	rf.voteCount++
 	if 2*rf.voteCount > len(rf.peers) && rf.isCandidate() {
-		rf.chanLeader <- struct{}{}
+		rf.chanBeElected <- struct{}{}
 	}
 }
 

@@ -139,7 +139,7 @@ func (rf *Raft) AppendEntries(args AppendEntriesArgs, reply *AppendEntriesReply)
 		return
 	}
 
-	rf.chanHeartbeat <- struct{}{}
+	rf.chanHeartBeat <- struct{}{}
 
 	DPrintf("%s 收到了真实有效的信号 %s", rf, args)
 

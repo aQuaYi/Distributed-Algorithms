@@ -52,10 +52,10 @@ func Make(peers []*labrpc.ClientEnd, me int,
 
 	// 私有状态
 	rf.state = FOLLOWER
+	// REVIEW: 把这些通道的设置成非缓冲的，看看会不会出错
 	rf.chanCommit = make(chan struct{}, 100)
-	rf.chanHeartbeat = make(chan struct{}, 100)
-	rf.chanGrantVote = make(chan struct{}, 100) // FIXME: 取消的这个 channel
-	rf.chanLeader = make(chan struct{}, 100)
+	rf.chanHeartBeat = make(chan struct{}, 100)
+	rf.chanBeElected = make(chan struct{}, 100)
 
 	// initialize from state persisted before a crash
 	rf.readPersist(persister.ReadRaftState())
@@ -74,8 +74,7 @@ func (rf *Raft) stateLoop() {
 			select {
 			case <-time.After(electionTimeout()):
 				rf.state = CANDIDATE
-			case <-rf.chanHeartbeat:
-			case <-rf.chanGrantVote:
+			case <-rf.chanHeartBeat:
 			}
 		case CANDIDATE:
 			rf.newElection()
@@ -87,36 +86,39 @@ func (rf *Raft) stateLoop() {
 
 func (rf *Raft) newElection() {
 	rf.mu.Lock()
+
 	rf.currentTerm++
-
-	DPrintf("%s begin new election\n", rf)
-
 	rf.votedFor = rf.me
 	rf.voteCount = 1
 
 	rf.persist()
-
 	rf.mu.Unlock()
+
+	DPrintf("%s begin new election\n", rf)
 
 	go rf.broadcastRequestVote()
 
 	select {
-	case <-rf.chanHeartbeat:
+	case <-time.After(electionTimeout()):
+	case <-rf.chanHeartBeat:
 		rf.state = FOLLOWER
 		DPrintf("%s receives chanHeartbeat", rf)
-	case <-rf.chanLeader:
-		rf.mu.Lock()
-		rf.state = LEADER
-		DPrintf("%s is Leader now", rf)
-		rf.nextIndex = make([]int, len(rf.peers))
-		rf.matchIndex = make([]int, len(rf.peers))
-		for i := range rf.peers {
-			rf.nextIndex[i] = rf.getLastIndex() + 1
-			rf.matchIndex[i] = 0
-		}
-		rf.mu.Unlock()
-	case <-time.After(electionTimeout()):
+	case <-rf.chanBeElected:
+		rf.comeToPower()
 	}
+}
+
+func (rf *Raft) comeToPower() {
+	rf.mu.Lock()
+	rf.state = LEADER
+	DPrintf("%s is Leader now", rf)
+	rf.nextIndex = make([]int, len(rf.peers))
+	rf.matchIndex = make([]int, len(rf.peers))
+	for i := range rf.peers {
+		rf.nextIndex[i] = rf.getLastIndex() + 1
+		rf.matchIndex[i] = 0
+	}
+	rf.mu.Unlock()
 }
 
 func (rf *Raft) newHeartBeat() {
