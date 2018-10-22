@@ -37,20 +37,25 @@ import (
 func Make(peers []*labrpc.ClientEnd, me int,
 	persister *Persister, applyCh chan ApplyMsg) *Raft {
 	rf := &Raft{}
-	rf.peers = peers
-	rf.persister = persister
-	rf.me = me
 
-	// Your initialization code here (2A, 2B, 2C).
-	rf.state = FOLLOWER
-	rf.votedFor = NOBODY
-	rf.logs = append(rf.logs, LogEntry{LogIndex: 0, LogTerm: 0, Command: 0})
+	// Make 函数参数的去处
+	rf.peers = peers
+	rf.me = me
+	rf.persister = persister
+	rf.chanApply = applyCh
+
+	// 需要 persist 的参数
 	rf.currentTerm = 0
+	rf.votedFor = NOBODY
+	le := LogEntry{LogIndex: 0, LogTerm: 0, Command: 0}
+	rf.logs = append(rf.logs, le) // 在 logs 预先放入一个，方便 Raft.getLastIndex()
+
+	// 私有状态
+	rf.state = FOLLOWER
 	rf.chanCommit = make(chan struct{}, 100)
 	rf.chanHeartbeat = make(chan struct{}, 100)
-	rf.chanGrantVote = make(chan struct{}, 100)
+	rf.chanGrantVote = make(chan struct{}, 100) // FIXME: 取消的这个 channel
 	rf.chanLeader = make(chan struct{}, 100)
-	rf.chanApply = applyCh
 
 	// initialize from state persisted before a crash
 	rf.readPersist(persister.ReadRaftState())
