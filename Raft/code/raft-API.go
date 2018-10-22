@@ -89,8 +89,7 @@ func (rf *Raft) newElection() {
 	rf.votedFor = rf.me
 	rf.voteCount = 1
 
-	// TODO: 放出这一句
-	// rf.persist()
+	rf.persist()
 
 	rf.mu.Unlock()
 
@@ -181,8 +180,7 @@ func (rf *Raft) Start(command interface{}) (int, int, bool) {
 			Command:  command,
 		}) // append new entry from client
 
-	// rf.persist()
-	// TODO: 放出这一句
+	rf.persist()
 
 	// Your code above
 	return logIndex, term, isLeader

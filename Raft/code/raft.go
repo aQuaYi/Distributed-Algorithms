@@ -1,5 +1,12 @@
 package raft
 
+import (
+	"bytes"
+	"encoding/gob"
+
+	"github.com/aQuaYi/Distributed-Algorithms/Raft/code/labgob"
+)
+
 //
 // this is an outline of the API that raft must expose to
 // the service (or tester). see comments below for
@@ -28,13 +35,15 @@ package raft
 func (rf *Raft) persist() {
 	// Your code here (2C).
 	// Example:
-	// w := new(bytes.Buffer)
-	// e := labgob.NewEncoder(w)
-	// e.Encode(rf.xxx)
-	// e.Encode(rf.yyy)
-	// data := w.Bytes()
-	// rf.persister.SaveRaftState(data)
-	panic("persist is empty")
+	w := new(bytes.Buffer)
+	e := labgob.NewEncoder(w)
+	e.Encode(rf.currentTerm)
+	e.Encode(rf.votedFor)
+	e.Encode(rf.logs)
+	data := w.Bytes()
+	rf.persister.SaveRaftState(data)
+
+	DPrintf("%s PERSISTED", rf)
 }
 
 //
@@ -48,15 +57,24 @@ func (rf *Raft) readPersist(data []byte) {
 	// Example:
 	// r := bytes.NewBuffer(data)
 	// d := labgob.NewDecoder(r)
-	// var xxx
-	// var yyy
-	// if d.Decode(&xxx) != nil ||
-	//    d.Decode(&yyy) != nil {
-	//   error...
+	// var currentTerm int
+	// var votedFor int
+	// var logs []LogEntry
+	// if d.Decode(&currentTerm) != nil ||
+	// d.Decode(&votedFor) != nil ||
+	// d.Decode(&logs) != nil {
+	// panic("readPersist 无法 Decode")
 	// } else {
-	//   rf.xxx = xxx
-	//   rf.yyy = yyy
+	// rf.currentTerm = currentTerm
+	// rf.votedFor = votedFor
+	// rf.logs = logs
 	// }
+
+	r := bytes.NewBuffer(data)
+	d := gob.NewDecoder(r)
+	d.Decode(&rf.currentTerm)
+	d.Decode(&rf.votedFor)
+	d.Decode(&rf.logs)
 }
 
 // Kill is

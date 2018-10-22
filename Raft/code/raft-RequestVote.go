@@ -122,7 +122,7 @@ func (rf *Raft) sendRequestVoteAndDealReply(i int, args RequestVoteArgs) {
 		rf.currentTerm = reply.Term
 		rf.state = FOLLOWER
 		rf.votedFor = NOBODY
-		// rf.persist() // TODO: 放出这个语句
+		rf.persist()
 		return
 	}
 

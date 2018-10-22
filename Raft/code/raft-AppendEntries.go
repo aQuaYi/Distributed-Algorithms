@@ -98,7 +98,7 @@ func (rf *Raft) sendAppendEntriesAndDealReply(i int, args AppendEntriesArgs) {
 		rf.currentTerm = reply.Term
 		rf.state = FOLLOWER
 		rf.votedFor = NOBODY
-		// rf.persist() // TODO: 放出这个语句
+		rf.persist()
 		return
 	}
 
@@ -130,8 +130,7 @@ func (rf *Raft) AppendEntries(args AppendEntriesArgs, reply *AppendEntriesReply)
 
 	rf.mu.Lock()
 	defer rf.mu.Unlock()
-	// defer rf.persist()
-	// TODO: 放出这个
+	defer rf.persist()
 
 	reply.Success = false
 
