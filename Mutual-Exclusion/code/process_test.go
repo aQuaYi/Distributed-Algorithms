@@ -65,7 +65,7 @@ func Test_process_String(t *testing.T) {
 	ast := assert.New(t)
 	//
 	me := 1
-	clock := newClock() // TODO: 使用 mock
+	clock := newClock()
 	p := &process{
 		me:    me,
 		clock: clock,
