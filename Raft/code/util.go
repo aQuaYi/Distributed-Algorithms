@@ -10,7 +10,6 @@ func DPrintf(format string, a ...interface{}) (n int, err error) {
 	if Debugging > 0 {
 		log.Printf(format, a...)
 	}
-	return
 }
 
 func min(a, b int) int {
