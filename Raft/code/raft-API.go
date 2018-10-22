@@ -60,14 +60,14 @@ func Make(peers []*labrpc.ClientEnd, me int,
 	// initialize from state persisted before a crash
 	rf.readPersist(persister.ReadRaftState())
 
-	go rf.stateLoop()
+	go rf.statesLoop()
 
 	go rf.applyLoop()
 
 	return rf
 }
 
-func (rf *Raft) stateLoop() {
+func (rf *Raft) statesLoop() {
 	for {
 		switch rf.state {
 		case FOLLOWER:
@@ -130,7 +130,9 @@ func (rf *Raft) newHeartBeat() {
 func (rf *Raft) applyLoop() {
 	for {
 		<-rf.chanCommit
+		//
 		rf.mu.Lock()
+		//
 		commitIndex := rf.commitIndex
 		baseIndex := rf.getBaseIndex()
 		for i := rf.lastApplied + 1; i <= commitIndex; i++ {
@@ -140,9 +142,10 @@ func (rf *Raft) applyLoop() {
 				Command:      rf.logs[i-baseIndex].Command,
 			}
 			rf.chanApply <- msg
-			rf.lastApplied = i
 			DPrintf("%s ApplyMSG: %s %s", rf, msg, rf.details())
+			rf.lastApplied = i
 		}
+		//
 		rf.mu.Unlock()
 	}
 }
@@ -219,9 +222,9 @@ func (rf *Raft) GetState() (int, bool) {
 // ApplyMsg, but set CommandValid to false for these other uses.
 //
 type ApplyMsg struct {
-	CommandValid bool
+	CommandValid bool // CommandValid = true 表示， 此消息是用于应用 Command
+	CommandIndex int  // Command 所在的 logEntry.logIndex 值
 	Command      interface{}
-	CommandIndex int
 }
 
 func (m ApplyMsg) String() string {

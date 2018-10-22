@@ -43,7 +43,6 @@ func (rf *Raft) RequestVote(args *RequestVoteArgs, reply *RequestVoteReply) {
 
 	rf.mu.Lock()
 	defer rf.mu.Unlock()
-	defer rf.persist()
 
 	// 1. replay false if term < currentTerm
 	if args.Term < rf.currentTerm {
@@ -51,6 +50,8 @@ func (rf *Raft) RequestVote(args *RequestVoteArgs, reply *RequestVoteReply) {
 		reply.VoteGranted = false
 		return
 	}
+
+	defer rf.persist()
 
 	if args.Term > rf.currentTerm {
 		rf.currentTerm = args.Term
@@ -68,7 +69,6 @@ func (rf *Raft) RequestVote(args *RequestVoteArgs, reply *RequestVoteReply) {
 	if isValidArgs(rf, args) {
 		reply.VoteGranted = true
 		rf.chanHeartBeat <- struct{}{}
-		rf.state = FOLLOWER // REVIEW: 删除这行，试试看
 		rf.votedFor = args.CandidateID
 		DPrintf("%s voted for %s", rf, args)
 		return

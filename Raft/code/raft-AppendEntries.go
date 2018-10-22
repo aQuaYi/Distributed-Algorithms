@@ -127,7 +127,6 @@ func (rf *Raft) AppendEntries(args AppendEntriesArgs, reply *AppendEntriesReply)
 
 	rf.mu.Lock()
 	defer rf.mu.Unlock()
-	defer rf.persist()
 
 	reply.Success = false
 
@@ -138,6 +137,8 @@ func (rf *Raft) AppendEntries(args AppendEntriesArgs, reply *AppendEntriesReply)
 		DPrintf("%s rejected %s", rf, args)
 		return
 	}
+
+	defer rf.persist()
 
 	rf.chanHeartBeat <- struct{}{}
 

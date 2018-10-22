@@ -28,6 +28,7 @@ type Raft struct {
 	/* ↓ state of raft on Figure 2 ↓ */
 
 	// Persistent state on all servers:
+	// "Persistent" 的意思是，一旦被修改，就要运行 rf.persist()
 	currentTerm int        // latest term server has seen. Initialized to 0.
 	votedFor    int        // candidateID that received vote in current Term
 	logs        []LogEntry // NOTICE: first LogEntry.LogIndex is 1
