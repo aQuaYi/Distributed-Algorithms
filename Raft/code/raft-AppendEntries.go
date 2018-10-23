@@ -126,13 +126,8 @@ func (rf *Raft) endAppendEntriesAndDealReply(id int, args AppendEntriesArgs) {
 	rf.nextIndex[id] = lastArgsLogIndex + 1
 }
 
-// TODO: 从这里继续开始看代码
-
 // AppendEntries 会处理收到 AppendEntries RPC
 func (rf *Raft) AppendEntries(args AppendEntriesArgs, reply *AppendEntriesReply) {
-
-	// Your code here.
-
 	rf.mu.Lock()
 	defer rf.mu.Unlock()
 
@@ -141,7 +136,6 @@ func (rf *Raft) AppendEntries(args AppendEntriesArgs, reply *AppendEntriesReply)
 	// 1. Replay false at once if term < currentTerm
 	if args.Term < rf.currentTerm {
 		reply.Term = rf.currentTerm
-		reply.NextIndex = rf.getLastIndex() + 1
 		DPrintf("%s rejected %s", rf, args)
 		return
 	}
