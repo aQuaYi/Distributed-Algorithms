@@ -130,6 +130,7 @@ func (rf *Raft) newHeartBeat() {
 func (rf *Raft) applyLoop() {
 	for {
 		<-rf.chanCommit
+		DPrintf("%s COMMITTED %s", rf, rf.details())
 		//
 		rf.mu.Lock()
 		//
