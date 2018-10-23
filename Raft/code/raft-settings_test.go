@@ -15,7 +15,7 @@ func Test_ElectionTimeout(t *testing.T) {
 	}
 }
 
-func Test_heartBeat(t *testing.T) {
+func Test_heartBeat_isInRange(t *testing.T) {
 	ast := assert.New(t)
 	minInterval := 30 * time.Millisecond
 	maxInterval := 100 * time.Millisecond

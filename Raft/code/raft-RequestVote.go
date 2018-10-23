@@ -7,7 +7,6 @@ import "fmt"
 // field names must start with capital letters!
 //
 type RequestVoteArgs struct {
-	// Your data here (2A, 2B).
 	Term         int // candidate's term
 	CandidateID  int // candidate requesting vote
 	LastLogIndex int // index of candidate's last log entry
@@ -15,7 +14,7 @@ type RequestVoteArgs struct {
 }
 
 func (a RequestVoteArgs) String() string {
-	return fmt.Sprintf("voteArgs{R%d:T%d;LastLogIndex:%d;LastLogTerm:%d}",
+	return fmt.Sprintf("voteArgs{R%d:T%d;LastIndex:%d;LastTerm:%d}",
 		a.CandidateID, a.Term, a.LastLogIndex, a.LastLogTerm)
 }
 
@@ -24,7 +23,6 @@ func (a RequestVoteArgs) String() string {
 // field names must start with capital letters!
 //
 type RequestVoteReply struct {
-	// Your data here (2A).
 	Term        int
 	VoteGranted bool
 }
@@ -37,8 +35,6 @@ func (reply RequestVoteReply) String() string {
 // example RequestVote RPC handler.
 //
 func (rf *Raft) RequestVote(args *RequestVoteArgs, reply *RequestVoteReply) {
-	// Your code here (2A, 2B).
-
 	DPrintf("%s 收到投票请求 [%s]", rf, args)
 
 	rf.mu.Lock()

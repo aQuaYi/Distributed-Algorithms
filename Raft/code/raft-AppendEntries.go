@@ -80,12 +80,12 @@ func (rf *Raft) broadcastAppendEntries() {
 	for id := range rf.peers {
 		if id != rf.me && rf.isLeader() {
 			args := rf.newAppendEntriesArgs(id)
-			go rf.endAppendEntriesAndDealReply(id, args)
+			go rf.sendAppendEntriesAndDealReply(id, args)
 		}
 	}
 }
 
-func (rf *Raft) endAppendEntriesAndDealReply(id int, args AppendEntriesArgs) {
+func (rf *Raft) sendAppendEntriesAndDealReply(id int, args AppendEntriesArgs) {
 	var reply AppendEntriesReply
 
 	DPrintf("%s AppendEntries to R%d with %s", rf, id, args)
@@ -131,6 +131,8 @@ func (rf *Raft) AppendEntries(args AppendEntriesArgs, reply *AppendEntriesReply)
 	rf.mu.Lock()
 	defer rf.mu.Unlock()
 
+	// REVIEW: 按照 figure 2 中的内容来，重新编写此函数
+
 	reply.Success = false
 
 	// 1. Replay false at once if term < currentTerm
@@ -152,7 +154,7 @@ func (rf *Raft) AppendEntries(args AppendEntriesArgs, reply *AppendEntriesReply)
 		rf.votedFor = NOBODY
 	}
 
-	reply.Term = args.Term
+	reply.Term = rf.currentTerm
 
 	if args.PrevLogIndex > rf.getLastIndex() {
 		reply.NextIndex = rf.getLastIndex() + 1
@@ -185,7 +187,6 @@ func (rf *Raft) AppendEntries(args AppendEntriesArgs, reply *AppendEntriesReply)
 	if args.LeaderCommit > rf.commitIndex {
 		rf.commitIndex = min(args.LeaderCommit, rf.getLastIndex())
 		rf.chanCommit <- struct{}{}
-		DPrintf("%s COMMITTED %s", rf, rf.details())
 	}
 
 }

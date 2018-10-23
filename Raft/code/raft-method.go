@@ -1,5 +1,7 @@
 package raft
 
+// 这里的方法都是被内部引用的，所以无需加锁
+
 func (rf *Raft) getLastIndex() int {
 	return rf.logs[len(rf.logs)-1].LogIndex
 }

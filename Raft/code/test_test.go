@@ -726,6 +726,7 @@ func TestUnreliableAgree2C(t *testing.T) {
 	cfg.end()
 }
 
+// TODO: 弄清楚这些测试代码里面说了什么
 func TestFigure8Unreliable2C(t *testing.T) {
 	servers := 5
 	cfg := makeConfig(t, servers, true)
