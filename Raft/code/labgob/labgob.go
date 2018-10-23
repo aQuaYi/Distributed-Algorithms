@@ -19,47 +19,56 @@ var mu sync.Mutex
 var errorCount int // for TestCapital
 var checked map[reflect.Type]bool
 
+// LabEncoder is
 type LabEncoder struct {
 	gob *gob.Encoder
 }
 
+// NewEncoder is
 func NewEncoder(w io.Writer) *LabEncoder {
 	enc := &LabEncoder{}
 	enc.gob = gob.NewEncoder(w)
 	return enc
 }
 
+// Encode is
 func (enc *LabEncoder) Encode(e interface{}) error {
 	checkValue(e)
 	return enc.gob.Encode(e)
 }
 
+// EncodeValue is
 func (enc *LabEncoder) EncodeValue(value reflect.Value) error {
 	checkValue(value.Interface())
 	return enc.gob.EncodeValue(value)
 }
 
+// LabDecoder is
 type LabDecoder struct {
 	gob *gob.Decoder
 }
 
+// NewDecoder is
 func NewDecoder(r io.Reader) *LabDecoder {
 	dec := &LabDecoder{}
 	dec.gob = gob.NewDecoder(r)
 	return dec
 }
 
+// Decode is
 func (dec *LabDecoder) Decode(e interface{}) error {
 	checkValue(e)
 	checkDefault(e)
 	return dec.gob.Decode(e)
 }
 
+// Register is
 func Register(value interface{}) {
 	checkValue(value)
 	gob.Register(value)
 }
 
+// RegisterName is
 func RegisterName(name string, value interface{}) {
 	checkValue(value)
 	gob.RegisterName(name, value)
@@ -94,7 +103,7 @@ func checkType(t reflect.Type) {
 				fmt.Printf("labgob error: lower-case field %v of %v in RPC or persist/snapshot will break your Raft\n",
 					f.Name, t.Name())
 				mu.Lock()
-				errorCount += 1
+				errorCount++
 				mu.Unlock()
 			}
 			checkType(f.Type)
@@ -169,7 +178,7 @@ func checkDefault1(value reflect.Value, depth int, name string) {
 				fmt.Printf("labgob warning: Decoding into a non-default variable/field %v may not work\n",
 					what)
 			}
-			errorCount += 1
+			errorCount++
 			mu.Unlock()
 		}
 		return
