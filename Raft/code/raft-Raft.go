@@ -59,7 +59,8 @@ type Raft struct {
 }
 
 func (rf *Raft) String() string {
-	return fmt.Sprintf(" <R%d:T%d:%s> ", rf.me, rf.currentTerm, rf.state)
+	return fmt.Sprintf(" <R%d:T%d:%s:C%d:A%d> ",
+		rf.me, rf.currentTerm, rf.state, rf.commitIndex, rf.lastApplied)
 }
 
 func (rf *Raft) details() string {
