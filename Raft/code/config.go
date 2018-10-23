@@ -51,7 +51,7 @@ type config struct {
 	logs      []map[int]int // copy of each server's committed entries
 	start     time.Time     // time at which make_config() was called
 	// begin()/end() statistics
-	t0        time.Time // time at which test_test.go called cfg.begin()
+	beginTime time.Time // time at which test_test.go called cfg.begin()
 	rpcs0     int       // rpcTotal() at start of test
 	cmds0     int       // number of agreements
 	maxIndex  int
@@ -483,7 +483,7 @@ func (cfg *config) one(cmd int, expectedServers int, retry bool) int {
 // e.g. cfg.begin("Test (2B): RPC counts aren't too high")
 func (cfg *config) begin(description string) {
 	fmt.Printf("%s ...\n", description)
-	cfg.t0 = time.Now()
+	cfg.beginTime = time.Now()
 	cfg.rpcs0 = cfg.rpcTotal()
 	cfg.cmds0 = 0
 	cfg.maxIndex0 = cfg.maxIndex
@@ -497,10 +497,10 @@ func (cfg *config) end() {
 	cfg.checkTimeout()
 	if cfg.t.Failed() == false {
 		cfg.mu.Lock()
-		t := time.Since(cfg.t0).Seconds()     // real time
-		nPeers := cfg.n                       // number of Raft peers
-		nRPC := cfg.rpcTotal() - cfg.rpcs0    // number of RPC sends
-		nCMDs := cfg.maxIndex - cfg.maxIndex0 // number of Raft agreements reported
+		t := time.Since(cfg.beginTime).Seconds() // real time
+		nPeers := cfg.n                          // number of Raft peers
+		nRPC := cfg.rpcTotal() - cfg.rpcs0       // number of RPC sends
+		nCMDs := cfg.maxIndex - cfg.maxIndex0    // number of Raft agreements reported
 		cfg.mu.Unlock()
 
 		fmt.Printf("  ... Passed --")

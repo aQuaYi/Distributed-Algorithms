@@ -24,8 +24,7 @@ func TestInitialElection2A(t *testing.T) {
 	cfg := makeConfig(t, servers, false)
 	defer cfg.cleanup()
 
-	cfg.begin("Test (2A): initial election")
-
+	cfg.begin("Test (2A): InitialElection2A initial election")
 	// is a leader elected?
 	cfg.checkOneLeader()
 
@@ -52,7 +51,7 @@ func TestReElection2A(t *testing.T) {
 	cfg := makeConfig(t, servers, false)
 	defer cfg.cleanup()
 
-	cfg.begin("Test (2A): election after network failure")
+	cfg.begin("Test (2A): ReElection2A election after network failure")
 
 	leader1 := cfg.checkOneLeader()
 
@@ -88,7 +87,7 @@ func TestBasicAgree2B(t *testing.T) {
 	cfg := makeConfig(t, servers, false)
 	defer cfg.cleanup()
 
-	cfg.begin("Test (2B): basic agreement")
+	cfg.begin("Test (2B): BasicAgree2B basic agreement")
 
 	iters := 3
 	for index := 1; index < iters+1; index++ {
@@ -111,7 +110,7 @@ func TestFailAgree2B(t *testing.T) {
 	cfg := makeConfig(t, servers, false)
 	defer cfg.cleanup()
 
-	cfg.begin("Test (2B): agreement despite follower disconnection")
+	cfg.begin("Test (2B): FailAgree2B agreement despite follower disconnection")
 
 	cfg.one(101, servers, false)
 
@@ -142,7 +141,7 @@ func TestFailNoAgree2B(t *testing.T) {
 	cfg := makeConfig(t, servers, false)
 	defer cfg.cleanup()
 
-	cfg.begin("Test (2B): no agreement if too many followers disconnect")
+	cfg.begin("Test (2B): FailNoAgree2B no agreement if too many followers disconnect")
 
 	cfg.one(10, servers, false)
 
@@ -193,7 +192,7 @@ func TestConcurrentStarts2B(t *testing.T) {
 	cfg := makeConfig(t, servers, false)
 	defer cfg.cleanup()
 
-	cfg.begin("Test (2B): concurrent Start()s")
+	cfg.begin("Test (2B): ConcurrentStarts2B concurrent Start()s")
 
 	var success bool
 loop:
@@ -294,7 +293,7 @@ func TestRejoin2B(t *testing.T) {
 	cfg := makeConfig(t, servers, false)
 	defer cfg.cleanup()
 
-	cfg.begin("Test (2B): rejoin of partitioned leader")
+	cfg.begin("Test (2B): Rejoin2B rejoin of partitioned leader")
 
 	cfg.one(101, servers, true)
 
@@ -332,7 +331,7 @@ func TestBackup2B(t *testing.T) {
 	cfg := makeConfig(t, servers, false)
 	defer cfg.cleanup()
 
-	cfg.begin("Test (2B): leader backs up quickly over incorrect follower logs")
+	cfg.begin("Test (2B): Backup2B leader backs up quickly over incorrect follower logs")
 
 	cfg.one(rand.Int(), servers, true)
 
@@ -404,7 +403,7 @@ func TestCount2B(t *testing.T) {
 	cfg := makeConfig(t, servers, false)
 	defer cfg.cleanup()
 
-	cfg.begin("Test (2B): RPC counts aren't too high")
+	cfg.begin("Test (2B): Count2B RPC counts aren't too high")
 
 	rpcs := func() (n int) {
 		for j := 0; j < servers; j++ {
@@ -514,7 +513,7 @@ func TestPersist12C(t *testing.T) {
 	cfg := makeConfig(t, servers, false)
 	defer cfg.cleanup()
 
-	cfg.begin("Test (2C): basic persistence")
+	cfg.begin("Test (2C): Persist12C basic persistence")
 
 	cfg.one(11, servers, true)
 
@@ -560,7 +559,7 @@ func TestPersist22C(t *testing.T) {
 	cfg := makeConfig(t, servers, false)
 	defer cfg.cleanup()
 
-	cfg.begin("Test (2C): more persistence")
+	cfg.begin("Test (2C): Persist22C more persistence")
 
 	index := 1
 	for iters := 0; iters < 5; iters++ {
@@ -606,7 +605,7 @@ func TestPersist32C(t *testing.T) {
 	cfg := makeConfig(t, servers, false)
 	defer cfg.cleanup()
 
-	cfg.begin("Test (2C): partitioned leader and one follower crash, leader restarts")
+	cfg.begin("Test (2C): Persist32C partitioned leader and one follower crash, leader restarts")
 
 	cfg.one(101, 3, true)
 
@@ -646,7 +645,7 @@ func TestFigure82C(t *testing.T) {
 	cfg := makeConfig(t, servers, false)
 	defer cfg.cleanup()
 
-	cfg.begin("Test (2C): Figure 8")
+	cfg.begin("Test (2C): Figure82C Figure 8")
 
 	cfg.one(rand.Int(), 1, true)
 
@@ -702,7 +701,7 @@ func TestUnreliableAgree2C(t *testing.T) {
 	cfg := makeConfig(t, servers, true)
 	defer cfg.cleanup()
 
-	cfg.begin("Test (2C): unreliable agreement")
+	cfg.begin("Test (2C): UnreliableAgree2C unreliable agreement")
 
 	var wg sync.WaitGroup
 
@@ -726,13 +725,12 @@ func TestUnreliableAgree2C(t *testing.T) {
 	cfg.end()
 }
 
-// TODO: 弄清楚这些测试代码里面说了什么
 func TestFigure8Unreliable2C(t *testing.T) {
 	servers := 5
 	cfg := makeConfig(t, servers, true)
 	defer cfg.cleanup()
 
-	cfg.begin("Test (2C): Figure 8 (unreliable)")
+	cfg.begin("Test (2C): Figure8Unreliable2C Figure 8 (unreliable)")
 
 	cfg.one(rand.Int()%10000, 1, true)
 
