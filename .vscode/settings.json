@@ -1,7 +1,11 @@
 {
     "cSpell.words": [
+        "Deserialize",
         "Jeiwan",
         "blockchain",
+        "boltdb",
+        "cbtx",
+        "deserializes",
         "labrpc",
         "rcvr",
         "replyv"
