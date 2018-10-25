@@ -8,6 +8,8 @@ import (
 	"os"
 )
 
+// TODO: 清理干净 CLI 的相关内容。
+
 // CLI responsible for processing command line arguments
 type CLI struct{}
 
