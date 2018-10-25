@@ -12,6 +12,8 @@ var (
 	maxNonce = math.MaxInt64
 )
 
+// 目标哈希值的前 targetBits 位必须是 0
+// 代表了挖矿的难度，数值越大越难
 const targetBits = 16
 
 // ProofOfWork represents a proof-of-work
@@ -23,7 +25,9 @@ type ProofOfWork struct {
 // NewProofOfWork builds and returns a ProofOfWork
 func NewProofOfWork(b *Block) *ProofOfWork {
 	target := big.NewInt(1)
+	// Lsh 是把 target 左移 256-targetBits 位
 	target.Lsh(target, uint(256-targetBits))
+	// 目标哈希值，需要比此时的 target 小
 
 	pow := &ProofOfWork{b, target}
 

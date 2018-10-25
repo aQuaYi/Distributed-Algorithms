@@ -9,17 +9,24 @@ import (
 
 // Block represents a block in the blockchain
 type Block struct {
-	Timestamp     int64
+	Timestamp     int64 // 创建此区块的时间
 	Transactions  []*Transaction
-	PrevBlockHash []byte
-	Hash          []byte
+	PrevBlockHash []byte // 上一个区块的哈希值，即父哈希
+	Hash          []byte // 当前区块的哈希值
 	Nonce         int
 	Height        int
 }
 
 // NewBlock creates and returns Block
 func NewBlock(transactions []*Transaction, prevBlockHash []byte, height int) *Block {
-	block := &Block{time.Now().Unix(), transactions, prevBlockHash, []byte{}, 0, height}
+	block := &Block{
+		Timestamp:     time.Now().Unix(),
+		Transactions:  transactions,
+		PrevBlockHash: prevBlockHash,
+		Hash:          []byte{},
+		Nonce:         0,
+		Height:        height,
+	}
 	pow := NewProofOfWork(block)
 	nonce, hash := pow.Run()
 

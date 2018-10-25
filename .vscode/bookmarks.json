@@ -33,5 +33,15 @@
 				"label": ""
 			}
 		]
+	},
+	{
+		"path": "$ROOTPATH$/PoW/code/proofofwork.go",
+		"bookmarks": [
+			{
+				"line": 36,
+				"column": 3,
+				"label": ""
+			}
+		]
 	}
 ]
