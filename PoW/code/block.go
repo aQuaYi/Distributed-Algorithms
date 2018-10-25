@@ -13,7 +13,7 @@ type Block struct {
 	Transactions  []*Transaction
 	PrevBlockHash []byte // 上一个区块的哈希值，即父哈希
 	Hash          []byte // 当前区块的哈希值
-	Nonce         int
+	Nonce         int    // REVIEW: 计算目标哈希值所需的 "计数器"
 	Height        int
 }
 
@@ -55,23 +55,25 @@ func (b *Block) HashTransactions() []byte {
 
 // Serialize serializes the block
 func (b *Block) Serialize() []byte {
-	var result bytes.Buffer
-	encoder := gob.NewEncoder(&result)
+	var buf bytes.Buffer
 
-	err := encoder.Encode(b)
+	enc := gob.NewEncoder(&buf)
+	err := enc.Encode(b)
 	if err != nil {
 		log.Panic(err)
 	}
 
-	return result.Bytes()
+	return buf.Bytes()
 }
 
 // DeserializeBlock deserializes a block
-func DeserializeBlock(d []byte) *Block {
+func DeserializeBlock(date []byte) *Block {
+	r := bytes.NewReader(date)
+	dec := gob.NewDecoder(r)
+
 	var block Block
 
-	decoder := gob.NewDecoder(bytes.NewReader(d))
-	err := decoder.Decode(&block)
+	err := dec.Decode(&block)
 	if err != nil {
 		log.Panic(err)
 	}

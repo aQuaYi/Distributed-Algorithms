@@ -2,6 +2,8 @@
     "cSpell.words": [
         "Deserialize",
         "Jeiwan",
+        "TXOs",
+        "Vout",
         "blockchain",
         "boltdb",
         "cbtx",

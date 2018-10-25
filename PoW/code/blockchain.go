@@ -12,9 +12,12 @@ import (
 	"github.com/boltdb/bolt"
 )
 
-const dbFile = "blockchain_%s.db"
-const blocksBucket = "blocks"
-const genesisCoinbaseData = "The Times 03/Jan/2009 Chancellor on brink of second bailout for banks"
+const (
+	dbFile              = "blockchain_%s.db"
+	blocksBucket        = "blocks"
+	latestBlock         = "l"
+	genesisCoinbaseData = "The Times 03/Jan/2009 Chancellor on brink of second bailout for banks"
+)
 
 // Blockchain implements interactions with a DB
 type Blockchain struct {
@@ -51,7 +54,7 @@ func CreateBlockchain(address, nodeID string) *Blockchain {
 			log.Panic(err)
 		}
 
-		err = b.Put([]byte("l"), genesis.Hash)
+		err = b.Put([]byte(latestBlock), genesis.Hash)
 		if err != nil {
 			log.Panic(err)
 		}
@@ -76,7 +79,7 @@ func NewBlockchain(nodeID string) *Blockchain {
 		os.Exit(1)
 	}
 
-	var tip []byte
+	var tip []byte // 取 tip 尖端的含义，意为指向最新的区块
 	db, err := bolt.Open(dbFile, 0600, nil)
 	if err != nil {
 		log.Panic(err)
@@ -84,7 +87,7 @@ func NewBlockchain(nodeID string) *Blockchain {
 
 	err = db.Update(func(tx *bolt.Tx) error {
 		b := tx.Bucket([]byte(blocksBucket))
-		tip = b.Get([]byte("l"))
+		tip = b.Get([]byte(latestBlock))
 
 		return nil
 	})
@@ -113,12 +116,12 @@ func (bc *Blockchain) AddBlock(block *Block) {
 			log.Panic(err)
 		}
 
-		lastHash := b.Get([]byte("l"))
+		lastHash := b.Get([]byte(latestBlock))
 		lastBlockData := b.Get(lastHash)
 		lastBlock := DeserializeBlock(lastBlockData)
 
 		if block.Height > lastBlock.Height {
-			err = b.Put([]byte("l"), block.Hash)
+			err = b.Put([]byte(latestBlock), block.Hash)
 			if err != nil {
 				log.Panic(err)
 			}
@@ -210,7 +213,7 @@ func (bc *Blockchain) GetBestHeight() int {
 
 	err := bc.db.View(func(tx *bolt.Tx) error {
 		b := tx.Bucket([]byte(blocksBucket))
-		lastHash := b.Get([]byte("l"))
+		lastHash := b.Get([]byte(latestBlock))
 		blockData := b.Get(lastHash)
 		lastBlock = *DeserializeBlock(blockData)
 
@@ -233,7 +236,7 @@ func (bc *Blockchain) GetBlock(blockHash []byte) (Block, error) {
 		blockData := b.Get(blockHash)
 
 		if blockData == nil {
-			return errors.New("Block is not found.")
+			return errors.New("block is not found")
 		}
 
 		block = *DeserializeBlock(blockData)
@@ -279,7 +282,7 @@ func (bc *Blockchain) MineBlock(transactions []*Transaction) *Block {
 
 	err := bc.db.View(func(tx *bolt.Tx) error {
 		b := tx.Bucket([]byte(blocksBucket))
-		lastHash = b.Get([]byte("l"))
+		lastHash = b.Get([]byte(latestBlock))
 
 		blockData := b.Get(lastHash)
 		block := DeserializeBlock(blockData)
@@ -301,7 +304,7 @@ func (bc *Blockchain) MineBlock(transactions []*Transaction) *Block {
 			log.Panic(err)
 		}
 
-		err = b.Put([]byte("l"), newBlock.Hash)
+		err = b.Put([]byte(latestBlock), newBlock.Hash)
 		if err != nil {
 			log.Panic(err)
 		}

@@ -51,23 +51,28 @@ func (pow *ProofOfWork) prepareData(nonce int) []byte {
 
 // Run performs a proof-of-work
 func (pow *ProofOfWork) Run() (int, []byte) {
+	// hashInt 是 hash 的整数表现
 	var hashInt big.Int
 	var hash [32]byte
-	nonce := 0
+	nonce := 0 // 计数器
 
 	fmt.Printf("Mining a new block")
 	for nonce < maxNonce {
 		data := pow.prepareData(nonce)
 
 		hash = sha256.Sum256(data)
+		// REVIEW: 这个 if 是什么意思呀
 		if math.Remainder(float64(nonce), 100000) == 0 {
 			fmt.Printf("\r%x", hash)
 		}
 		hashInt.SetBytes(hash[:])
 
 		if hashInt.Cmp(pow.target) == -1 {
+			// 当哈希所代表的数值，小于 pow.target 的时候，
+			// 说明找到了想要的 nonce 及其哈希值
 			break
 		} else {
+			// 没有找到就顺着继续找
 			nonce++
 		}
 	}
@@ -77,6 +82,7 @@ func (pow *ProofOfWork) Run() (int, []byte) {
 }
 
 // Validate validates block's PoW
+// 验证 block，hash，nonce 和 target 是否匹配
 func (pow *ProofOfWork) Validate() bool {
 	var hashInt big.Int
 
