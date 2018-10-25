@@ -21,8 +21,8 @@ const (
 
 // Blockchain implements interactions with a DB
 type Blockchain struct {
-	tip []byte
-	db  *bolt.DB
+	db  *bolt.DB // 存储全部区块数据的 key/value 数据库
+	tip []byte   // 最新的区块 serialize 后的值
 }
 
 // CreateBlockchain creates a new blockchain DB
@@ -66,7 +66,7 @@ func CreateBlockchain(address, nodeID string) *Blockchain {
 		log.Panic(err)
 	}
 
-	bc := Blockchain{tip, db}
+	bc := Blockchain{tip: tip, db: db}
 
 	return &bc
 }
@@ -95,7 +95,7 @@ func NewBlockchain(nodeID string) *Blockchain {
 		log.Panic(err)
 	}
 
-	bc := Blockchain{tip, db}
+	bc := Blockchain{tip: tip, db: db}
 
 	return &bc
 }
@@ -200,7 +200,7 @@ func (bc *Blockchain) FindUTXO() map[string]TXOutputs {
 	return UTXO
 }
 
-// Iterator returns a BlockchainIterat
+// Iterator returns a BlockchainIterator
 func (bc *Blockchain) Iterator() *BlockchainIterator {
 	bci := &BlockchainIterator{bc.tip, bc.db}
 

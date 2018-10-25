@@ -3,12 +3,14 @@
         "Deserialize",
         "Jeiwan",
         "TXOs",
+        "Txid",
         "Vout",
         "blockchain",
         "boltdb",
         "cbtx",
         "deserializes",
         "labrpc",
+        "priv",
         "rcvr",
         "replyv"
     ]
