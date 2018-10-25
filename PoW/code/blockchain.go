@@ -15,14 +15,14 @@ import (
 const (
 	dbFile              = "blockchain_%s.db"
 	blocksBucket        = "blocks"
-	latestBlock         = "l"
+	lastBlockHash       = "l"
 	genesisCoinbaseData = "The Times 03/Jan/2009 Chancellor on brink of second bailout for banks"
 )
 
 // Blockchain implements interactions with a DB
 type Blockchain struct {
 	db  *bolt.DB // 存储全部区块数据的 key/value 数据库
-	tip []byte   // 最新的区块 serialize 后的值
+	tip []byte   // 最新的区块的哈希值
 }
 
 // CreateBlockchain creates a new blockchain DB
@@ -54,7 +54,7 @@ func CreateBlockchain(address, nodeID string) *Blockchain {
 			log.Panic(err)
 		}
 
-		err = b.Put([]byte(latestBlock), genesis.Hash)
+		err = b.Put([]byte(lastBlockHash), genesis.Hash)
 		if err != nil {
 			log.Panic(err)
 		}
@@ -87,7 +87,7 @@ func NewBlockchain(nodeID string) *Blockchain {
 
 	err = db.Update(func(tx *bolt.Tx) error {
 		b := tx.Bucket([]byte(blocksBucket))
-		tip = b.Get([]byte(latestBlock))
+		tip = b.Get([]byte(lastBlockHash))
 
 		return nil
 	})
@@ -116,12 +116,12 @@ func (bc *Blockchain) AddBlock(block *Block) {
 			log.Panic(err)
 		}
 
-		lastHash := b.Get([]byte(latestBlock))
+		lastHash := b.Get([]byte(lastBlockHash))
 		lastBlockData := b.Get(lastHash)
 		lastBlock := DeserializeBlock(lastBlockData)
 
 		if block.Height > lastBlock.Height {
-			err = b.Put([]byte(latestBlock), block.Hash)
+			err = b.Put([]byte(lastBlockHash), block.Hash)
 			if err != nil {
 				log.Panic(err)
 			}
@@ -213,7 +213,7 @@ func (bc *Blockchain) GetBestHeight() int {
 
 	err := bc.db.View(func(tx *bolt.Tx) error {
 		b := tx.Bucket([]byte(blocksBucket))
-		lastHash := b.Get([]byte(latestBlock))
+		lastHash := b.Get([]byte(lastBlockHash))
 		blockData := b.Get(lastHash)
 		lastBlock = *DeserializeBlock(blockData)
 
@@ -282,7 +282,7 @@ func (bc *Blockchain) MineBlock(transactions []*Transaction) *Block {
 
 	err := bc.db.View(func(tx *bolt.Tx) error {
 		b := tx.Bucket([]byte(blocksBucket))
-		lastHash = b.Get([]byte(latestBlock))
+		lastHash = b.Get([]byte(lastBlockHash))
 
 		blockData := b.Get(lastHash)
 		block := DeserializeBlock(blockData)
@@ -304,7 +304,7 @@ func (bc *Blockchain) MineBlock(transactions []*Transaction) *Block {
 			log.Panic(err)
 		}
 
-		err = b.Put([]byte(latestBlock), newBlock.Hash)
+		err = b.Put([]byte(lastBlockHash), newBlock.Hash)
 		if err != nil {
 			log.Panic(err)
 		}
