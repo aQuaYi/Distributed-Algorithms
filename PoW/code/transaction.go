@@ -176,9 +176,9 @@ func (tx *Transaction) Verify(prevTXs map[string]Transaction) bool {
 
 func divide(bs []byte) (big.Int, big.Int) {
 	left, right := big.Int{}, big.Int{}
-	half := len(bs) / 2
-	left.SetBytes(bs[:half])
-	right.SetBytes(bs[half:])
+	mid := len(bs) / 2
+	left.SetBytes(bs[:mid])
+	right.SetBytes(bs[mid:])
 	return left, right
 }
 
