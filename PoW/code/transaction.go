@@ -148,17 +148,19 @@ func (tx *Transaction) Verify(prevTXs map[string]Transaction) bool {
 		txCopy.Vin[inID].Signature = nil
 		txCopy.Vin[inID].PubKey = prevTx.Vout[vin.Vout].PubKeyHash
 
-		r := big.Int{}
-		s := big.Int{}
-		sigLen := len(vin.Signature)
-		r.SetBytes(vin.Signature[:(sigLen / 2)])
-		s.SetBytes(vin.Signature[(sigLen / 2):])
+		// r := big.Int{}
+		// s := big.Int{}
+		// sigLen := len(vin.Signature)
+		// r.SetBytes(vin.Signature[:(sigLen / 2)])
+		// s.SetBytes(vin.Signature[(sigLen / 2):])
+		r, s := divide(vin.Signature)
 
-		x := big.Int{}
-		y := big.Int{}
-		keyLen := len(vin.PubKey)
-		x.SetBytes(vin.PubKey[:(keyLen / 2)])
-		y.SetBytes(vin.PubKey[(keyLen / 2):])
+		// x := big.Int{}
+		// y := big.Int{}
+		// keyLen := len(vin.PubKey)
+		// x.SetBytes(vin.PubKey[:(keyLen / 2)])
+		// y.SetBytes(vin.PubKey[(keyLen / 2):])
+		x, y := divide(vin.PubKey)
 
 		dataToVerify := fmt.Sprintf("%x\n", txCopy)
 
@@ -170,6 +172,14 @@ func (tx *Transaction) Verify(prevTXs map[string]Transaction) bool {
 	}
 
 	return true
+}
+
+func divide(bs []byte) (big.Int, big.Int) {
+	a, b := big.Int{}, big.Int{}
+	half := len(bs) / 2
+	a.SetBytes(bs[:half])
+	b.SetBytes(bs[half:])
+	return a, b
 }
 
 // NewCoinbaseTX creates a new coinbase transaction
