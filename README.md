@@ -16,10 +16,10 @@ Diego Ongaro 和 John Ousterhout 认为 Paxos 难以理解， 于是在 [《In S
 ## [PoW](PoW)
 
 为了实现去中心化的数字货币--[Bitcoin](https://github.com/bitcoin/bitcoin)
-，[中本聪](https://zh.wikipedia.org/zh-hans/%E4%B8%AD%E6%9C%AC%E8%81%AA)利用 Pow (Proof of Work) 算法来解决系统中的拜占庭将军问题。
+，[中本聪](https://zh.wikipedia.org/zh-hans/%E4%B8%AD%E6%9C%AC%E8%81%AA)利用 PoW (Proof of Work) 算法来解决系统中的拜占庭将军问题。
 
 ## PoS
 
 ## DPoS
 
-## Paxos
+## PBFT
