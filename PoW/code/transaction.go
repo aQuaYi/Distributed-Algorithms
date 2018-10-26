@@ -175,11 +175,11 @@ func (tx *Transaction) Verify(prevTXs map[string]Transaction) bool {
 }
 
 func divide(bs []byte) (big.Int, big.Int) {
-	a, b := big.Int{}, big.Int{}
+	left, right := big.Int{}, big.Int{}
 	half := len(bs) / 2
-	a.SetBytes(bs[:half])
-	b.SetBytes(bs[half:])
-	return a, b
+	left.SetBytes(bs[:half])
+	right.SetBytes(bs[half:])
+	return left, right
 }
 
 // NewCoinbaseTX creates a new coinbase transaction
