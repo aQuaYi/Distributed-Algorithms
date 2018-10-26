@@ -9,12 +9,12 @@ import (
 
 // Block represents a block in the blockchain
 type Block struct {
-	Timestamp     int64 // 创建此区块的时间
-	Transactions  []*Transaction
-	PrevBlockHash []byte // 上一个区块的哈希值，即父哈希
-	Hash          []byte // 当前区块的哈希值
-	Nonce         int    // REVIEW: 计算目标哈希值所需的 "计数器"
-	Height        int
+	Timestamp     int64          // 创建此区块的时间
+	Transactions  []*Transaction // 所有新生成的交易
+	PrevBlockHash []byte         // 上一个区块的哈希值，即父哈希
+	Hash          []byte         // 当前区块的哈希值
+	Nonce         int            // 计算目标哈希值所需的 "计数器"
+	Height        int            // REVIEW: ???
 }
 
 // NewBlock creates and returns Block
@@ -38,6 +38,7 @@ func NewBlock(transactions []*Transaction, prevBlockHash []byte, height int) *Bl
 
 // NewGenesisBlock creates and returns genesis Block
 func NewGenesisBlock(coinbase *Transaction) *Block {
+	// 创世区块也需要包含 coinbase 交易
 	return NewBlock([]*Transaction{coinbase}, []byte{}, 0)
 }
 
@@ -45,6 +46,7 @@ func NewGenesisBlock(coinbase *Transaction) *Block {
 func (b *Block) HashTransactions() []byte {
 	var transactions [][]byte
 
+	// REVIEW: 这里不需要排序的吗? 不需要， merkleTree 技术就不需要
 	for _, tx := range b.Transactions {
 		transactions = append(transactions, tx.Serialize())
 	}
