@@ -51,7 +51,7 @@ func (pow *ProofOfWork) prepareData(nonce int) []byte {
 
 // Run performs a proof-of-work
 func (pow *ProofOfWork) Run() (int, []byte) {
-	// hashInt 是 hash 的整数表现
+	// hashInt 是把 hash 按照大端无符号的方式，解释成整数
 	var hashInt big.Int
 	var hash [32]byte
 	nonce := 0 // 计数器
