@@ -7,13 +7,14 @@ import (
 )
 
 // Int64ToHex converts an int64 to a byte array
+// Int64ToHex 把 num 的 16 进制数值，按照大端法转换成了 []bytes
+// 例如， Int64ToHex(0x18) = []byte("0000000000000018")
 func Int64ToHex(num int64) []byte {
 	buff := new(bytes.Buffer)
 	err := binary.Write(buff, binary.BigEndian, num)
 	if err != nil {
 		log.Panic(err)
 	}
-
 	return buff.Bytes()
 }
 
