@@ -9,7 +9,7 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func TestBase58(t *testing.T) {
+func Test_Base58(t *testing.T) {
 	rawHash := "00010966776006953D5567439E5E39F86A0D273BEED61967F6"
 	hash, err := hex.DecodeString(rawHash)
 	if err != nil {

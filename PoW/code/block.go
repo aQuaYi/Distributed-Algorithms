@@ -14,7 +14,7 @@ type Block struct {
 	PrevBlockHash []byte         // 上一个区块的哈希值，即父哈希
 	Hash          []byte         // 当前区块的哈希值
 	Nonce         int            // 计算目标哈希值所需的 "计数器"
-	Height        int            // REVIEW: ???
+	Height        int            // 区块在区块链中索引值，创世区块为 0
 }
 
 // NewBlock creates and returns Block
@@ -28,7 +28,8 @@ func NewBlock(transactions []*Transaction, prevBlockHash []byte, height int) *Bl
 		Height:        height,
 	}
 	pow := NewProofOfWork(block)
-	nonce, hash := pow.Run()
+
+	nonce, hash := pow.mining()
 
 	block.Hash = hash[:]
 	block.Nonce = nonce

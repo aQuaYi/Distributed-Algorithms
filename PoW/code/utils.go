@@ -7,7 +7,9 @@ import (
 )
 
 // Int64ToHex converts an int64 to a byte array
-// Int64ToHex 把 num 的 16 进制数值，按照大端法转换成了 []bytes
+// Int64ToHex 把 num 的二进制编码，按照大端法的顺序存储在了 []byte
+// []byte 中的每个元素会存放 一个字节的内容
+// 具体用法，请参考其单元测试
 func Int64ToHex(num int64) []byte {
 	buff := new(bytes.Buffer)
 	err := binary.Write(buff, binary.BigEndian, num)
@@ -18,6 +20,7 @@ func Int64ToHex(num int64) []byte {
 }
 
 // ReverseBytes reverses a byte array
+// 反转 data 的顺序
 func ReverseBytes(data []byte) {
 	for i, j := 0, len(data)-1; i < j; i, j = i+1, j-1 {
 		data[i], data[j] = data[j], data[i]

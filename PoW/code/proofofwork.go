@@ -49,22 +49,26 @@ func (pow *ProofOfWork) prepareData(nonce int) []byte {
 	return data
 }
 
-// Run performs a proof-of-work
-func (pow *ProofOfWork) Run() (int, []byte) {
+// mining performs a proof-of-work
+// 这就是俗称的挖矿过程，找到合适的 nonce 使得区块的哈希值 < target
+func (pow *ProofOfWork) mining() (int, []byte) {
 	// hashInt 是把 hash 按照大端无符号的方式，解释成整数
 	var hashInt big.Int
 	var hash [32]byte
-	nonce := 0 // 计数器
+	nonce := 0 // once number 简称 nonce https://zh.wikipedia.org/zh-cn/Nonce
 
 	fmt.Printf("Mining a new block")
+
 	for nonce < maxNonce {
 		data := pow.prepareData(nonce)
 
 		hash = sha256.Sum256(data)
-		// REVIEW: 这个 if 是什么意思呀
+
+		// TODO: 清洁代码时，可以删除此处
 		if math.Remainder(float64(nonce), 100000) == 0 {
 			fmt.Printf("\r%x", hash)
 		}
+
 		hashInt.SetBytes(hash[:])
 
 		if hashInt.Cmp(pow.target) == -1 {
@@ -76,6 +80,7 @@ func (pow *ProofOfWork) Run() (int, []byte) {
 			nonce++
 		}
 	}
+
 	fmt.Print("\n\n")
 
 	return nonce, hash[:]

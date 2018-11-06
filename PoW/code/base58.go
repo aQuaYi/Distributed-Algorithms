@@ -5,9 +5,16 @@ import (
 	"math/big"
 )
 
+/**
+ * 用于将公钥与比特币地址之间的相互转换
+ * 具体技术要求可以参考 https://en.bitcoin.it/wiki/Base58Check_encoding
+ */
+
+// 缺少 0，I，O，l 这 4 个容易混淆的字符，还剩 58 个字符。
 var b58Alphabet = []byte("123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz")
 
-// Base58Encode encodes a byte array to Base58
+// Base58Encode encodes a byte slice to Base58
+// Base58Encode: 公钥 --> 比特币地址
 func Base58Encode(input []byte) []byte {
 	var result []byte
 
@@ -33,6 +40,7 @@ func Base58Encode(input []byte) []byte {
 }
 
 // Base58Decode decodes Base58-encoded data
+// Base58Decode: 比特币地址 --> 公钥
 func Base58Decode(input []byte) []byte {
 	result := big.NewInt(0)
 
