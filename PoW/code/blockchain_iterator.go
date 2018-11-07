@@ -38,3 +38,9 @@ func (i *BlockchainIterator) HasNext() bool {
 	// 生成创世区块时，其 prevBlockHash 参数设置为了 []byte，而非 nil
 	return len(i.nextHash) != 0
 }
+
+// Iterator returns a BlockchainIterator
+func (bc *Blockchain) Iterator() *BlockchainIterator {
+	bci := &BlockchainIterator{bc.tip, bc.db}
+	return bci
+}

@@ -144,27 +144,25 @@ func (bc *Blockchain) AddBlock(block *Block) {
 }
 
 // FindTransaction finds a transaction by its ID
+// 具体过程就是每个区块挨个去查验
+// TODO: 返回 Transaction 的指针
 func (bc *Blockchain) FindTransaction(ID []byte) (Transaction, error) {
 	bci := bc.Iterator()
-
-	for {
+	//
+	for bci.HasNext() {
 		block := bci.Next()
-
 		for _, tx := range block.Transactions {
 			if bytes.Compare(tx.ID, ID) == 0 {
 				return *tx, nil
 			}
 		}
-
-		if len(block.PrevBlockHash) == 0 {
-			break
-		}
 	}
-
+	//
 	return Transaction{}, errors.New("Transaction is not found")
 }
 
 // FindUTXO finds all unspent transaction outputs and returns transactions with spent outputs removed
+// FIXME: 弄清楚这个方法的内容
 func (bc *Blockchain) FindUTXO() map[string]TXOutputs {
 	UTXO := make(map[string]TXOutputs)
 	spentTXOs := make(map[string][]int)
@@ -208,129 +206,111 @@ func (bc *Blockchain) FindUTXO() map[string]TXOutputs {
 	return UTXO
 }
 
-// Iterator returns a BlockchainIterator
-func (bc *Blockchain) Iterator() *BlockchainIterator {
-	bci := &BlockchainIterator{bc.tip, bc.db}
-	return bci
-}
-
 // GetBestHeight returns the height of the latest block
+// 因为重新运行 node 后，生成新的区块，需要用到 best height
 func (bc *Blockchain) GetBestHeight() int {
 	var lastBlock Block
-
+	//
 	err := bc.db.View(func(tx *bolt.Tx) error {
 		b := tx.Bucket([]byte(blocksBucket))
 		lastHash := b.Get([]byte(lastBlockHash))
-		blockData := b.Get(lastHash)
-		lastBlock = *DeserializeBlock(blockData)
-
+		data := b.Get(lastHash)
+		lastBlock = *DeserializeBlock(data)
 		return nil
 	})
+	//
 	if err != nil {
-		log.Panic(err)
+		log.Panicf("获取最新的区块链失败：%s", err)
 	}
-
+	//
 	return lastBlock.Height
 }
 
 // GetBlock finds a block by its hash and returns it
+// 按照区块的 hash 值，获取区块的内容
 func (bc *Blockchain) GetBlock(blockHash []byte) (Block, error) {
 	var block Block
-
+	//
 	err := bc.db.View(func(tx *bolt.Tx) error {
 		b := tx.Bucket([]byte(blocksBucket))
-
-		blockData := b.Get(blockHash)
-
-		if blockData == nil {
+		data := b.Get(blockHash)
+		if data == nil {
 			return errors.New("block is not found")
 		}
-
-		block = *DeserializeBlock(blockData)
-
+		block = *DeserializeBlock(data)
 		return nil
 	})
+	//
 	if err != nil {
 		return block, err
 	}
-
+	//
 	return block, nil
 }
 
 // GetBlockHashes returns a list of hashes of all the blocks in the chain
+// 越老的区块，索引值越大
 func (bc *Blockchain) GetBlockHashes() [][]byte {
 	var blocks [][]byte
 	bci := bc.Iterator()
-
-	for {
+	for bci.HasNext() {
 		block := bci.Next()
-
 		blocks = append(blocks, block.Hash)
-
-		if len(block.PrevBlockHash) == 0 {
-			break
-		}
 	}
-
 	return blocks
 }
 
 // MineBlock mines a new block with the provided transactions
 func (bc *Blockchain) MineBlock(transactions []*Transaction) *Block {
-	var lastHash []byte
-	var lastHeight int
-
+	// 挖矿前，先验证每个交易是否可行
 	for _, tx := range transactions {
-		// TODO: ignore transaction if it's not valid
 		if bc.VerifyTransaction(tx) != true {
 			log.Panic("ERROR: Invalid transaction")
 		}
 	}
-
+	//
+	var lastHash []byte
+	var lastHeight int
+	//
 	err := bc.db.View(func(tx *bolt.Tx) error {
 		b := tx.Bucket([]byte(blocksBucket))
 		lastHash = b.Get([]byte(lastBlockHash))
-
-		blockData := b.Get(lastHash)
-		block := DeserializeBlock(blockData)
-
+		data := b.Get(lastHash)
+		block := DeserializeBlock(data)
 		lastHeight = block.Height
-
 		return nil
 	})
 	if err != nil {
-		log.Panic(err)
+		log.Panicf("获取 lastHash 和 lastHeight 时，出错：%s", err)
 	}
-
-	newBlock := NewBlock(transactions, lastHash, lastHeight+1)
-
+	// NewBlock 中包含了挖矿的过程
+	block := NewBlock(transactions, lastHash, lastHeight+1)
+	// 把新挖出来的区块，放入数据库
 	err = bc.db.Update(func(tx *bolt.Tx) error {
 		b := tx.Bucket([]byte(blocksBucket))
-		err := b.Put(newBlock.Hash, newBlock.Serialize())
+		err := b.Put(block.Hash, block.Serialize())
 		if err != nil {
 			log.Panic(err)
 		}
-
-		err = b.Put([]byte(lastBlockHash), newBlock.Hash)
+		err = b.Put([]byte(lastBlockHash), block.Hash)
 		if err != nil {
 			log.Panic(err)
 		}
-
-		bc.tip = newBlock.Hash
-
 		return nil
 	})
 	if err != nil {
 		log.Panic(err)
 	}
-
-	return newBlock
+	// 更新 bc.tip
+	bc.tip = block.Hash
+	return block
 }
 
 // SignTransaction signs inputs of a Transaction
+// FIXME: 弄清楚这个方法的内容
 func (bc *Blockchain) SignTransaction(tx *Transaction, privKey ecdsa.PrivateKey) {
 	prevTXs := make(map[string]Transaction)
-
+	//
 	for _, vin := range tx.Vin {
 		prevTX, err := bc.FindTransaction(vin.Txid)
 		if err != nil {
@@ -338,18 +318,19 @@ func (bc *Blockchain) SignTransaction(tx *Transaction, privKey ecdsa.PrivateKey)
 		}
 		prevTXs[hex.EncodeToString(prevTX.ID)] = prevTX
 	}
-
+	//
 	tx.Sign(privKey, prevTXs)
 }
 
 // VerifyTransaction verifies transaction input signatures
+// FIXME: 弄清楚这个方法的内容
 func (bc *Blockchain) VerifyTransaction(tx *Transaction) bool {
 	if tx.IsCoinbase() {
 		return true
 	}
-
+	//
 	prevTXs := make(map[string]Transaction)
-
+	//
 	for _, vin := range tx.Vin {
 		prevTX, err := bc.FindTransaction(vin.Txid)
 		if err != nil {
@@ -357,6 +338,6 @@ func (bc *Blockchain) VerifyTransaction(tx *Transaction) bool {
 		}
 		prevTXs[hex.EncodeToString(prevTX.ID)] = prevTX
 	}
-
+	//
 	return tx.Verify(prevTXs)
 }
