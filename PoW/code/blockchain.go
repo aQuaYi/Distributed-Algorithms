@@ -13,7 +13,7 @@ import (
 )
 
 const (
-	dbFile              = "blockchain_%s.db"
+	dbFormat            = "blockchain_%s.db"
 	blocksBucket        = "blocks"
 	lastBlockHash       = "l"
 	genesisCoinbaseData = "The Times 03/Jan/2009 Chancellor on brink of second bailout for banks"
@@ -27,8 +27,8 @@ type Blockchain struct {
 
 // CreateBlockchain creates a new blockchain DB
 func CreateBlockchain(address, nodeID string) *Blockchain {
-	dbFile := fmt.Sprintf(dbFile, nodeID)
-	if dbExists(dbFile) {
+	dbFile := fmt.Sprintf(dbFormat, nodeID)
+	if exist(dbFile) {
 		fmt.Println("Blockchain already exists.")
 		os.Exit(1)
 	}
@@ -73,8 +73,8 @@ func CreateBlockchain(address, nodeID string) *Blockchain {
 
 // NewBlockchain creates a new Blockchain with genesis Block
 func NewBlockchain(nodeID string) *Blockchain {
-	dbFile := fmt.Sprintf(dbFile, nodeID)
-	if dbExists(dbFile) == false {
+	dbFile := fmt.Sprintf(dbFormat, nodeID)
+	if exist(dbFile) == false {
 		fmt.Println("No existing blockchain found. Create one first.")
 		os.Exit(1)
 	}
@@ -351,12 +351,4 @@ func (bc *Blockchain) VerifyTransaction(tx *Transaction) bool {
 	}
 
 	return tx.Verify(prevTXs)
-}
-
-func dbExists(dbFile string) bool {
-	if _, err := os.Stat(dbFile); os.IsNotExist(err) {
-		return false
-	}
-
-	return true
 }

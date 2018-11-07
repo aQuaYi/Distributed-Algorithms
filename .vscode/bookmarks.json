@@ -33,5 +33,15 @@
 				"label": ""
 			}
 		]
+	},
+	{
+		"path": "$ROOTPATH$/PoW/code/blockchain.go",
+		"bookmarks": [
+			{
+				"line": 30,
+				"column": 11,
+				"label": ""
+			}
+		]
 	}
 ]
