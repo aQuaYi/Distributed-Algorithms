@@ -20,3 +20,5 @@ Go 的标准库 [sha256](https://golang.org/pkg/crypto/sha256/) 实现了[安全
 - 校验和无法反求 data
 
 ## encoding/binary
+
+## Merkle Tree

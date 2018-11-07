@@ -57,6 +57,7 @@ func (b *Block) HashTransactions() []byte {
 }
 
 // Serialize serializes the block
+// 序列化的目的是为了把 block 保存到 k-v 数据库中
 func (b *Block) Serialize() []byte {
 	var buf bytes.Buffer
 
@@ -70,6 +71,7 @@ func (b *Block) Serialize() []byte {
 }
 
 // DeserializeBlock deserializes a block
+// 反向序列化是为了从数据库中取出 block
 func DeserializeBlock(date []byte) *Block {
 	r := bytes.NewReader(date)
 	dec := gob.NewDecoder(r)
