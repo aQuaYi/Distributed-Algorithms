@@ -95,8 +95,8 @@ func (u UTXOSet) CountTransactions() int {
 	return counter
 }
 
-// Reindex rebuilds the UTXO set
-func (u UTXOSet) Reindex() {
+// ReIndex rebuilds the UTXO set
+func (u UTXOSet) ReIndex() {
 	db := u.Blockchain.db
 	bucketName := []byte(utxoBucket)
 

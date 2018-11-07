@@ -134,7 +134,7 @@ func (cli *CLI) Run() {
 	}
 
 	if reindexUTXOCmd.Parsed() {
-		cli.reindexUTXO(nodeID)
+		cli.reIndexUTXO(nodeID)
 	}
 
 	if sendCmd.Parsed() {

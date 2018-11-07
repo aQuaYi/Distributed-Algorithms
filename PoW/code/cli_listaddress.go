@@ -5,6 +5,7 @@ import (
 	"log"
 )
 
+// TODO: 精简掉这个方法
 func (cli *CLI) listAddresses(nodeID string) {
 	wallets, err := NewWallets(nodeID)
 	if err != nil {

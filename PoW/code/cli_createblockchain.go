@@ -5,6 +5,8 @@ import (
 	"log"
 )
 
+// 从命令行创建区块链
+// TODO: 精简掉这个方法
 func (cli *CLI) createBlockchain(address, nodeID string) {
 	if !ValidateAddress(address) {
 		log.Panic("ERROR: Address is not valid")
@@ -13,7 +15,7 @@ func (cli *CLI) createBlockchain(address, nodeID string) {
 	defer bc.db.Close()
 
 	UTXOSet := UTXOSet{bc}
-	UTXOSet.Reindex()
+	UTXOSet.ReIndex()
 
 	fmt.Println("Done!")
 }

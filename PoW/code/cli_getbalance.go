@@ -5,6 +5,7 @@ import (
 	"log"
 )
 
+// TODO: 精简掉这个方法
 func (cli *CLI) getBalance(address, nodeID string) {
 	if !ValidateAddress(address) {
 		log.Panic("ERROR: Address is not valid")
