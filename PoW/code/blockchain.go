@@ -203,7 +203,6 @@ func (bc *Blockchain) FindUTXO() map[string]TXOutputs {
 // Iterator returns a BlockchainIterator
 func (bc *Blockchain) Iterator() *BlockchainIterator {
 	bci := &BlockchainIterator{bc.tip, bc.db}
-
 	return bci
 }
 
