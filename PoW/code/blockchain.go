@@ -26,6 +26,7 @@ type Blockchain struct {
 }
 
 // CreateBlockchain creates a new blockchain DB
+// TODO: 把 nodeID 改成 int 类型
 func CreateBlockchain(address, nodeID string) *Blockchain {
 	dbFile := fmt.Sprintf(dbFormat, nodeID)
 	if exist(dbFile) {
@@ -35,25 +36,26 @@ func CreateBlockchain(address, nodeID string) *Blockchain {
 
 	var tip []byte
 
+	// cbtx = coinbase transaction
 	cbtx := NewCoinbaseTX(address, genesisCoinbaseData)
 	genesis := NewGenesisBlock(cbtx)
 
 	db, err := bolt.Open(dbFile, 0600, nil)
 	if err != nil {
-		log.Panic(err)
+		log.Panicf("创建 %s 是出错：%s", dbFile, err)
 	}
 
 	err = db.Update(func(tx *bolt.Tx) error {
 		b, err := tx.CreateBucket([]byte(blocksBucket))
 		if err != nil {
-			log.Panic(err)
+			log.Panicf("在 %s 中创建 %s 时，失败：%s", dbFile, blocksBucket, err)
 		}
-
+		// 把创世区块放入 dbFile 的 blockBucket 中
 		err = b.Put(genesis.Hash, genesis.Serialize())
 		if err != nil {
 			log.Panic(err)
 		}
-
+		// 把创世区块的 hash 值，放入 dbFile 的 blockBucket 的 lastBlockHash key 中
 		err = b.Put([]byte(lastBlockHash), genesis.Hash)
 		if err != nil {
 			log.Panic(err)
@@ -62,16 +64,20 @@ func CreateBlockchain(address, nodeID string) *Blockchain {
 
 		return nil
 	})
+
 	if err != nil {
-		log.Panic(err)
+		log.Panicf("创建仅包含创世区块的区块链数据库文件 %s 时，出错：%s", dbFile, err)
 	}
 
+	// 区块链就是一串珠子，和，把珠子串起来的线头
 	bc := Blockchain{tip: tip, db: db}
 
 	return &bc
 }
 
 // NewBlockchain creates a new Blockchain with genesis Block
+// CreateBlockchain 用于从无到有地创建区块链数据库
+// NewBlockChain    用于打开现有的区块链数据库
 func NewBlockchain(nodeID string) *Blockchain {
 	dbFile := fmt.Sprintf(dbFormat, nodeID)
 	if exist(dbFile) == false {
@@ -79,20 +85,20 @@ func NewBlockchain(nodeID string) *Blockchain {
 		os.Exit(1)
 	}
 
-	var tip []byte // 取 tip 尖端的含义，意为指向最新的区块
 	db, err := bolt.Open(dbFile, 0600, nil)
 	if err != nil {
-		log.Panic(err)
+		log.Panicf("打开 %s 时，失败：%s", dbFile, err)
 	}
+
+	var tip []byte // 取 tip 尖端的含义，意为指向最新的区块
 
 	err = db.Update(func(tx *bolt.Tx) error {
 		b := tx.Bucket([]byte(blocksBucket))
 		tip = b.Get([]byte(lastBlockHash))
-
 		return nil
 	})
 	if err != nil {
-		log.Panic(err)
+		log.Panicf("在 %s 中获取 lastBlockHash 的值时，失败：%s", dbFile, err)
 	}
 
 	bc := Blockchain{tip: tip, db: db}
@@ -104,8 +110,8 @@ func NewBlockchain(nodeID string) *Blockchain {
 func (bc *Blockchain) AddBlock(block *Block) {
 	err := bc.db.Update(func(tx *bolt.Tx) error {
 		b := tx.Bucket([]byte(blocksBucket))
-		blockInDb := b.Get(block.Hash)
 
+		blockInDb := b.Get(block.Hash)
 		if blockInDb != nil {
 			return nil
 		}
@@ -113,7 +119,7 @@ func (bc *Blockchain) AddBlock(block *Block) {
 		blockData := block.Serialize()
 		err := b.Put(block.Hash, blockData)
 		if err != nil {
-			log.Panic(err)
+			log.Panicf("往 %v 的区块链数据库中存入 %v 时，失败：%s", bc, block, err) // TODO: 为 bc 和 block 添加输出格式，把 %v 改成 %s
 		}
 
 		lastHash := b.Get([]byte(lastBlockHash))
@@ -130,9 +136,11 @@ func (bc *Blockchain) AddBlock(block *Block) {
 
 		return nil
 	})
+
 	if err != nil {
-		log.Panic(err)
+		log.Panicf("把 %v 存入区块链时，失败：%s", block, err)
 	}
+
 }
 
 // FindTransaction finds a transaction by its ID
