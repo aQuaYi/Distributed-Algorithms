@@ -22,3 +22,7 @@ Go 的标准库 [sha256](https://golang.org/pkg/crypto/sha256/) 实现了[安全
 ## encoding/binary
 
 ## Merkle Tree
+
+## UTXO (Unspent Transaction Output)
+
+## 公钥（public key）和签名（signature）
