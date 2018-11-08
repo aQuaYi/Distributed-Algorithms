@@ -192,7 +192,7 @@ func (bc *Blockchain) FindUTXO() map[string]TXOutputs {
 
 			if tx.IsCoinbase() == false {
 				for _, in := range tx.Vin {
-					inTxID := hex.EncodeToString(in.RefTxID)
+					inTxID := hex.EncodeToString(in.RefTxHash)
 					spentTXOs[inTxID] = append(spentTXOs[inTxID], in.OutIndex)
 				}
 			}
@@ -309,7 +309,7 @@ func (bc *Blockchain) SignTransaction(tx *Transaction, privKey ecdsa.PrivateKey)
 	prevTXs := make(map[string]Transaction)
 	//
 	for _, vin := range tx.Vin {
-		prevTX, err := bc.FindTransaction(vin.RefTxID)
+		prevTX, err := bc.FindTransaction(vin.RefTxHash)
 		if err != nil {
 			log.Panic(err)
 		}
@@ -329,7 +329,7 @@ func (bc *Blockchain) VerifyTransaction(tx *Transaction) bool {
 	prevTXs := make(map[string]Transaction)
 	//
 	for _, vin := range tx.Vin {
-		prevTX, err := bc.FindTransaction(vin.RefTxID)
+		prevTX, err := bc.FindTransaction(vin.RefTxHash)
 		if err != nil {
 			log.Panic(err)
 		}
