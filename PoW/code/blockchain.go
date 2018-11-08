@@ -168,7 +168,7 @@ func (bc *Blockchain) FindUTXO() map[string]TXOutputs {
 	spentTXOs := make(map[string][]int)
 	bci := bc.Iterator()
 
-	for {
+	for bci.HasNext() {
 		block := bci.Next()
 
 		for _, tx := range block.Transactions {
@@ -198,9 +198,6 @@ func (bc *Blockchain) FindUTXO() map[string]TXOutputs {
 			}
 		}
 
-		if len(block.PrevBlockHash) == 0 {
-			break
-		}
 	}
 
 	return UTXO
