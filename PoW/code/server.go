@@ -246,7 +246,7 @@ func handleInv(request []byte, bc *Blockchain) {
 	if payload.Type == "tx" {
 		txID := payload.Items[0]
 
-		if mempool[hex.EncodeToString(txID)].ID == nil {
+		if mempool[hex.EncodeToString(txID)].Hash == nil {
 			sendGetData(payload.AddrFrom, "tx", txID)
 		}
 	}
@@ -309,12 +309,12 @@ func handleTx(request []byte, bc *Blockchain) {
 
 	txData := payload.Transaction
 	tx := DeserializeTransaction(txData)
-	mempool[hex.EncodeToString(tx.ID)] = tx
+	mempool[hex.EncodeToString(tx.Hash)] = tx
 
 	if nodeAddress == knownNodes[0] {
 		for _, node := range knownNodes {
 			if node != nodeAddress && node != payload.AddFrom {
-				sendInv(node, "tx", [][]byte{tx.ID})
+				sendInv(node, "tx", [][]byte{tx.Hash})
 			}
 		}
 	} else {
@@ -344,7 +344,7 @@ func handleTx(request []byte, bc *Blockchain) {
 			fmt.Println("New block is mined!")
 
 			for _, tx := range txs {
-				txID := hex.EncodeToString(tx.ID)
+				txID := hex.EncodeToString(tx.Hash)
 				delete(mempool, txID)
 			}
 

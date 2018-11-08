@@ -4,8 +4,9 @@ import "bytes"
 
 // TXInput represents a transaction input
 type TXInput struct {
-	Txid      []byte
-	Vout      int
+	RefTxID  []byte
+	OutIndex int
+	// RefTxID + Vout 表明 input 所 “引用” 的是名为 RefTxID.Vout[OutIndex]
 	Signature []byte
 	PubKey    []byte
 }

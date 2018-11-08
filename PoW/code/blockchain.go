@@ -152,7 +152,7 @@ func (bc *Blockchain) FindTransaction(ID []byte) (Transaction, error) {
 	for bci.HasNext() {
 		block := bci.Next()
 		for _, tx := range block.Transactions {
-			if bytes.Compare(tx.ID, ID) == 0 {
+			if bytes.Compare(tx.Hash, ID) == 0 {
 				return *tx, nil
 			}
 		}
@@ -172,7 +172,7 @@ func (bc *Blockchain) FindUTXO() map[string]TXOutputs {
 		block := bci.Next()
 
 		for _, tx := range block.Transactions {
-			txID := hex.EncodeToString(tx.ID)
+			txID := hex.EncodeToString(tx.Hash)
 
 		Outputs:
 			for outIdx, out := range tx.Vout {
@@ -192,8 +192,8 @@ func (bc *Blockchain) FindUTXO() map[string]TXOutputs {
 
 			if tx.IsCoinbase() == false {
 				for _, in := range tx.Vin {
-					inTxID := hex.EncodeToString(in.Txid)
-					spentTXOs[inTxID] = append(spentTXOs[inTxID], in.Vout)
+					inTxID := hex.EncodeToString(in.RefTxID)
+					spentTXOs[inTxID] = append(spentTXOs[inTxID], in.OutIndex)
 				}
 			}
 		}
@@ -309,11 +309,11 @@ func (bc *Blockchain) SignTransaction(tx *Transaction, privKey ecdsa.PrivateKey)
 	prevTXs := make(map[string]Transaction)
 	//
 	for _, vin := range tx.Vin {
-		prevTX, err := bc.FindTransaction(vin.Txid)
+		prevTX, err := bc.FindTransaction(vin.RefTxID)
 		if err != nil {
 			log.Panic(err)
 		}
-		prevTXs[hex.EncodeToString(prevTX.ID)] = prevTX
+		prevTXs[hex.EncodeToString(prevTX.Hash)] = prevTX
 	}
 	//
 	tx.Sign(privKey, prevTXs)
@@ -329,11 +329,11 @@ func (bc *Blockchain) VerifyTransaction(tx *Transaction) bool {
 	prevTXs := make(map[string]Transaction)
 	//
 	for _, vin := range tx.Vin {
-		prevTX, err := bc.FindTransaction(vin.Txid)
+		prevTX, err := bc.FindTransaction(vin.RefTxID)
 		if err != nil {
 			log.Panic(err)
 		}
-		prevTXs[hex.EncodeToString(prevTX.ID)] = prevTX
+		prevTXs[hex.EncodeToString(prevTX.Hash)] = prevTX
 	}
 	//
 	return tx.Verify(prevTXs)

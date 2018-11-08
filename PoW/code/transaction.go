@@ -19,14 +19,14 @@ const subsidy = 10
 
 // Transaction represents a Bitcoin transaction
 type Transaction struct {
-	ID   []byte
+	Hash []byte // Tx 其余所有部分的 hash 值
 	Vin  []TXInput
 	Vout []TXOutput
 }
 
 // IsCoinbase checks whether the transaction is coinbase
 func (tx Transaction) IsCoinbase() bool {
-	return len(tx.Vin) == 1 && len(tx.Vin[0].Txid) == 0 && tx.Vin[0].Vout == -1
+	return len(tx.Vin) == 1 && len(tx.Vin[0].RefTxID) == 0 && tx.Vin[0].OutIndex == -1
 }
 
 // Serialize returns a serialized Transaction
@@ -42,12 +42,12 @@ func (tx Transaction) Serialize() []byte {
 	return encoded.Bytes()
 }
 
-// Hash returns the hash of the Transaction
-func (tx *Transaction) Hash() []byte {
+// getHash returns the hash value of the Transaction when .Hash is nil
+func (tx *Transaction) getHash() []byte {
 	var hash [32]byte
 
 	txCopy := *tx
-	txCopy.ID = []byte{}
+	txCopy.Hash = nil
 
 	hash = sha256.Sum256(txCopy.Serialize())
 
@@ -61,7 +61,7 @@ func (tx *Transaction) Sign(privKey ecdsa.PrivateKey, prevTXs map[string]Transac
 	}
 
 	for _, vin := range tx.Vin {
-		if prevTXs[hex.EncodeToString(vin.Txid)].ID == nil {
+		if prevTXs[hex.EncodeToString(vin.RefTxID)].Hash == nil {
 			log.Panic("ERROR: Previous transaction is not correct")
 		}
 	}
@@ -69,9 +69,9 @@ func (tx *Transaction) Sign(privKey ecdsa.PrivateKey, prevTXs map[string]Transac
 	txCopy := tx.TrimmedCopy()
 
 	for inID, vin := range txCopy.Vin {
-		prevTx := prevTXs[hex.EncodeToString(vin.Txid)]
+		prevTx := prevTXs[hex.EncodeToString(vin.RefTxID)]
 		txCopy.Vin[inID].Signature = nil
-		txCopy.Vin[inID].PubKey = prevTx.Vout[vin.Vout].PubKeyHash
+		txCopy.Vin[inID].PubKey = prevTx.Vout[vin.OutIndex].PubKeyHash
 
 		dataToSign := fmt.Sprintf("%x\n", txCopy)
 
@@ -90,13 +90,13 @@ func (tx *Transaction) Sign(privKey ecdsa.PrivateKey, prevTXs map[string]Transac
 func (tx Transaction) String() string {
 	var lines []string
 
-	lines = append(lines, fmt.Sprintf("--- Transaction %x:", tx.ID))
+	lines = append(lines, fmt.Sprintf("--- Transaction %x:", tx.Hash))
 
 	for i, input := range tx.Vin {
 
 		lines = append(lines, fmt.Sprintf("     Input %d:", i))
-		lines = append(lines, fmt.Sprintf("       TXID:      %x", input.Txid))
-		lines = append(lines, fmt.Sprintf("       Out:       %d", input.Vout))
+		lines = append(lines, fmt.Sprintf("       TXID:      %x", input.RefTxID))
+		lines = append(lines, fmt.Sprintf("       Out:       %d", input.OutIndex))
 		lines = append(lines, fmt.Sprintf("       Signature: %x", input.Signature))
 		lines = append(lines, fmt.Sprintf("       PubKey:    %x", input.PubKey))
 	}
@@ -116,14 +116,14 @@ func (tx *Transaction) TrimmedCopy() Transaction {
 	var outputs []TXOutput
 
 	for _, vin := range tx.Vin {
-		inputs = append(inputs, TXInput{vin.Txid, vin.Vout, nil, nil})
+		inputs = append(inputs, TXInput{vin.RefTxID, vin.OutIndex, nil, nil})
 	}
 
 	for _, vout := range tx.Vout {
 		outputs = append(outputs, TXOutput{vout.Value, vout.PubKeyHash})
 	}
 
-	txCopy := Transaction{tx.ID, inputs, outputs}
+	txCopy := Transaction{tx.Hash, inputs, outputs}
 
 	return txCopy
 }
@@ -135,7 +135,7 @@ func (tx *Transaction) Verify(prevTXs map[string]Transaction) bool {
 	}
 
 	for _, vin := range tx.Vin {
-		if prevTXs[hex.EncodeToString(vin.Txid)].ID == nil {
+		if prevTXs[hex.EncodeToString(vin.RefTxID)].Hash == nil {
 			log.Panic("ERROR: Previous transaction is not correct")
 		}
 	}
@@ -144,9 +144,9 @@ func (tx *Transaction) Verify(prevTXs map[string]Transaction) bool {
 	curve := elliptic.P256()
 
 	for inID, vin := range tx.Vin {
-		prevTx := prevTXs[hex.EncodeToString(vin.Txid)]
+		prevTx := prevTXs[hex.EncodeToString(vin.RefTxID)]
 		txCopy.Vin[inID].Signature = nil
-		txCopy.Vin[inID].PubKey = prevTx.Vout[vin.Vout].PubKeyHash
+		txCopy.Vin[inID].PubKey = prevTx.Vout[vin.OutIndex].PubKeyHash
 
 		// r := big.Int{}
 		// s := big.Int{}
@@ -197,7 +197,7 @@ func NewCoinbaseTX(to, data string) *Transaction {
 	txin := TXInput{[]byte{}, -1, nil, []byte(data)}
 	txout := NewTXOutput(subsidy, to)
 	tx := Transaction{nil, []TXInput{txin}, []TXOutput{*txout}}
-	tx.ID = tx.Hash()
+	tx.Hash = tx.getHash()
 
 	return &tx
 }
@@ -235,7 +235,7 @@ func NewUTXOTransaction(wallet *Wallet, to string, amount int, UTXOSet *UTXOSet)
 	}
 
 	tx := Transaction{nil, inputs, outputs}
-	tx.ID = tx.Hash()
+	tx.Hash = tx.getHash()
 	UTXOSet.Blockchain.SignTransaction(&tx, wallet.PrivateKey)
 
 	return &tx

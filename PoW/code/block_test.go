@@ -13,7 +13,7 @@ func Test_Serialize_And_Deserialize(t *testing.T) {
 		Timestamp: 1024,
 		Transactions: []*Transaction{
 			&Transaction{
-				ID:   []byte("This is Transactions' ID"),
+				Hash: []byte("This is Transactions' ID"),
 				Vin:  []TXInput{TXInput{}},
 				Vout: []TXOutput{TXOutput{}},
 			},
