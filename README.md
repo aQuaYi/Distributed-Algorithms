@@ -23,3 +23,5 @@ Diego Ongaro 和 John Ousterhout 认为 Paxos 难以理解， 于是在 [《In S
 ## DPoS
 
 ## PBFT
+
+TODO: 总结分布式系统的特点
