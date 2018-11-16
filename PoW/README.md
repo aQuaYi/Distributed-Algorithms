@@ -4,6 +4,17 @@
 
 TODO: 本目录下的代码着重于演示 Pow 算法，会弱化其余部分。
 
+## 散列函数 (Hash function)
+
+[散列函数](https://zh.wikipedia.org/zh-cn/%E6%95%A3%E5%88%97%E5%87%BD%E6%95%B8)具有以下特点:
+
+- 正向快速：可以很快地计算出 hash 值。
+- 逆向困难：给定 hash 值，基本不可能逆推出明文。
+- 输入敏感：输入的细微改变，输出的 hash 值也会明显不同。
+- 冲突避免：几乎不可能找到两个输入值，具有相同的输出。
+
+比特币中使用的 sha256 散列算法。 // TODO: 完善此处的说明
+
 ## PoW
 
 ## 哈希计算
@@ -28,3 +39,7 @@ Go 的标准库 [sha256](https://golang.org/pkg/crypto/sha256/) 实现了[安全
 ## Merkle Tree
 
 ## 公钥（public key）和签名（signature）
+
+## 参考链接
+
+- <https://blog.csdn.net/asdzheng/article/details/70226007>
