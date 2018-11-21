@@ -47,7 +47,7 @@ func NewGenesisBlock(coinbase *Transaction) *Block {
 func (b *Block) HashTransactions() []byte {
 	var transactions [][]byte
 
-	// REVIEW: 这里不需要排序的吗? 不需要， merkleTree 技术就不需要
+	// 顺序会影响最后的返回结果
 	for _, tx := range b.Transactions {
 		transactions = append(transactions, tx.Serialize())
 	}

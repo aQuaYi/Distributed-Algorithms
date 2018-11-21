@@ -32,7 +32,9 @@ func NewMerkleTree(data [][]byte) *MerkleTree {
 
 	for i := 0; i < len(data)/2; i++ {
 		var newLevel []MerkleNode
-
+		// FIXME: 这里的代码有问题，
+		// 上面的 len(data)%2 == 0 并不能保证 len(data) 是 2 的 n 次方
+		// 当 len(nodes) 为奇数时，下下行的 j+1 会导致溢出
 		for j := 0; j < len(nodes); j += 2 {
 			node := NewMerkleNode(&nodes[j], &nodes[j+1], nil)
 			newLevel = append(newLevel, *node)
